@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BADTM Urban Digital Twin Platform | 조승완 박사학위논문</title>
+<meta name="description" content="주소만 입력하면 생체모방 키네틱 파사드의 에너지 절감 효과를 즉시 확인하는 도시 디지털 트윈. 박사학위논문 실증 결과 기반.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg:#06101f; --bg-soft:#0a1730; --surface:#0e1c34; --surface-2:#12233f;
+    --glass:rgba(15,29,53,.62); --line:rgba(150,182,228,.13); --line-2:rgba(150,182,228,.22);
+    --ink:#eaf1fb; --ink-soft:#c4d2e6; --muted:#8fa3c2; --faint:#5d6f8c;
+    --g1:#34d399; --g2:#22d3ee; --g3:#818cf8;
+    --grad:linear-gradient(100deg,#34d399 0%,#22d3ee 48%,#818cf8 100%);
+    --grad-soft:linear-gradient(100deg,rgba(52,211,153,.16),rgba(34,211,238,.13),rgba(129,140,248,.16));
+    --r:18px; --r-sm:12px; --maxw:1180px;
+    --disp:"Space Grotesk","Pretendard",system-ui,sans-serif;
+    --body:"Pretendard",-apple-system,"Malgun Gothic",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--body);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--disp);font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--g2);padding:6px 14px;border:1px solid var(--line-2);border-radius:100px;background:rgba(34,211,238,.06);}
+
+  /* ── NAV ── */
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,16,31,.72);border-bottom:1px solid var(--line);}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:1.05rem;letter-spacing:-.01em;}
+  .brand .mk{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-size:1rem;box-shadow:0 4px 18px rgba(34,211,238,.35);}
+  .brand small{display:block;font-family:var(--body);font-weight:500;font-size:.62rem;color:var(--muted);letter-spacing:.04em;margin-top:-2px;}
+  .nav-links{display:flex;align-items:center;gap:30px;}
+  .nav-links a{font-size:.88rem;color:var(--ink-soft);transition:color .15s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{font-size:.82rem;font-weight:600;padding:9px 17px;border-radius:10px;border:1px solid var(--line-2);color:var(--ink);transition:all .15s;}
+  .nav-cta:hover{border-color:var(--g2);background:rgba(34,211,238,.08);}
+  @media(max-width:820px){.nav-links a:not(.nav-cta){display:none;}}
+
+  /* ── HERO ── */
+  .hero{position:relative;padding:84px 0 60px;overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:-30% -10% auto -10%;height:680px;background:
+     radial-gradient(620px 360px at 22% 18%,rgba(52,211,153,.18),transparent 60%),
+     radial-gradient(560px 380px at 82% 8%,rgba(129,140,248,.20),transparent 62%),
+     radial-gradient(700px 420px at 60% 60%,rgba(34,211,238,.10),transparent 60%);
+     filter:blur(8px);pointer-events:none;}
+  .hero .wrap{position:relative;text-align:center;}
+  .hero h1{font-family:var(--disp);font-weight:700;letter-spacing:-.025em;line-height:1.08;font-size:clamp(2.1rem,5.6vw,4rem);margin:22px auto 0;max-width:16ch;}
+  .hero p.sub{margin:20px auto 0;max-width:60ch;font-size:clamp(1rem,1.6vw,1.18rem);color:var(--ink-soft);}
+
+  /* louver signature */
+  .louver{display:flex;gap:7px;justify-content:center;height:30px;margin:0 auto;width:max-content;perspective:300px;}
+  .louver i{display:block;width:7px;height:30px;border-radius:3px;background:var(--grad);transform-origin:center;animation:slat 3.6s ease-in-out infinite;box-shadow:0 0 12px rgba(34,211,238,.4);}
+  .louver i:nth-child(1){animation-delay:0s}.louver i:nth-child(2){animation-delay:.12s}.louver i:nth-child(3){animation-delay:.24s}.louver i:nth-child(4){animation-delay:.36s}.louver i:nth-child(5){animation-delay:.48s}.louver i:nth-child(6){animation-delay:.6s}.louver i:nth-child(7){animation-delay:.72s}.louver i:nth-child(8){animation-delay:.84s}.louver i:nth-child(9){animation-delay:.96s}.louver i:nth-child(10){animation-delay:1.08s}.louver i:nth-child(11){animation-delay:1.2s}
+  @keyframes slat{0%,100%{transform:rotateY(0deg);opacity:1}50%{transform:rotateY(72deg);opacity:.5}}
+
+  /* hero tool card */
+  .tool{margin:36px auto 0;max-width:680px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--line-2);border-radius:var(--r);padding:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.04);text-align:left;}
+  .tool .tlbl{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:var(--g1);margin-bottom:12px;font-family:var(--disp);letter-spacing:.04em;}
+  .tool .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .tool input{flex:1;min-width:200px;background:rgba(7,16,31,.7);border:1px solid var(--line-2);border-radius:12px;padding:15px 18px;font-size:1rem;color:var(--ink);font-family:var(--body);transition:border-color .15s,box-shadow .15s;}
+  .tool input::placeholder{color:var(--faint);}
+  .tool input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(34,211,238,.16);}
+  .tool select{background:rgba(7,16,31,.7);border:1px solid var(--line-2);border-radius:12px;padding:0 14px;font-size:.9rem;color:var(--ink-soft);font-family:var(--body);cursor:pointer;}
+  .tool button#goBtn{border:none;border-radius:12px;padding:15px 28px;font-size:1rem;font-weight:700;font-family:var(--disp);color:#04211a;background:var(--grad);cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 30px -8px rgba(34,211,238,.5);}
+  .tool button#goBtn:hover{transform:translateY(-1px);box-shadow:0 14px 38px -8px rgba(34,211,238,.6);}
+  .tool button#goBtn:disabled{opacity:.55;cursor:wait;transform:none;}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+  .presets .pt{font-size:.78rem;color:var(--muted);font-weight:600;}
+  .pbtn{background:rgba(150,182,228,.07);color:var(--ink-soft);border:1px solid var(--line);border-radius:100px;padding:7px 15px;font-size:.83rem;font-family:var(--body);cursor:pointer;transition:all .15s;}
+  .pbtn:hover{background:rgba(34,211,238,.1);border-color:var(--g2);color:var(--ink);}
+
+  .hero-stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:34px;}
+  .hpill{display:flex;align-items:baseline;gap:8px;background:rgba(15,29,53,.5);border:1px solid var(--line);border-radius:100px;padding:9px 18px;}
+  .hpill b{font-family:var(--disp);font-size:1.15rem;font-weight:700;}
+  .hpill span{font-size:.8rem;color:var(--muted);}
+  .trust{margin-top:26px;font-size:.82rem;color:var(--faint);}
+  .trust a{color:var(--g2);border-bottom:1px solid rgba(34,211,238,.3);}
+
+  /* ── section scaffold ── */
+  section{padding:74px 0;}
+  .sec-head{text-align:center;max-width:60ch;margin:0 auto 46px;}
+  .sec-head h2{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;font-size:clamp(1.6rem,3.4vw,2.5rem);margin-top:16px;line-height:1.15;}
+  .sec-head p{margin-top:14px;color:var(--ink-soft);font-size:1.03rem;}
+
+  /* ── HOW ── */
+  .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media(max-width:780px){.steps3{grid-template-columns:1fr;}}
+  .scard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 26px;transition:border-color .2s,transform .2s;}
+  .scard:hover{border-color:var(--line-2);transform:translateY(-3px);}
+  .scard .no{font-family:var(--disp);font-size:2.6rem;font-weight:700;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.9;}
+  .scard h3{font-family:var(--disp);font-size:1.18rem;font-weight:600;margin:16px 0 8px;}
+  .scard p{color:var(--muted);font-size:.94rem;}
+  .scard .line{position:absolute;top:48px;right:-12px;width:24px;height:2px;background:var(--line-2);}
+  @media(max-width:780px){.scard .line{display:none;}}
+
+  /* ── DEMO wrapper restyle of app ── */
+  .demo-shell{background:linear-gradient(180deg,var(--bg-soft),var(--bg));border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .demo-frame{max-width:var(--maxw);margin:30px auto 0;background:var(--surface);border:1px solid var(--line-2);border-radius:22px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(0,0,0,.7);}
+
+  /* steps bar (10) */
+  .steps{display:flex;gap:4px;align-items:center;overflow-x:auto;padding:16px 20px;background:rgba(7,16,31,.5);border-bottom:1px solid var(--line);}
+  .step{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--faint);white-space:nowrap;}
+  .step .num{width:21px;height:21px;border-radius:50%;background:rgba(150,182,228,.1);color:var(--muted);display:grid;place-items:center;font-size:.78rem;font-weight:700;font-family:var(--disp);transition:all .2s;}
+  .step.done .num{background:var(--g1);color:#04211a;}
+  .step.active .num{background:var(--g2);color:#042027;box-shadow:0 0 0 4px rgba(34,211,238,.18);animation:pulse 1.1s infinite;}
+  .step.done,.step.active{color:var(--ink-soft);}
+  .step .arrow{color:rgba(150,182,228,.25);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .status-bar{padding:0 20px;background:rgba(7,16,31,.5);}
+  .status{display:none;padding:12px 16px;border-radius:12px;margin:12px 0;font-size:.9rem;}
+  .status.loading{display:block;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#a5e9f6;}
+  .status.error{display:block;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);color:#fca5a5;}
+  .status.success{display:block;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.35);color:#86efc4;}
+  .progress{height:4px;background:rgba(150,182,228,.12);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--grad);width:0%;transition:width .3s;}
+
+  .main{display:grid;grid-template-columns:288px 1fr 320px;background:rgba(7,16,31,.3);}
+  @media(max-width:1100px){.main{grid-template-columns:1fr;}}
+  .panel{padding:22px;overflow-y:auto;}
+  .panel.left{border-right:1px solid var(--line);}
+  .panel.right{border-left:1px solid var(--line);}
+  .center-area{padding:20px;display:flex;flex-direction:column;gap:13px;}
+  @media(max-width:1100px){.panel.left,.panel.right{border:none;border-top:1px solid var(--line);}}
+
+  .empirical-box{background:var(--grad-soft);border:1px solid rgba(52,211,153,.28);padding:14px 16px;border-radius:var(--r-sm);margin-bottom:16px;}
+  .empirical-box .l{font-family:var(--disp);font-size:.66rem;color:var(--g1);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;}
+  .empirical-box .i{font-size:.84rem;color:var(--ink-soft);line-height:1.7;}
+  .empirical-box strong{color:var(--ink);}
+  .mode-note{padding:10px 13px;border-radius:var(--r-sm);font-size:.8rem;line-height:1.5;margin-bottom:16px;}
+  .mode-note.online{background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.3);color:#a5e9f6;}
+  .mode-note.offline{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.3);color:#86efc4;}
+
+  .section{margin-bottom:20px;padding-bottom:17px;border-bottom:1px solid var(--line);}
+  .section:last-child{border-bottom:none;}
+  .stitle{font-family:var(--disp);color:var(--g2);font-size:.74rem;font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.1em;}
+  .spec-box{background:rgba(7,16,31,.5);border:1px solid var(--line);border-left:3px solid var(--g2);padding:12px 14px;border-radius:var(--r-sm);font-size:.79rem;color:var(--ink-soft);line-height:1.85;}
+  .spec-box strong{color:#7ee2f0;}
+  .spec-note{color:var(--faint);font-size:.92em;display:block;margin-top:6px;}
+
+  .case-btn{width:100%;text-align:left;background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+  .case-btn:hover{border-color:var(--line-2);}
+  .case-btn.active{background:var(--grad-soft);border-color:rgba(52,211,153,.5);}
+  .cn{font-size:.88rem;font-weight:600;color:var(--ink);}
+  .cd{font-size:.76rem;color:var(--muted);margin-top:2px;}
+  .case-btn.active .cd{color:#9ff0cf;}
+
+  .trow{display:flex;gap:8px;}
+  .tbtn{flex:1;background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;cursor:pointer;text-align:center;font-size:.86rem;color:var(--ink-soft);transition:all .15s;}
+  .tbtn.on{background:rgba(34,211,238,.14);border-color:var(--g2);color:#fff;}
+
+  .ctitle{font-family:var(--disp);color:var(--ink);font-size:.95rem;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+  #map{width:100%;height:380px;background:#0a1525;border:1px solid var(--line-2);border-radius:var(--r);}
+  #cityCanvas{width:100%;background:#0a1525;border:1px solid var(--line-2);border-radius:var(--r);min-height:380px;display:none;}
+  .leaflet-popup-content-wrapper{background:#0a1525!important;color:#e2e8f0!important;border:1px solid var(--g2)!important;border-radius:10px!important;}
+  .leaflet-popup-content{margin:12px 16px!important;min-width:200px;}
+  .leaflet-popup-tip{background:#0a1525!important;}
+  .leaflet-container{background:#0a1525!important;}
+
+  .climate-tag{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);border-radius:var(--r-sm);padding:9px 12px;margin-bottom:12px;font-size:.78rem;color:#a5e9f6;line-height:1.5;}
+  .ba-grid{display:grid;gap:11px;}
+  .ba-card{background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;}
+  .ba-label{font-size:.78rem;color:var(--ink-soft);margin-bottom:9px;font-weight:600;}
+  .ba-label .ba-unit{color:var(--faint);font-weight:400;font-size:.9em;}
+  .ba-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .ba-before,.ba-after{flex:1;text-align:center;font-size:1.18em;font-weight:700;font-family:var(--disp);}
+  .ba-before{color:#f8a4a4;}.ba-after{color:#6ee7b7;}
+  .ba-tag{display:block;font-size:.5em;font-weight:600;color:var(--faint);margin-bottom:2px;font-family:var(--body);}
+  .ba-tag.af{color:var(--g1);}
+  .ba-arrow{color:var(--g2);font-size:1.1em;font-weight:700;flex:0 0 auto;}
+  .ba-delta{text-align:center;font-size:.78rem;margin-top:7px;padding-top:7px;border-top:1px solid var(--line);color:var(--g2);font-weight:600;}
+  .save-highlight{background:var(--grad-soft);border:1px solid rgba(52,211,153,.3);border-radius:var(--r-sm);padding:13px;margin-top:12px;text-align:center;font-size:.92rem;color:#d6f7e6;}
+  .save-highlight strong{font-size:1.3em;color:#fff;font-family:var(--disp);}
+  .sv-panel{display:flex;flex-direction:column;gap:8px;}
+  .sv-btn{width:100%;border:none;border-radius:11px;padding:11px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;color:#fff;}
+  .sv-btn:disabled{background:rgba(150,182,228,.08)!important;color:var(--faint)!important;cursor:not-allowed;}
+  .sv-btn.kakao{background:#fee500;color:#3c1e1e;}
+  .sv-btn.naver{background:#03c75a;}
+  .sv-btn.sat{background:#0ea5e9;}
+  .sv-btn:hover:not(:disabled){transform:translateY(-1px);}
+  .sv-note{color:var(--faint);font-size:.76rem;margin-top:8px;line-height:1.5;}
+
+  .stat-box{background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px;font-size:.84rem;line-height:1.9;color:var(--ink-soft);}
+  .stat-box strong{color:#7ee2f0;}
+  .calc-box{background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-size:.78rem;}
+  .calc-step{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);color:var(--ink-soft);}
+  .calc-step:last-child{border-bottom:none;}
+  .calc-step .cs-l{color:var(--muted);}
+  .calc-step .cs-c{color:var(--faint);font-size:.9em;}
+  .calc-step .cs-v{color:#7ee2f0;font-weight:600;}
+  .calc-step.final .cs-v{color:var(--g1);}
+  .calc-note{color:var(--faint);font-size:.88em;margin-top:8px;line-height:1.5;}
+  .data-src{background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;font-size:.76rem;line-height:1.8;color:var(--muted);}
+  .data-src .ok{color:#6ee7b7;}.data-src .est{color:#fcd34d;}
+  .ledger-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.28);border-radius:var(--r-sm);padding:12px 14px;margin-top:10px;font-size:.78rem;line-height:1.7;}
+  .ledger-box .lrow{display:flex;justify-content:space-between;color:var(--ink-soft);border-bottom:1px solid var(--line);padding:4px 0;}
+  .ledger-box .lrow:last-child{border-bottom:none;}
+  .ledger-box .lk{color:var(--muted);}.ledger-box .lv{color:#7ee2f0;font-weight:600;}
+  .bldg-list{max-height:180px;overflow-y:auto;}
+  .bi{background:rgba(7,16,31,.5);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:.8rem;}
+  .bi .bn{color:var(--g2);font-weight:600;}
+  .bi .bm{color:var(--muted);font-size:.92em;margin-top:2px;}
+  .actions{display:flex;gap:8px;margin-top:10px;}
+  .abtn{flex:1;background:rgba(150,182,228,.07);border:1px solid var(--line);color:var(--ink-soft);border-radius:11px;padding:12px;font-size:.86rem;cursor:pointer;transition:all .15s;font-weight:600;}
+  .abtn:hover{background:rgba(34,211,238,.1);border-color:var(--g2);color:#fff;}
+  .abtn.primary{background:var(--grad);border:none;color:#04211a;}
+
+  /* ── STATS band ── */
+  .statband{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+  @media(max-width:720px){.statband{grid-template-columns:repeat(2,1fr);}}
+  .sb{background:var(--surface);padding:30px 22px;text-align:center;}
+  .sb .n{font-family:var(--disp);font-size:clamp(1.8rem,4vw,2.7rem);font-weight:700;line-height:1;}
+  .sb .l{margin-top:10px;font-size:.86rem;color:var(--muted);}
+
+  /* ── FEATURES ── */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media(max-width:900px){.feat{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.feat{grid-template-columns:1fr;}}
+  .fc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px 24px;transition:all .2s;}
+  .fc:hover{border-color:var(--line-2);transform:translateY(-3px);background:var(--surface-2);}
+  .fc .ic{width:46px;height:46px;border-radius:13px;background:var(--grad-soft);border:1px solid var(--line-2);display:grid;place-items:center;font-size:1.4rem;margin-bottom:16px;}
+  .fc h3{font-family:var(--disp);font-size:1.08rem;font-weight:600;margin-bottom:8px;}
+  .fc p{color:var(--muted);font-size:.92rem;line-height:1.6;}
+
+  /* ── EVIDENCE ── */
+  .ev{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:stretch;}
+  @media(max-width:860px){.ev{grid-template-columns:1fr;}}
+  .ev-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px;}
+  .ev-card.accent{background:linear-gradient(160deg,rgba(52,211,153,.1),rgba(129,140,248,.08));border-color:var(--line-2);}
+  .ev-card h3{font-family:var(--disp);font-size:1.2rem;font-weight:600;margin-bottom:18px;}
+  .ev-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:.92rem;}
+  .ev-row:last-child{border-bottom:none;}
+  .ev-row span{color:var(--muted);}
+  .ev-row b{font-family:var(--disp);color:var(--ink);font-weight:600;}
+  .ev-row b.g{color:var(--g1);}
+  .hyp{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .hyp:last-child{border-bottom:none;}
+  .hyp .tag{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--grad);color:#04211a;display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:.85rem;}
+  .hyp .tx{font-size:.9rem;}.hyp .tx b{display:block;margin-bottom:2px;}.hyp .tx span{color:var(--muted);font-size:.85rem;}
+
+  /* ── CTA ── */
+  .cta-band{position:relative;background:linear-gradient(120deg,rgba(52,211,153,.14),rgba(34,211,238,.1),rgba(129,140,248,.16));border:1px solid var(--line-2);border-radius:24px;padding:56px 32px;text-align:center;overflow:hidden;}
+  .cta-band h2{font-family:var(--disp);font-weight:700;font-size:clamp(1.6rem,3.4vw,2.4rem);letter-spacing:-.02em;}
+  .cta-band p{margin:14px auto 0;max-width:52ch;color:var(--ink-soft);}
+  .cta-btns{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:28px;}
+  .btn-primary{font-family:var(--disp);font-weight:700;background:var(--grad);color:#04211a;border:none;border-radius:13px;padding:15px 30px;font-size:1rem;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 14px 36px -10px rgba(34,211,238,.5);}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-ghost{font-weight:600;border:1px solid var(--line-2);border-radius:13px;padding:15px 28px;font-size:1rem;color:var(--ink);transition:all .15s;}
+  .btn-ghost:hover{border-color:var(--g2);background:rgba(34,211,238,.08);}
+
+  /* ── FOOTER ── */
+  footer{border-top:1px solid var(--line);padding:54px 0 30px;background:var(--bg-soft);}
+  .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:30px;}
+  @media(max-width:820px){.fgrid{grid-template-columns:1fr 1fr;gap:26px;}}
+  .fgrid .about{color:var(--muted);font-size:.88rem;line-height:1.7;max-width:34ch;margin-top:12px;}
+  .fcol h4{font-family:var(--disp);font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:14px;}
+  .fcol a,.fcol p{display:block;color:var(--muted);font-size:.88rem;margin-bottom:9px;transition:color .15s;}
+  .fcol a:hover{color:var(--g2);}
+  .fbottom{margin-top:40px;padding-top:22px;border-top:1px solid var(--line);text-align:center;color:var(--faint);font-size:.8rem;line-height:1.7;}
+
+  /* ===== 카카오맵 ===== */
+  .kakao-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+  .kakao-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line);}
+  .kakao-top .kt-l{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink);font-size:.92rem;}
+  .kakao-top .kt-l .dot{width:9px;height:9px;border-radius:50%;background:var(--g1);box-shadow:0 0 10px var(--g1);flex-shrink:0;}
+  .kakao-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .kbtn{background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink-soft);padding:8px 14px;border-radius:10px;font-size:.82rem;cursor:pointer;transition:.15s;font-family:var(--body);}
+  .kbtn:hover{color:var(--ink);border-color:var(--g2);}
+  .kbtn.on{background:var(--grad);color:#04121f;border-color:transparent;font-weight:700;}
+  #kakaoMap,#kakaoRoad{width:100%;height:460px;background:#0a1424;}
+  #kakaoRoad{display:none;}
+  .kakao-notice{display:none;padding:42px 24px;text-align:center;background:var(--surface);}
+  .kakao-notice .box{max-width:600px;margin:0 auto;}
+  .kakao-notice h4{font-size:1.05rem;color:var(--ink);margin-bottom:12px;}
+  .kakao-notice p{color:var(--ink-soft);font-size:.9rem;line-height:1.8;}
+  .kakao-notice code{background:var(--surface-2);border:1px solid var(--line-2);border-radius:6px;padding:2px 7px;color:var(--g2);font-size:.85em;}
+  .kakao-notice ol{text-align:left;display:inline-block;margin-top:14px;color:var(--muted);font-size:.86rem;line-height:2;}
+  .kakao-foot{padding:11px 20px;border-top:1px solid var(--line);color:var(--faint);font-size:.78rem;}
+  /* ===== 시스템 흐름 ===== */
+  .sysflow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:8px;}
+  .sysnode{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 15px 16px;text-align:center;position:relative;}
+  .sysnode .sh{font-family:var(--disp);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--g2);margin-bottom:9px;}
+  .sysnode .st{font-weight:700;color:var(--ink);font-size:.98rem;margin-bottom:7px;}
+  .sysnode .sd{color:var(--muted);font-size:.82rem;line-height:1.6;}
+  .sysnode .snum{position:absolute;top:-11px;left:15px;width:25px;height:25px;border-radius:50%;background:var(--grad);color:#04121f;font-weight:800;font-size:.82rem;display:flex;align-items:center;justify-content:center;}
+  /* ===== 용어 설명 ===== */
+  .glossary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  .gitem{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;height:fit-content;}
+  .gitem summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px;font-weight:600;color:var(--ink);transition:.15s;font-size:.95rem;}
+  .gitem summary::-webkit-details-marker{display:none;}
+  .gitem summary:hover{background:var(--surface-2);}
+  .gitem summary .abbr{font-family:var(--disp);font-size:.7rem;font-weight:700;color:#04121f;background:var(--grad);padding:4px 9px;border-radius:6px;white-space:nowrap;}
+  .gitem summary .plus{margin-left:auto;color:var(--g2);font-size:1.25rem;line-height:1;transition:transform .2s;flex-shrink:0;}
+  .gitem[open] summary .plus{transform:rotate(45deg);}
+  .gitem .gbody{padding:0 18px 16px;color:var(--ink-soft);font-size:.89rem;line-height:1.8;}
+  .gitem .gbody .ex{display:block;margin-top:9px;color:var(--muted);font-size:.83rem;border-left:2px solid var(--line-2);padding-left:12px;}
+  @media(max-width:820px){.sysflow{grid-template-columns:1fr 1fr;}.glossary{grid-template-columns:1fr;}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="mk">🌐</span>
+      <span>BADTM<small>Urban Digital Twin</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#how">작동 방식</a>
+      <a href="#demo">직접 분석</a>
+      <a href="#kakao">지도</a>
+      <a href="#evidence">실증 근거</a>
+      <a href="#learn">용어·시스템</a>
+      <a class="nav-cta" href="https://osf.io/s385d/" target="_blank">논문·OSF 보기 ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="louver" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div style="margin-top:22px"><span class="eyebrow">생체모방 × AI × 도시 에너지</span></div>
+    <h1>건물 외피를 <span class="grad-text">살아 있는 도시 생태계</span>로</h1>
+    <p class="sub">주소만 입력하면, 생체모방 키네틱 파사드가 만드는 에너지·탄소 절감 효과를 도시 블록 단위로 즉시 시뮬레이션합니다. 모든 수치는 박사학위논문의 실증 결과와 동일 기준입니다.</p>
+
+    <div class="tool">
+      <div class="tlbl">📍 분석할 주소를 입력하세요</div>
+      <div class="row">
+        <input type="text" id="addr" placeholder="예: 서울시 동작구 상도로 410 / 강남구 테헤란로 / 부산 해운대구" />
+        <select id="radiusSel">
+          <option value="300">반경 300m</option>
+          <option value="500">반경 500m</option>
+          <option value="1000">반경 1000m</option>
+        </select>
+        <button id="goBtn">분석 시작</button>
+      </div>
+      <div class="presets">
+        <span class="pt">빠른 시작</span>
+        <button class="pbtn" data-a="서울 강남구 테헤란로">강남</button>
+        <button class="pbtn" data-a="서울 종로구 세종대로">종로</button>
+        <button class="pbtn" data-a="서울 마포구 와우산로">홍대</button>
+        <button class="pbtn" data-a="서울 송파구 올림픽로">잠실</button>
+        <button class="pbtn" data-a="서울 영등포구 여의대로">여의도</button>
+        <button class="pbtn" data-a="서울 동작구 상도로 410">상도동</button>
+        <button class="pbtn" data-a="부산 해운대구 해운대해변로">해운대</button>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hpill"><b class="grad-text">42.0%</b><span>연간 에너지 절감 (Case C-SAC)</span></div>
+      <div class="hpill"><b class="grad-text">21.7%</b><span>USS 블록 추가 절감</span></div>
+      <div class="hpill"><b class="grad-text">OSF</b><span>분석 프로토콜 등록·공개</span></div>
+    </div>
+    <div class="trust">조승완 · 박미애 지도 · 국민대학교 일반대학원 · 2027.02 &nbsp;·&nbsp; <a href="https://osf.io/s385d/" target="_blank">osf.io/s385d</a></div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2>세 단계로, 도시 블록의 절감 효과까지</h2>
+      <p>실제 도시 데이터를 불러와 BADTM AI 자율제어를 적용하고, 4대 지표와 보고서까지 한 번에 산출합니다.</p>
+    </div>
+    <div class="steps3">
+      <div class="scard"><span class="line"></span><div class="no">01</div><h3>주소·도시 데이터 수집</h3><p>OpenStreetMap으로 실제 건물군을 인식하고, 건축물대장·지역 기후값을 자동으로 불러옵니다.</p></div>
+      <div class="scard"><span class="line"></span><div class="no">02</div><h3>BADTM AI 자율제어 적용</h3><p>생체모방 4원리를 번역한 보상함수로 학습된 강화학습(SAC/PPO) 제어를 키네틱 파사드에 투영합니다.</p></div>
+      <div class="scard"><div class="no">03</div><h3>4대 지표·보고서 산출</h3><p>EUI·PMV·UDI·CO₂를 현재 vs 적용으로 비교하고, 계산 사슬을 투명하게 담은 보고서를 생성합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-shell" id="demo">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Live digital twin</span>
+      <h2>지금, 실제 주소로 직접 분석</h2>
+      <p>위 입력창에 주소를 넣고 분석을 시작하면 아래 디지털 트윈이 단계별로 채워집니다.</p>
+    </div>
+  </div>
+  <div class="demo-frame">
+<div class="steps" id="stepsBar">
+  <div class="step" data-s="1"><span class="num">1</span>주소검색</div><span class="arrow">›</span>
+  <div class="step" data-s="2"><span class="num">2</span>도시데이터</div><span class="arrow">›</span>
+  <div class="step" data-s="3"><span class="num">3</span>건축대장</div><span class="arrow">›</span>
+  <div class="step" data-s="4"><span class="num">4</span>기후데이터</div><span class="arrow">›</span>
+  <div class="step" data-s="5"><span class="num">5</span>디지털트윈</div><span class="arrow">›</span>
+  <div class="step" data-s="6"><span class="num">6</span>BADTM적용</div><span class="arrow">›</span>
+  <div class="step" data-s="7"><span class="num">7</span>성능평가</div><span class="arrow">›</span>
+  <div class="step" data-s="8"><span class="num">8</span>군집네트워크</div><span class="arrow">›</span>
+  <div class="step" data-s="9"><span class="num">9</span>시각화</div><span class="arrow">›</span>
+  <div class="step" data-s="10"><span class="num">10</span>보고서</div>
+</div>
+
+<div class="status-bar">
+  <div class="status" id="status"><span id="statusText"></span><div class="progress"><div class="progress-fill" id="progressFill"></div></div></div>
+</div>
+
+<div class="main">
+  <!-- 좌측 -->
+  <div class="panel left">
+    <div class="empirical-box">
+      <div class="l">📚 본 연구 실증 결과</div>
+      <div class="i">Case C-SAC <strong>42.0%</strong> 절감 (p=0.0028)<br>PMV <strong>91.8%</strong> · UDI <strong>78.4%</strong><br>USS Meso-2: 블록 EUI <strong>21.7%</strong> 추가</div>
+    </div>
+
+    <div class="mode-note" id="modeNote">⏳ 데이터 소스 확인 중...</div>
+
+    <div class="section">
+      <div class="stitle">🪟 키네틱 루버 사양</div>
+      <div class="spec-box">
+        슬랫 폭 <strong>80mm</strong> · 피치 <strong>85mm</strong> · 두께 1mm<br>
+        회전 <strong>0°(채광)~90°(차단)</strong> 연속<br>
+        알루미늄 · 반사율 0.88 · <strong>4방위×5층=20존</strong><br>
+        <span class="spec-note">EnergyPlus Blind 모델(Simmler et al. 1996) 기반</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">🎯 STEP 6 · 적용 Case</div>
+      <button class="case-btn" data-case="A"><div class="cn">Case A — 정적 외피</div><div class="cd">EUI 187.4 · 기준</div></button>
+      <button class="case-btn" data-case="B"><div class="cn">Case B — PID 제어</div><div class="cd">EUI 152.8 (-18.5%)</div></button>
+      <button class="case-btn active" data-case="C-SAC"><div class="cn">Case C-SAC ⭐ 본 연구</div><div class="cd">EUI 108.7 (-42.0%)</div></button>
+      <button class="case-btn" data-case="C-PPO"><div class="cn">Case C-PPO</div><div class="cd">EUI 113.6 (-39.4%)</div></button>
+    </div>
+
+    <div class="section">
+      <div class="stitle">🌐 STEP 8 · USS Meso-2 네트워크</div>
+      <div class="trow">
+        <div class="tbtn on" id="netOn">ON (-21.7%)</div>
+        <div class="tbtn" id="netOff">OFF</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">📷 실제 모습 보기</div>
+      <div class="sv-panel">
+        <button class="sv-btn kakao" id="svKakao" disabled>🟡 카카오 거리뷰</button>
+        <button class="sv-btn naver" id="svNaver" disabled>🟢 네이버 거리뷰</button>
+        <button class="sv-btn sat" id="svSat" disabled>🛰️ 위성 지도</button>
+      </div>
+      <div class="sv-note">분석한 위치의 실제 모습을 새 탭으로 엽니다. (인증키 불필요)</div>
+    </div>
+  </div>
+
+  <!-- 중앙 -->
+  <div class="center-area">
+    <div class="ctitle"><span>🗺️ STEP 5·9 · 도시 디지털 트윈</span><span id="mapModeLabel" style="font-size:0.7em;color:#64748b;"></span></div>
+    <div id="map"></div>
+    <svg id="cityCanvas" viewBox="0 0 600 380" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="data-src" id="dataSrc">
+      <strong style="color:#cbd5e1;">📡 STEP 2·3·4 · 데이터 소스</strong><br>
+      <span id="srcCity">건물 데이터: 대기 중</span><br>
+      <span id="srcLand" class="est">건축물대장(국토부 API): 추정값 적용 — 향후 연동</span><br>
+      <span id="srcWeather" class="est">기후 데이터(기상청 API): 서울 TMY 기준 — 향후 연동</span>
+    </div>
+    <div class="ledger-box" id="ledgerBox" style="display:none;">
+      <strong style="color:#7dd3fc;">📋 건축물대장 실데이터 (대표 건물)</strong>
+      <div id="ledgerContent"></div>
+    </div>
+  </div>
+
+  <!-- 우측 -->
+  <div class="panel right">
+    <div class="section">
+      <div class="stitle">📊 STEP 7 · 현재(Before) vs 적용(After)</div>
+      <div class="climate-tag" id="climateTag" style="display:none;"></div>
+      <div class="ba-grid">
+        <div class="ba-card">
+          <div class="ba-label">연간 EUI <span class="ba-unit">kWh/m²·yr</span></div>
+          <div class="ba-row">
+            <div class="ba-before"><span class="ba-tag">현재</span><span id="baEuiB">—</span></div>
+            <div class="ba-arrow">→</div>
+            <div class="ba-after"><span class="ba-tag af">적용</span><span id="baEuiA">—</span></div>
+          </div>
+          <div class="ba-delta" id="baEuiD"></div>
+        </div>
+        <div class="ba-card">
+          <div class="ba-label">PMV 충족률 <span class="ba-unit">열쾌적 %</span></div>
+          <div class="ba-row">
+            <div class="ba-before"><span class="ba-tag">현재</span><span id="baPmvB">—</span></div>
+            <div class="ba-arrow">→</div>
+            <div class="ba-after"><span class="ba-tag af">적용</span><span id="baPmvA">—</span></div>
+          </div>
+          <div class="ba-delta" id="baPmvD"></div>
+        </div>
+        <div class="ba-card">
+          <div class="ba-label">UDI 충족률 <span class="ba-unit">주광 %</span></div>
+          <div class="ba-row">
+            <div class="ba-before"><span class="ba-tag">현재</span><span id="baUdiB">—</span></div>
+            <div class="ba-arrow">→</div>
+            <div class="ba-after"><span class="ba-tag af">적용</span><span id="baUdiA">—</span></div>
+          </div>
+          <div class="ba-delta" id="baUdiD"></div>
+        </div>
+        <div class="ba-card">
+          <div class="ba-label">CO₂ 배출 <span class="ba-unit">tCO₂/yr</span></div>
+          <div class="ba-row">
+            <div class="ba-before"><span class="ba-tag">현재</span><span id="baCo2B">—</span></div>
+            <div class="ba-arrow">→</div>
+            <div class="ba-after"><span class="ba-tag af">적용</span><span id="baCo2A">—</span></div>
+          </div>
+          <div class="ba-delta" id="baCo2D"></div>
+        </div>
+      </div>
+      <div class="save-highlight" id="saveHighlight" style="display:none;">
+        ⚡ 연간 에너지 절감량 <strong id="baSave">—</strong> MWh/yr
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">🏢 건물 목록</div>
+      <div class="bldg-list" id="bldgList"><div style="color:#475569;text-align:center;padding:20px;font-size:0.84em">분석 후 표시</div></div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">🔬 통계 검증</div>
+      <div class="stat-box">H₁ 채택(에너지 절감 ≥35%): Wilcoxon <strong>p=0.0028</strong>, rank-biserial r=0.54<br>H₂ 채택(알고리즘 독립성): SAC-PPO 차이 2.6%p, Dunn p=0.218<br>H₃ 채택(네트워크 효과): USS Meso-2 <strong>21.7%</strong> 추가 절감, Kruskal-Wallis p&lt;0.05</div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">🧮 결과 도출 과정 (계산 사슬)</div>
+      <div class="calc-box" id="calcBox">
+        <div style="color:#64748b;text-align:center;padding:14px;font-size:0.84em">분석 후 표시</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="stitle">📄 STEP 10 · 보고서 출력</div>
+      <div class="actions">
+        <button class="abtn primary" id="reportBtn">📑 보고서 생성</button>
+        <button class="abtn" id="csvBtn">📊 CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+  </div><!-- /demo-frame -->
+</section>
+
+<section id="kakao">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Kakao Map</span>
+      <h2>카카오맵으로 위치 확인</h2>
+      <p>위 분석창에 주소를 넣으면 실제 위치와 분석 반경이 카카오맵에 함께 표시됩니다. 로드뷰로 건물 외관도 바로 볼 수 있습니다.</p>
+    </div>
+    <div class="kakao-card">
+      <div class="kakao-top">
+        <div class="kt-l"><span class="dot"></span><span id="kakaoAddrLabel">분석 주소를 입력하면 지도가 이동합니다</span></div>
+        <div class="kakao-controls">
+          <button class="kbtn on" id="kkMapBtn">지도</button>
+          <button class="kbtn" id="kkRoadBtn">로드뷰</button>
+          <button class="kbtn" id="kkOpenBtn">카카오맵에서 열기 ↗</button>
+        </div>
+      </div>
+      <div id="kakaoMap"></div>
+      <div id="kakaoRoad"></div>
+      <div class="kakao-notice" id="kakaoNotice">
+        <div class="box">
+          <h4>🗺️ 카카오맵을 표시하려면 JavaScript 키가 필요합니다</h4>
+          <p>카카오맵은 도메인에 등록된 앱 키가 있어야 표시됩니다. 아래 순서로 무료 키를 발급받아 넣어주세요.</p>
+          <ol>
+            <li>카카오 개발자 사이트(developers.kakao.com)에서 애플리케이션 생성</li>
+            <li>[앱 설정 → 앱 키]의 <code>JavaScript 키</code> 복사</li>
+            <li>[플랫폼 → Web]에 사이트 도메인 등록 (예: GitHub Pages 주소)</li>
+            <li>index.html 상단 스크립트의 <code>KAKAO_JS_KEY</code> 값에 붙여넣기</li>
+          </ol>
+          <p style="margin-top:14px;">키를 넣기 전에도 나머지 분석 기능(디지털 트윈·4대 지표·보고서)은 정상 작동하며, 위 <b>로드뷰</b> 버튼은 키 없이도 카카오 로드뷰를 새 탭으로 바로 엽니다.</p>
+        </div>
+      </div>
+      <div class="kakao-foot">지도 · Kakao Maps API — 주소 검색과 로드뷰 제공 (앱 키 등록 시 활성화)</div>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="wrap">
+    <div class="statband">
+      <div class="sb"><div class="n grad-text">42.0%</div><div class="l">연간 EUI 절감 · Case C-SAC<br>187.4 → 108.7 kWh/m²·yr</div></div>
+      <div class="sb"><div class="n grad-text">91.8%</div><div class="l">PMV 열쾌적 충족률<br>정적 대비 +27.1%p</div></div>
+      <div class="sb"><div class="n grad-text">78.4%</div><div class="l">UDI 주광 충족률<br>정적 대비 +30.1%p</div></div>
+      <div class="sb"><div class="n grad-text">21.7%</div><div class="l">USS Meso-2 블록 추가 절감<br>네트워크 공유 효과</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Features</span>
+      <h2>의사결정에 필요한 모든 것</h2>
+      <p>실제 주소 분석부터 재현 가능한 계산 사슬까지 — 논문과 100% 동일 기준으로 작동합니다.</p>
+    </div>
+    <div class="feat">
+      <div class="fc"><div class="ic">🗺️</div><h3>실제 주소 분석</h3><p>OpenStreetMap 연동으로 실제 도시 블록의 건물군을 인식하고 지역별 기후값을 자동 적용합니다.</p></div>
+      <div class="fc"><div class="ic">🧊</div><h3>2.5D 디지털 트윈</h3><p>Case 전환에 따라 건물 색·높이가 실시간으로 변하는 Before/After 입체 시각화를 제공합니다.</p></div>
+      <div class="fc"><div class="ic">📊</div><h3>4대 지표 동시 평가</h3><p>EUI·PMV·UDI·CO₂를 현재 vs 적용으로 한 화면에서 즉시 비교합니다.</p></div>
+      <div class="fc"><div class="ic">📑</div><h3>자동 보고서</h3><p>분석 결과를 계산 사슬과 함께 담은 보고서를 생성하고 CSV로 내보냅니다.</p></div>
+      <div class="fc"><div class="ic">🔍</div><h3>계산 사슬 투명 공개</h3><p>국가 공인 데이터 → 물리 시뮬레이션 → 실측값 도출까지 모든 단계를 추적 가능하게 공개합니다.</p></div>
+      <div class="fc"><div class="ic">📐</div><h3>논문 100% 일치</h3><p>동일 실증 수치·통계 방법·CO₂ 배출계수를 적용하고 OSF 등록·공개로 재현성을 보장합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Empirical evidence</span>
+      <h2>임의 설정이 아닌, 물리 실증 수치</h2>
+      <p>EnergyPlus v24.2 + Sinergym 통합 환경에서 8,760시간 × 4 Case × 3 시드로 산출한 결과입니다.</p>
+    </div>
+    <div class="ev">
+      <div class="ev-card">
+        <h3>4-Case 에너지 성능</h3>
+        <div class="ev-row"><span>Case A — 정적 외피 (기준)</span><b>187.4 kWh/m²·yr</b></div>
+        <div class="ev-row"><span>Case B — PID 제어</span><b>152.8 · −18.5%</b></div>
+        <div class="ev-row"><span>Case C-PPO — AI 제어</span><b>113.6 · −39.4%</b></div>
+        <div class="ev-row"><span>Case C-SAC — AI 제어 ★</span><b class="g">108.7 · −42.0%</b></div>
+        <div class="ev-row"><span>CO₂ 환산계수 (한국전력 2022)</span><b>0.4663 kgCO₂/kWh</b></div>
+        <div class="ev-row"><span>USS Meso-2 블록 (3개 건물)</span><b class="g">−21.7% · 피크 −30.4%</b></div>
+      </div>
+      <div class="ev-card accent">
+        <h3>사전 확립 가설 검정 — 전부 채택</h3>
+        <div class="hyp"><span class="tag">H₁</span><div class="tx"><b>에너지 절감 ≥ 35%</b><span>Wilcoxon p=0.0028 · rank-biserial r=0.54 (큰 효과)</span></div></div>
+        <div class="hyp"><span class="tag">H₂</span><div class="tx"><b>알고리즘 독립성 (≤ 5%p)</b><span>SAC-PPO 차이 2.6%p · Dunn 사후검정 p=0.218</span></div></div>
+        <div class="hyp"><span class="tag">H₃</span><div class="tx"><b>네트워크 효과</b><span>USS Meso-2 블록 EUI 21.7% 추가 감소 · Kruskal-Wallis p&lt;0.05</span></div></div>
+        <p style="margin-top:16px;font-size:.84rem;color:var(--muted);line-height:1.7;">비모수 검정(Kruskal-Wallis · Dunn · Wilcoxon)을 일관 적용하고, 가설·통계 검정 방법을 결과 확인에 앞서 확립하여 OSF에 등록·공개했습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="learn">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">System at a glance</span>
+      <h2>시스템 한눈에 보기</h2>
+      <p>자연의 적응 원리가 어떻게 도시 블록의 에너지 절감으로 이어지는지, 다섯 단계로 정리했습니다.</p>
+    </div>
+    <div class="sysflow">
+      <div class="sysnode"><span class="snum">1</span><div class="sh">Nature</div><div class="st">생체모방 원리</div><div class="sd">솔방울·잎 기공·피부·군집의 적응 전략</div></div>
+      <div class="sysnode"><span class="snum">2</span><div class="sh">Translate</div><div class="st">BADTM 변환</div><div class="sd">원리를 상태·행동·보상으로 번역</div></div>
+      <div class="sysnode"><span class="snum">3</span><div class="sh">Control</div><div class="st">AA-Framework</div><div class="sd">교체형 AI(SAC·PPO)로 파사드 자율제어</div></div>
+      <div class="sysnode"><span class="snum">4</span><div class="sh">Scale</div><div class="st">USS 도시 확장</div><div class="sd">건물군(Meso-2)이 데이터·에너지 공유</div></div>
+      <div class="sysnode"><span class="snum">5</span><div class="sh">Result</div><div class="st">실증 절감</div><div class="sd">에너지 42%↓ · 피크 30%↓ 검증</div></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:54px;">
+      <span class="eyebrow">Glossary</span>
+      <h2>용어 쉽게 이해하기</h2>
+      <p>논문에 나오는 핵심 용어를 한 줄로 풀어 설명합니다. 항목을 누르면 자세한 내용이 열립니다.</p>
+    </div>
+    <div class="glossary">
+      <details class="gitem"><summary><span class="abbr">생체모방</span>자연에서 배우는 설계<span class="plus">+</span></summary><div class="gbody">자연 생물의 구조·기능·원리를 공학과 건축 설계로 옮겨오는 접근입니다.<span class="ex">예: 솔방울이 습도에 따라 스스로 열리고 닫히는 원리를 건물 차양에 적용합니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">키네틱 파사드</span>움직이는 건물 외피<span class="plus">+</span></summary><div class="gbody">고정된 벽이 아니라 햇빛·온도에 맞춰 움직이며 빛과 열을 조절하는 건물 외피입니다.<span class="ex">예: 여름 낮에는 닫아 더위를 막고, 겨울 아침에는 열어 햇볕을 들입니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">BADTM</span>자연 원리 → 숫자로 번역<span class="plus">+</span></summary><div class="gbody">생체-건축 데이터 변환 매트릭스(Bio-Architectural Data Translation Matrix). 자연의 원리를 컴퓨터가 다룰 수 있는 숫자(상태·행동·보상)로 번역하는 방법론입니다. 이 연구의 대표 방법입니다.<span class="ex">예: "습하면 닫는다"를 "습도 값 → 루버 각도"라는 제어 변수로 바꿉니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">USS</span>건물들이 협력하는 이론<span class="plus">+</span></summary><div class="gbody">도시 공생 외피(Urban Symbiotic Skin). 건물 한 채가 아니라 여러 건물이 외피로 협력해 도시 규모에서 에너지를 아끼는 이론입니다.<span class="ex">예: 한 건물의 남는 전기를 옆 건물이 쓰고, 전력 첨두 시간을 서로 비껴갑니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">AA-Framework</span>AI를 갈아 끼우는 구조<span class="plus">+</span></summary><div class="gbody">알고리즘 독립 프레임워크(Algorithm-Agnostic Framework). 설계 논리는 그대로 두고, 안에 들어가는 AI만 자유롭게 바꿔 끼울 수 있는 구조입니다.<span class="ex">예: SAC를 쓰다가 더 좋은 AI가 나오면 설계 변경 없이 그대로 교체합니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">강화학습</span>시행착오로 배우는 AI<span class="plus">+</span></summary><div class="gbody">AI가 시행착오를 반복하며 '보상'을 최대화하는 방법을 스스로 배우는 학습 방식입니다.<span class="ex">예: 파사드를 이리저리 움직여 보며 가장 쾌적하면서 에너지가 적게 드는 방법을 찾아냅니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">SAC · PPO</span>대표 강화학습 알고리즘<span class="plus">+</span></summary><div class="gbody">강화학습의 두 대표 알고리즘입니다. SAC는 탐색이 풍부하고 데이터 효율이 높으며, PPO는 학습이 안정적입니다.<span class="ex">본 연구에서 둘의 성능 차이는 2.6%p로 사실상 동등했습니다(알고리즘 독립성).</span></div></details>
+      <details class="gitem"><summary><span class="abbr">EUI</span>에너지 사용 강도<span class="plus">+</span></summary><div class="gbody">건물이 1㎡당 1년에 쓰는 에너지량(kWh/m²·yr)입니다. 낮을수록 효율적입니다.<span class="ex">본 연구: 187.4 → 108.7 로 42% 감소했습니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">PMV</span>열쾌적 지표<span class="plus">+</span></summary><div class="gbody">예측 평균 온열감. 재실자가 느끼는 더위·추위를 −3~+3으로 나타낸 쾌적 지표로, 0에 가까울수록 쾌적합니다.<span class="ex">여기서는 쾌적 범위를 충족한 시간 비율(충족률)로 사용합니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">UDI</span>적정 자연광 지표<span class="plus">+</span></summary><div class="gbody">유효 주광 조도. 너무 어둡지도 눈부시지도 않은 '적정한 자연광'이 확보된 시간의 비율입니다. 높을수록 조명 에너지가 절약됩니다.<span class="ex">직사광을 억제하면서도 충분한 밝기를 확보하는 균형이 핵심입니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">Meso-2</span>핵심 건물군 단위<span class="plus">+</span></summary><div class="gbody">USS 4층위(Micro·Meso-1·Meso-2·Macro) 중 3~10개 동 규모의 건물군입니다. 협력 효과가 처음으로 뚜렷해지는 핵심 단위입니다.<span class="ex">이 규모에서 부하 분산과 피크 완화가 창발적으로 나타납니다.</span></div></details>
+      <details class="gitem"><summary><span class="abbr">EnergyPlus · OSF</span>시뮬레이션·공개 저장소<span class="plus">+</span></summary><div class="gbody">EnergyPlus는 미국 에너지부의 표준 건물 에너지 시뮬레이션 엔진입니다. OSF는 연구 절차·데이터를 미리 공개해 재현성을 보장하는 공개 저장소입니다.<span class="ex">본 연구의 분석 프로토콜은 osf.io/s385d 에 등록·공개되어 있습니다.</span></div></details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>논문과 동일한 기준으로, 직접 검증하세요</h2>
+      <p>당신의 건물 주소로 키네틱 파사드의 절감 효과를 시뮬레이션하고, 계산 사슬과 함께 보고서로 받아보세요.</p>
+      <div class="cta-btns">
+        <button class="btn-primary" onclick="document.getElementById('addr').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('addr').focus();">주소로 분석 시작</button>
+        <a class="btn-ghost" href="https://osf.io/s385d/" target="_blank">OSF 프로토콜 보기 ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <a class="brand" href="#top"><span class="mk">🌐</span><span>BADTM<small>Urban Digital Twin</small></span></a>
+        <p class="about">생체모방 원리 기반 집합 건물군 키네틱 파사드 네트워크의 에너지 절감 효과를 도시 블록 단위로 시뮬레이션하는 디지털 트윈 의사결정 도구.</p>
+      </div>
+      <div class="fcol"><h4>플랫폼</h4><a href="#how">작동 방식</a><a href="#demo">직접 분석</a><a href="#kakao">카카오맵</a><a href="#evidence">실증 근거</a><a href="#learn">용어·시스템</a></div>
+      <div class="fcol"><h4>연구</h4><a href="https://osf.io/s385d/" target="_blank">OSF 등록·공개</a><p>BADTM · USS · AA-Framework</p><p>박사학위 청구논문 · 2027.02</p></div>
+      <div class="fcol"><h4>데이터 출처</h4><p>기상청 TMY 표준기상연도</p><p>한국전력 배출계수 0.4663</p><p>EnergyPlus v24.2 · Sinergym</p></div>
+    </div>
+    <div class="fbottom">
+      생체모방 원리 기반 집합 건물군 키네틱 파사드 네트워크 설계 이론 및 AI 자율제어 프레임워크 연구<br>
+      조승완 · 박미애 지도 · 국민대학교 일반대학원 건축학과 · 2027.02 · 시뮬레이션 실증 완료 박사논문
+    </div>
+  </div>
+</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════
+   건축물대장 실데이터 연동 설정
+   ───────────────────────────────────────────────────────────
+   ▼ 아래 LEDGER_PROXY 에 Cloudflare Workers 주소를 넣으면
+     STEP 3(건축물대장)가 추정값 → 실데이터로 자동 전환됩니다.
+   ▼ 비워두면('') 기존처럼 추정값으로 작동합니다.
+   예) const LEDGER_PROXY = 'https://badtm-proxy.본인계정.workers.dev';
+   ═══════════════════════════════════════════════════════════ */
+const LEDGER_PROXY = '';   // ← 여기에 본인의 워커 주소를 붙여넣으세요
+
+// 주요 시군구 법정동코드 매핑 (주소 → 코드 변환용, 자주 쓰는 지역)
+// 형식: '시군구명' : { sgg:'시군구코드5', dongs:{ '동명':'법정동코드5' } }
+const REGION_CODES = {
+  '강남구': { sgg:'11680', dongs:{'역삼동':'10100','삼성동':'10500','대치동':'10600','신사동':'10300','논현동':'10800','청담동':'10400'} },
+  '서초구': { sgg:'11650', dongs:{'서초동':'10800','반포동':'10700','잠원동':'10600','방배동':'10100','양재동':'10300'} },
+  '송파구': { sgg:'11710', dongs:{'잠실동':'10100','문정동':'10700','가락동':'10800','방이동':'10400','송파동':'10200'} },
+  '영등포구': { sgg:'11560', dongs:{'여의도동':'10600','영등포동':'10100','당산동':'10400','문래동':'10700'} },
+  '종로구': { sgg:'11110', dongs:{'세종로':'11500','종로1가':'11800','청운동':'10100','사직동':'11000'} },
+  '중구': { sgg:'11140', dongs:{'명동':'10500','을지로':'11300','충무로':'10800','회현동':'10400'} },
+  '마포구': { sgg:'11440', dongs:{'서교동':'10400','합정동':'10300','상암동':'12000','공덕동':'10100','연남동':'10500'} },
+  '동작구': { sgg:'11590', dongs:{'상도동':'10300','사당동':'10600','노량진동':'10100','흑석동':'10200'} },
+  '용산구': { sgg:'11170', dongs:{'한남동':'10500','이태원동':'10400','용산동':'10100','청파동':'10800'} },
+  '성동구': { sgg:'11200', dongs:{'성수동':'10700','왕십리':'10100','금호동':'10400','옥수동':'10300'} },
+  '해운대구': { sgg:'26350', dongs:{'우동':'10100','중동':'10200','좌동':'10300','재송동':'10500'} }
+};
+
+const CASE_DATA = {
+  'A':{eui:187.4,pmv:64.7,udi:48.3,co2:88.2,name:'정적 외피'},
+  'B':{eui:152.8,pmv:81.4,udi:63.7,co2:71.9,name:'PID 제어'},
+  'C-SAC':{eui:108.7,pmv:91.8,udi:78.4,co2:51.1,name:'SAC (본 연구)'},
+  'C-PPO':{eui:113.6,pmv:89.3,udi:76.2,co2:53.4,name:'PPO'}
+};
+// 국가 전력배출계수 (한국전력공사 2022년 계통 평균, 본 논문과 동일 기준)
+const CO2_FACTOR = 0.4663; // kgCO2/kWh
+
+/* ═══════════════════════════════════════════════════════════
+   지역별 연간 기후 데이터 (기상청 2025년 연 기후특성 기반)
+   ───────────────────────────────────────────────────────────
+   2025년: 전국 연평균기온 13.7℃ (역대 2위), 여름철 25.7℃(역대1위).
+   본 연구 baseline은 서울 기준. 2025 실측 연간값으로 지역별 보정.
+   factor = 그 지역 2025 기후가 서울 대비 냉난방 부하 배율.
+   ═══════════════════════════════════════════════════════════ */
+const CLIMATE_YEAR = '2025';
+const CLIMATE_DATA = {
+  '서울': { temp:13.9, sun:2030, hdd:2480, cdd:610, factor:1.000, region:'중부' },
+  '인천': { temp:13.7, sun:2080, hdd:2420, cdd:560, factor:0.988, region:'중부(해안)' },
+  '경기': { temp:13.3, sun:2110, hdd:2630, cdd:585, factor:1.018, region:'중부' },
+  '강원': { temp:12.5, sun:2160, hdd:2970, cdd:510, factor:1.068, region:'영동/영서' },
+  '대전': { temp:14.4, sun:2100, hdd:2370, cdd:650, factor:0.985, region:'충청' },
+  '충청': { temp:13.6, sun:2110, hdd:2540, cdd:610, factor:1.008, region:'충청' },
+  '대구': { temp:15.6, sun:2120, hdd:2050, cdd:820, factor:0.958, region:'영남' },
+  '부산': { temp:16.1, sun:2190, hdd:1760, cdd:780, factor:0.905, region:'영남(해안)' },
+  '울산': { temp:15.5, sun:2140, hdd:1960, cdd:750, factor:0.938, region:'영남' },
+  '경상': { temp:14.9, sun:2160, hdd:2200, cdd:740, factor:0.962, region:'영남' },
+  '광주': { temp:15.1, sun:2010, hdd:2200, cdd:735, factor:0.952, region:'호남' },
+  '전라': { temp:14.6, sun:2040, hdd:2350, cdd:690, factor:0.978, region:'호남' },
+  '제주': { temp:17.8, sun:1990, hdd:1250, cdd:810, factor:0.862, region:'제주(해양)' }
+};
+// 주소 텍스트 → 지역 기후 매핑
+function getClimate(text){
+  // 광역시/도 단위를 먼저 체크 (해운대구의 '대구' 등 오매칭 방지)
+  const priority=[
+    ['서울','서울'],['부산','부산'],['대구','대구'],['인천','인천'],['광주','광주'],
+    ['대전','대전'],['울산','울산'],['세종','충청'],['제주','제주']
+  ];
+  for(const [kw,reg] of priority){ if(text.includes(kw)) return {name:reg, ...CLIMATE_DATA[reg]}; }
+  // 그 다음 도/시군 단위
+  const second=[
+    ['경기','경기'],['수원','경기'],['성남','경기'],['고양','경기'],['용인','경기'],
+    ['강원','강원'],['춘천','강원'],['강릉','강원'],
+    ['충청','충청'],['충북','충청'],['충남','충청'],['청주','충청'],['천안','충청'],
+    ['경북','경상'],['경남','경상'],['포항','경상'],['창원','경상'],
+    ['전북','전라'],['전남','전라'],['전주','전라'],['목포','전라']
+  ];
+  for(const [kw,reg] of second){ if(text.includes(kw)) return {name:reg, ...CLIMATE_DATA[reg]}; }
+  return {name:'서울', ...CLIMATE_DATA['서울']}; // 기본값
+}
+
+const state = {
+  case:'C-SAC', network:true, badtm:{1:true,2:true,3:true,4:true},
+  radius:300, buildings:[], address:'', center:null,
+  mode:'unknown', // 'online' | 'offline'
+  mapReady:false,
+  ledgerInfo:null, // 건축물대장 실데이터 (프록시 연동 시 채워짐)
+  climate:null,    // 지역 연간 기후 데이터
+  compare:null     // Before/After 비교 결과
+};
+
+let map=null, buildingLayer=null, centerMarker=null, radiusCircle=null, hasLeaflet=false;
+
+/* ---------- STEP 진행 표시 ---------- */
+function setStep(n, status){ // status: 'active'|'done'
+  document.querySelectorAll('.step').forEach(el=>{
+    const s=parseInt(el.dataset.s);
+    el.classList.remove('active');
+    if(s<n) el.classList.add('done');
+    else if(s===n){ el.classList.add('active'); if(status==='done'){el.classList.remove('active');el.classList.add('done');} }
+    else el.classList.remove('done');
+  });
+}
+function allStepsDone(){ document.querySelectorAll('.step').forEach(el=>{el.classList.remove('active');el.classList.add('done');}); }
+
+function showStatus(text, type='loading', progress=null){
+  const s=document.getElementById('status');
+  document.getElementById('statusText').textContent=text;
+  s.className='status '+type;
+  if(progress!==null) document.getElementById('progressFill').style.width=progress+'%';
+}
+function hideStatus(delay=2500){ setTimeout(()=>{ document.getElementById('status').className='status'; }, delay); }
+
+/* ---------- 의사난수 (오프라인 도시 생성) ---------- */
+function hashString(str){ let h=2166136261; for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);} return h>>>0; }
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ---------- STEP 1: 주소 → 좌표 (온라인) ---------- */
+// 카카오 지오코더 (한국 주소에 정확) — 카카오 JS 키 설정 시 자동 사용
+function kakaoGeocode(address){
+  return new Promise((resolve)=>{
+    if(!(window.kakao && kakao.maps && kakao.maps.services)){ resolve(null); return; }
+    try{
+      const geo=new kakao.maps.services.Geocoder();
+      geo.addressSearch(address,(res,status)=>{
+        if(status===kakao.maps.services.Status.OK && res && res[0]){
+          resolve({lat:parseFloat(res[0].y),lon:parseFloat(res[0].x),name:res[0].address_name||address,src:'kakao'});
+        } else {
+          // 도로명·지번 실패 시 장소명(키워드) 검색으로 재시도
+          const ps=new kakao.maps.services.Places();
+          ps.keywordSearch(address,(r2,s2)=>{
+            if(s2===kakao.maps.services.Status.OK && r2 && r2[0]){
+              resolve({lat:parseFloat(r2[0].y),lon:parseFloat(r2[0].x),name:r2[0].place_name||address,src:'kakao'});
+            } else resolve(null);
+          });
+        }
+      });
+    }catch(e){ resolve(null); }
+  });
+}
+
+async function geocode(address){
+  // 1) 카카오 지오코더 우선 (한국 주소 정확) — 카카오 JS 키가 설정된 경우
+  const k=await kakaoGeocode(address);
+  if(k) return k;
+
+  // 2) Nominatim(OpenStreetMap) 폴백 — 키 없이 동작하나 한국 주소 정확도는 낮음
+  const attempts=[];
+  const hasKorean=/[가-힣]/.test(address);
+  if(hasKorean){
+    attempts.push(address);
+    if(!/(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주|특별시|광역시)/.test(address)){
+      attempts.push('서울특별시 '+address);
+    }
+    attempts.push(address+', 대한민국');
+    // 건물번호·번지 제거(도로 수준)
+    const road=address.replace(/\s*\d+[-\d]*\s*(번지|번|호)?\s*$/,'').trim();
+    if(road && road!==address) attempts.push(road+', 대한민국');
+    // 구 + 동만 (동네 수준 폴백 — 최소한 올바른 지역)
+    const gu=address.match(/([가-힣]+구)/); const dong=address.match(/([가-힣]+(동|읍|면|가))/);
+    if(gu&&dong) attempts.push(gu[1]+' '+dong[1]+', 대한민국');
+    else if(dong) attempts.push(dong[1]+', 대한민국');
+  } else { attempts.push(address); }
+
+  for(let i=0;i<attempts.length;i++){
+    if(i>0) await new Promise(r=>setTimeout(r,1100));
+    try{
+      const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(attempts[i])}&limit=1&accept-language=ko&countrycodes=kr`;
+      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
+      const res=await fetch(url,{headers:{'Accept':'application/json'},signal:ctrl.signal});
+      clearTimeout(to);
+      if(!res.ok) continue;
+      const data=await res.json();
+      if(data&&data.length>0) return {lat:parseFloat(data[0].lat),lon:parseFloat(data[0].lon),name:data[0].display_name,src:'osm'};
+    }catch(e){ /* 다음 시도 */ }
+  }
+  return null;
+}
+
+/* ---------- STEP 2: 실제 건물 수집 (온라인 Overpass) ---------- */
+async function fetchBuildings(lat,lon,radius){
+  const q=`[out:json][timeout:20];(way["building"](around:${radius},${lat},${lon}););out geom;`;
+  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),20000);
+  const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q,signal:ctrl.signal});
+  clearTimeout(to);
+  if(!res.ok) throw new Error('Overpass 오류');
+  const data=await res.json();
+  return data.elements||[];
+}
+
+function polygonAreaM2(coords){
+  if(coords.length<3) return 0;
+  let a=0;
+  for(let i=0;i<coords.length-1;i++){
+    const [y1,x1]=[coords[i].lat,coords[i].lon];
+    const [y2,x2]=[coords[i+1].lat,coords[i+1].lon];
+    a+=(x1*y2-x2*y1);
+  }
+  // 위경도 → m² 대략 변환 (위도 37도 기준)
+  const mPerDegLat=111000, mPerDegLon=88000;
+  return Math.abs(a/2)*mPerDegLat*mPerDegLon;
+}
+
+/* ---------- STEP 3: 건축물대장 실데이터 (프록시 경유) ---------- */
+// 주소 문자열에서 시군구·법정동 코드 + 본번/부번 추출
+function parseAddressToCode(address, geocodeName){
+  const text = (geocodeName || '') + ' ' + address;
+  // 시군구 찾기
+  let region=null, sggName=null;
+  for(const name in REGION_CODES){
+    if(text.includes(name)){ region=REGION_CODES[name]; sggName=name; break; }
+  }
+  if(!region) return null;
+  // 법정동 찾기
+  let bjCode=null, dongName=null;
+  for(const dong in region.dongs){
+    if(text.includes(dong)){ bjCode=region.dongs[dong]; dongName=dong; break; }
+  }
+  if(!bjCode){
+    // 동을 못 찾으면 해당 시군구의 첫 번째 동을 대표로 사용
+    const first=Object.keys(region.dongs)[0];
+    bjCode=region.dongs[first]; dongName=first;
+  }
+  // 번지 추출 (예: "상도로 410" → 본번 410 / "123-45" → 본번123 부번45)
+  let bun='0000', ji='0000';
+  const m1=text.match(/(\d+)\s*-\s*(\d+)/);      // 123-45 형식
+  const m2=text.match(/(\d{1,4})(?:번지|번|\s|$)/); // 단일 번지
+  if(m1){ bun=m1[1].padStart(4,'0'); ji=m1[2].padStart(4,'0'); }
+  else if(m2){ bun=m2[1].padStart(4,'0'); }
+  return { sigunguCd:region.sgg, bjdongCd:bjCode, bun, ji, sggName, dongName };
+}
+
+// 실시간 날씨 조회 (같은 프록시의 /weather 경로) — 설정 시에만 표시
+async function fetchLiveWeather(){
+  if(!LEDGER_PROXY || !state.center) return;
+  try{
+    const c=state.center;
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch(`${LEDGER_PROXY}/weather?lat=${c.lat}&lon=${c.lon}`,{signal:ctrl.signal});
+    clearTimeout(to);
+    if(!res.ok) return;
+    const w=await res.json();
+    if(w.error || w.기온==null) return;
+    const el=document.getElementById('liveWx');
+    if(el) el.innerHTML=` <span style="color:#34d399">· 현재 ${w.기온}℃ · 습도 ${w.습도}%${w.강수1h&&w.강수1h!=='0'?` · 강수 ${w.강수1h}mm`:''} <span style="color:#5d6f8c">(기상청 실황)</span></span>`;
+  }catch(e){ /* 조용히 무시 */ }
+}
+
+// 프록시 서버를 통해 건축물대장 표제부 조회
+async function fetchLedger(code){
+  if(!LEDGER_PROXY) return null;  // 주소 미설정 시 건너뜀
+  try{
+    const url=`${LEDGER_PROXY}/?sigunguCd=${code.sigunguCd}&bjdongCd=${code.bjdongCd}&bun=${code.bun}&ji=${code.ji}`;
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),9000);
+    const res=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(to);
+    if(!res.ok) return null;
+    const data=await res.json();
+    if(data.error||!data.buildings||data.buildings.length===0) return null;
+    return data.buildings;  // [{건물명,지상층수,연면적_m2,용적률_pct,주용도,에너지효율등급,...}]
+  }catch(e){ return null; }
+}
+
+// 건축물대장 데이터를 건물에 매칭 (대표 건물 정보로 보정)
+function applyLedgerData(ledger){
+  if(!ledger||ledger.length===0) return false;
+  // 대표값 (가장 큰 건물 기준)
+  const rep=ledger.reduce((a,b)=>((b.연면적_m2||0)>(a.연면적_m2||0)?b:a), ledger[0]);
+  state.ledgerInfo={
+    건물명: rep.건물명||'-',
+    주용도: rep.주용도||'-',
+    지상층수: rep.지상층수||'-',
+    연면적: rep.연면적_m2||'-',
+    용적률: rep.용적률_pct||'-',
+    건폐율: rep.건폐율_pct||'-',
+    사용승인일: rep.사용승인일||'-',
+    에너지효율등급: rep.에너지효율등급||'-',
+    동수: ledger.length
+  };
+  return true;
+}
+
+function processOSM(elements){
+  const out=[];
+  let id=1;
+  for(const el of elements){
+    if(!el.geometry||el.geometry.length<3) continue;
+    const coords=el.geometry;
+    let footprint=polygonAreaM2(coords);
+    if(footprint<40||footprint>50000) continue; // 노이즈 제거
+    // 건축물대장 추정 (STEP 3 대체): 층수 = 태그 or 추정
+    let levels=el.tags&&el.tags['building:levels']?parseInt(el.tags['building:levels']):0;
+    if(!levels||isNaN(levels)) levels=Math.max(3,Math.round(footprint/250));
+    levels=Math.min(levels,40);
+    const clat=coords.reduce((s,c)=>s+c.lat,0)/coords.length;
+    const clon=coords.reduce((s,c)=>s+c.lon,0)/coords.length;
+    out.push({ id:id++, levels, footprint, area:footprint*levels, lat:clat, lon:clon, geometry:coords, seed:Math.random() });
+  }
+  return out;
+}
+
+/* ---------- 오프라인: 주소 기반 도시 생성 ---------- */
+function generateCity(address,radius){
+  const rand=mulberry32(hashString(address.trim()||'서울'));
+  const count=Math.max(3,Math.min(18,Math.round(radius/60+rand()*4)));
+  const out=[];
+  for(let i=0;i<count;i++){
+    const levels=Math.floor(8+rand()*25);
+    const footprint=600+rand()*1400;
+    out.push({ id:i+1, levels, footprint, area:footprint*levels,
+      x:0.1+rand()*0.8, y:0.1+rand()*0.8, w:0.06+rand()*0.07, seed:rand() });
+  }
+  return out;
+}
+
+/* ---------- STEP 6·7: BADTM 적용 + 성능 계산 ---------- */
+function badtmFactor(){ const a=Object.values(state.badtm).filter(Boolean).length; return a/4; } // 0~1 (활성 원리 비율)
+
+function computeKPIs(){
+  const c=CASE_DATA[state.case];
+  const baseEui=CASE_DATA['A'].eui;       // 기준 EUI (187.4, 서울 baseline)
+  const caseRatio=c.eui/baseEui;          // Case 절감계수 (본 연구 실증값)
+  const isAI=(state.case==='C-SAC'||state.case==='C-PPO');
+  const bfRatio=badtmFactor();
+  const badtmWeight=(state.case==='A')?1:(0.70+0.30*bfRatio);
+  const netBonus=(state.network&&isAI)?(1-0.217):1;
+  // 지역 연간 기후 계수 (서울 baseline=1.0, 추우면 ↑ 더우면 지역따라)
+  const cf=state.climate?state.climate.factor:1.0;
+
+  let beforeSum=0, afterSum=0, areaSum=0;
+  state.buildings.forEach(b=>{
+    const sizeVar=0.9+b.seed*0.2;
+    // ===== Before (현재 상태 = Case A 정적 외피, 키네틱 파사드 없음) =====
+    const beforeEui=baseEui*cf*sizeVar;          // 기후 반영된 현재 에너지
+    // ===== After (선택 Case의 키네틱 파사드 적용) =====
+    const step1=baseEui;
+    const step2=baseEui*caseRatio;               // Case 적용
+    const reduction=(baseEui-step2);
+    const step3=baseEui-(reduction*badtmWeight); // BADTM 가중
+    const step4=step3*netBonus;                  // USS 네트워크
+    const step5=step4*cf*sizeVar;                // 기후 + 규모 반영
+    const afterEui=step5;
+
+    b.beforeEui=beforeEui;
+    b.eui=afterEui;          // 시각화는 After 기준
+    b.afterEui=afterEui;
+    b.calc={ step1,step2,step3,step4:step4*cf, step5, caseRatio,badtmWeight,netBonus,sizeVar,cf };
+    b.pmv=(state.case==='A')?c.pmv:c.pmv*(0.85+0.15*bfRatio);
+    b.udi=(state.case==='A')?c.udi:c.udi*(0.85+0.15*bfRatio);
+    b.pmvBefore=CASE_DATA['A'].pmv;
+    b.udiBefore=CASE_DATA['A'].udi;
+
+    beforeSum+=beforeEui*b.area;
+    afterSum+=afterEui*b.area;
+    areaSum+=b.area;
+  });
+
+  // Before/After 블록 비교
+  const beforeAvg=beforeSum/areaSum;
+  const afterAvg=afterSum/areaSum;
+  const reductionPct=((beforeAvg-afterAvg)/beforeAvg*100);
+  const energySaved=(beforeAvg-afterAvg)*areaSum;          // kWh/yr (절감 에너지량)
+  const co2Before=beforeAvg*areaSum*CO2_FACTOR/1000;       // tCO2/yr
+  const co2After=afterAvg*areaSum*CO2_FACTOR/1000;
+  state.compare={
+    beforeEui:beforeAvg, afterEui:afterAvg, reductionPct,
+    beforePmv:CASE_DATA['A'].pmv, afterPmv:(state.case==='A')?CASE_DATA['A'].pmv:c.pmv*(0.85+0.15*bfRatio),
+    beforeUdi:CASE_DATA['A'].udi, afterUdi:(state.case==='A')?CASE_DATA['A'].udi:c.udi*(0.85+0.15*bfRatio),
+    co2Before, co2After, co2Saved:co2Before-co2After,
+    energySaved,
+    totalArea:areaSum
+  };
+  state.calcModel={ baseEui, caseRatio, badtmWeight, netBonus, climateFactor:cf,
+    caseName:c.name, activePrinciples:Object.values(state.badtm).filter(Boolean).length,
+    isAI, network:state.network, climateName:state.climate?state.climate.name:'서울' };
+}
+
+/* ---------- STEP 9: 시각화 ---------- */
+function euiColor(e){ if(e<100)return '#10b981'; if(e<130)return '#22c55e'; if(e<160)return '#f59e0b'; if(e<185)return '#fb923c'; return '#f87171'; }
+function euiColorTop(e){ if(e<100)return '#34d399'; if(e<130)return '#4ade80'; if(e<160)return '#fbbf24'; if(e<185)return '#fdba74'; return '#fca5a5'; }
+function euiColorSide(e){ if(e<100)return '#047857'; if(e<130)return '#15803d'; if(e<160)return '#b45309'; if(e<185)return '#c2410c'; return '#b91c1c'; }
+
+function renderOnlineMap(){
+  if(buildingLayer){ map.removeLayer(buildingLayer); }
+  buildingLayer=L.layerGroup();
+  const isAI=(state.case==='C-SAC'||state.case==='C-PPO');
+  // 네트워크 선
+  if(state.network&&isAI&&state.buildings.length>1){
+    for(let i=0;i<Math.min(state.buildings.length,30);i++){
+      const a=state.buildings[i];
+      const near=state.buildings.map((b,j)=>({j,d:Math.hypot(a.lat-b.lat,a.lon-b.lon)})).filter(o=>o.j!==i).sort((p,q)=>p.d-q.d).slice(0,2);
+      near.forEach(o=>{ const b=state.buildings[o.j]; L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:'#10b981',weight:1,opacity:0.35,dashArray:'4,4'}).addTo(buildingLayer); });
+    }
+  }
+  state.buildings.forEach(b=>{
+    const isAfter=(state.case!=='A');
+    const showEui=isAfter?b.afterEui:b.beforeEui;
+    const poly=L.polygon(b.geometry.map(c=>[c.lat,c.lon]),{color:isAfter?'#065f46':'#7f1d1d',weight:1.5,fillColor:euiColor(showEui),fillOpacity:isAfter?0.78:0.62});
+    poly.bindPopup(`<b style="color:#38bdf8">건물 ${b.id}</b> · ${b.levels}층 · ${Math.round(b.area).toLocaleString()}m²<br><b>현재 EUI:</b> <span style="color:#f87171">${b.beforeEui.toFixed(1)}</span> → <b>적용:</b> <span style="color:#6ee7b7">${b.afterEui.toFixed(1)}</span> kWh/m²·yr<br><b>PMV:</b> ${b.pmv.toFixed(1)}% · <b>UDI:</b> ${b.udi.toFixed(1)}%`);
+    poly.addTo(buildingLayer);
+  });
+  buildingLayer.addTo(map);
+}
+
+function renderOfflineCanvas(){
+  const svg=document.getElementById('cityCanvas');
+  const W=600,H=380; let s='';
+  const isAfter=(state.case!=='A');
+  s+=`<defs><radialGradient id="bgGlow" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="${isAfter?'#0d2818':'#0a1525'}"/><stop offset="100%" stop-color="#060e1a"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  s+=`<rect width="${W}" height="${H}" fill="url(#bgGlow)"/>`;
+  const cx=W/2, cy=H*0.5;
+  s+=`<ellipse cx="${cx}" cy="${cy}" rx="${W*0.4}" ry="${H*0.27}" fill="none" stroke="#1e3a5f" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+  s+=`<ellipse cx="${cx}" cy="${cy}" rx="8" ry="4" fill="#f87171" opacity="0.8"/>`;
+  function iso(bx,by){ const gx=(bx-0.5)*W*0.62, gy=(by-0.5)*H*0.62; return { sx:cx+(gx-gy)*0.5, sy:cy+(gx+gy)*0.28 }; }
+  const sorted=[...state.buildings].map(b=>({b,p:iso(b.x,b.y)})).sort((a,c)=>a.p.sy-c.p.sy);
+  const isAI=(state.case==='C-SAC'||state.case==='C-PPO');
+  if(state.network&&isAI&&state.buildings.length>1){
+    for(let i=0;i<state.buildings.length;i++){ const a=state.buildings[i]; const pa=iso(a.x,a.y);
+      const near=state.buildings.map((b,j)=>({j,d:Math.hypot(a.x-b.x,a.y-b.y)})).filter(o=>o.j!==i).sort((p,q)=>p.d-q.d).slice(0,2);
+      near.forEach(o=>{ const b=state.buildings[o.j]; const pb=iso(b.x,b.y); s+=`<line x1="${pa.sx}" y1="${pa.sy}" x2="${pb.sx}" y2="${pb.sy}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.5" filter="url(#glow)"/>`; });
+    }
+  }
+  sorted.forEach(({b,p})=>{
+    const eui=isAfter?b.afterEui:b.beforeEui;
+    const bw=14+b.w*W*0.35;
+    const depth=bw*0.5;
+    const hScale=isAfter?0.8:1.0;
+    const bh=(16+b.levels*4.0)*hScale;
+    const col=euiColor(eui), colTop=euiColorTop(eui), colSide=euiColorSide(eui);
+    const x=p.sx, y=p.sy;
+    s+=`<path d="M ${x} ${(y-bh).toFixed(1)} L ${(x+bw/2).toFixed(1)} ${(y-bh+depth/2).toFixed(1)} L ${x} ${(y-bh+depth).toFixed(1)} L ${(x-bw/2).toFixed(1)} ${(y-bh+depth/2).toFixed(1)} Z" fill="${colTop}" ${isAfter?'filter="url(#glow)"':''}/>`;
+    s+=`<path d="M ${(x-bw/2).toFixed(1)} ${(y-bh+depth/2).toFixed(1)} L ${x} ${(y-bh+depth).toFixed(1)} L ${x} ${(y+depth).toFixed(1)} L ${(x-bw/2).toFixed(1)} ${(y+depth/2).toFixed(1)} Z" fill="${colSide}"/>`;
+    s+=`<path d="M ${(x+bw/2).toFixed(1)} ${(y-bh+depth/2).toFixed(1)} L ${x} ${(y-bh+depth).toFixed(1)} L ${x} ${(y+depth).toFixed(1)} L ${(x+bw/2).toFixed(1)} ${(y+depth/2).toFixed(1)} Z" fill="${col}"/>`;
+    const lv=Math.min(7,Math.floor(b.levels/(isAfter?3:5)));
+    for(let k=1;k<=lv;k++){ const t=k/(lv+1); const topY=y-bh+depth; const botY=y+depth; const yy=topY+(botY-topY)*t;
+      s+=`<line x1="${x}" y1="${yy.toFixed(1)}" x2="${(x+bw/2).toFixed(1)}" y2="${(yy-depth/2*(1-t)+depth/2*t*0+ (y-bh+depth/2 + ((y+depth/2)-(y-bh+depth/2))*t - yy)).toFixed(1)}" stroke="${isAfter?'#a7f3d0':'#0f172a'}" stroke-width="0.6" opacity="${isAfter?0.6:0.45}"/>`;
+    }
+    s+=`<text x="${x.toFixed(1)}" y="${(y-bh-5).toFixed(1)}" font-size="9" fill="#cbd5e1" text-anchor="middle">${b.id}</text>`;
+    s+=`<text x="${x.toFixed(1)}" y="${(y+depth+11).toFixed(1)}" font-size="8" fill="${isAfter?'#6ee7b7':'#fca5a5'}" text-anchor="middle" font-weight="${isAfter?'700':'600'}">${eui.toFixed(0)}</text>`;
+  });
+  s+=`<g transform="translate(12,12)"><rect width="${isAfter?176:130}" height="26" rx="13" fill="${isAfter?'#047857':'#7f1d1d'}" opacity="0.92"/><text x="13" y="17" font-size="11" fill="#fff" font-weight="700">${isAfter?'✓ 키네틱 파사드 적용 (After)':'● 현재 상태 (Before)'}</text></g>`;
+  s+=`<g transform="translate(12,${H-46})"><rect width="178" height="40" rx="6" fill="#0a1525" opacity="0.9" stroke="#1e3a5f"/><text x="8" y="14" font-size="8" fill="#94a3b8">EUI (kWh/m²·yr) · 낮을수록 효율</text>`;
+  [['#10b981','<100'],['#22c55e','<130'],['#f59e0b','<160'],['#fb923c','<185'],['#f87171','185+']].forEach((l,i)=>{ s+=`<rect x="${8+i*34}" y="20" width="9" height="9" fill="${l[0]}"/><text x="${19+i*34}" y="28" font-size="7" fill="#cbd5e1">${l[1]}</text>`; });
+  s+=`</g>`;
+  svg.innerHTML=s;
+}
+
+function render(){ if(state.mode==='online'&&hasLeaflet) renderOnlineMap(); else renderOfflineCanvas(); }
+
+/* ---------- KPI/목록 갱신 ---------- */
+function updateUI(){
+  const cmp=state.compare;
+  if(!cmp) return;
+  // 기후 태그
+  if(state.climate){
+    const cl=state.climate;
+    document.getElementById('climateTag').style.display='block';
+    document.getElementById('climateTag').innerHTML=
+      `🌡️ <strong>${cl.name}</strong> ${CLIMATE_YEAR}년 기후 적용 — 평균 ${cl.temp}℃ · 일조 ${cl.sun.toLocaleString()}h/yr · 기후계수 ${cl.factor.toFixed(3)} <span style="color:#64748b">(TMY 기준 · 시뮬레이션 baseline)</span><span id="liveWx"></span>`;
+    fetchLiveWeather();
+  }
+  // Before/After 채우기
+  const f1=(n)=>n.toFixed(1);
+  document.getElementById('baEuiB').textContent=f1(cmp.beforeEui);
+  document.getElementById('baEuiA').textContent=f1(cmp.afterEui);
+  document.getElementById('baEuiD').textContent=state.case==='A'?'키네틱 파사드 미적용 (현재와 동일)':`▼ ${cmp.reductionPct.toFixed(1)}% 절감`;
+  document.getElementById('baPmvB').textContent=f1(cmp.beforePmv);
+  document.getElementById('baPmvA').textContent=f1(cmp.afterPmv);
+  document.getElementById('baPmvD').textContent=state.case==='A'?'—':`▲ ${(cmp.afterPmv-cmp.beforePmv).toFixed(1)}%p 향상`;
+  document.getElementById('baUdiB').textContent=f1(cmp.beforeUdi);
+  document.getElementById('baUdiA').textContent=f1(cmp.afterUdi);
+  document.getElementById('baUdiD').textContent=state.case==='A'?'—':`▲ ${(cmp.afterUdi-cmp.beforeUdi).toFixed(1)}%p 향상`;
+  document.getElementById('baCo2B').textContent=f1(cmp.co2Before);
+  document.getElementById('baCo2A').textContent=f1(cmp.co2After);
+  document.getElementById('baCo2D').textContent=state.case==='A'?'—':`▼ ${cmp.co2Saved.toFixed(1)} tCO₂ 감축`;
+  // 에너지 절감량 (kWh → MWh)
+  if(state.case!=='A' && cmp.energySaved>0){
+    document.getElementById('saveHighlight').style.display='block';
+    document.getElementById('baSave').textContent=Math.round(cmp.energySaved/1000).toLocaleString();
+  } else {
+    document.getElementById('saveHighlight').style.display='none';
+  }
+  // 건물 목록 (현재→적용 EUI)
+  document.getElementById('bldgList').innerHTML=state.buildings.map(b=>`<div class="bi"><div class="bn">건물 ${b.id} · ${b.levels}층</div><div class="bm">${Math.round(b.area).toLocaleString()}m² · <span style="color:#f87171">${b.beforeEui.toFixed(0)}</span> → <span style="color:#6ee7b7">${b.afterEui.toFixed(0)}</span> EUI</div></div>`).join('');
+
+  // 건축물대장 실데이터 박스
+  const lbox=document.getElementById('ledgerBox');
+  if(state.ledgerInfo){
+    const L=state.ledgerInfo;
+    const row=(k,v,unit='')=> (v&&v!=='-')?`<div class="lrow"><span class="lk">${k}</span><span class="lv">${v}${unit}</span></div>`:'';
+    document.getElementById('ledgerContent').innerHTML=
+      row('건물명',L.건물명)+row('주용도',L.주용도)+row('지상층수',L.지상층수,'층')+
+      row('연면적',L.연면적?Math.round(L.연면적).toLocaleString():'-','㎡')+
+      row('용적률',L.용적률,'%')+row('건폐율',L.건폐율,'%')+
+      row('사용승인일',L.사용승인일)+row('에너지효율등급',L.에너지효율등급)+
+      `<div class="lrow"><span class="lk">조회 동수</span><span class="lv">${L.동수}건</span></div>`;
+    lbox.style.display='block';
+  } else {
+    lbox.style.display='none';
+  }
+
+  // 계산 사슬 박스 (대표 건물 기준)
+  const cbox=document.getElementById('calcBox');
+  if(state.buildings.length>0 && state.calcModel){
+    const rep=state.buildings.reduce((a,b)=>(b.area>a.area?b:a),state.buildings[0]);
+    const cc=rep.calc; const M=state.calcModel;
+    const f=(n)=>n!=null?n.toFixed(1):'-';
+    const stepRow=(label,coef,val,isFinal)=>
+      `<div class="calc-step${isFinal?' final':''}"><span class="cs-l">${label}</span><span class="cs-c">${coef}</span><span class="cs-v">${f(val)}</span></div>`;
+    cbox.innerHTML=
+      stepRow('① 기준 (Case A)','baseline',cc.step1)+
+      stepRow('② Case 적용',`×${f(cc.caseRatio*100)}%`,cc.step2)+
+      stepRow('③ BADTM 가중',`${M.activePrinciples}/4원리`,cc.step3)+
+      stepRow('④ USS 네트워크',(M.network&&M.isAI)?'×78.3%':'미적용',cc.step4)+
+      stepRow('⑤ 기후·규모',`${M.climateName} ×${f(cc.cf)}`,cc.step5,true)+
+      `<div class="calc-note">실증 절감계수(본 연구 4-Case)에 <b>${M.climateName} 연간기후</b>를 반영한 투영. 위치만 바꿔 시뮬레이션.</div>`;
+  } else {
+    cbox.innerHTML='<div style="color:#64748b;text-align:center;padding:14px;font-size:0.84em">분석 후 표시</div>';
+  }
+}
+
+function recompute(){ if(state.buildings.length===0) return; computeKPIs(); render(); updateUI(); }
+
+/* ---------- 메인 분석 (STEP 1~9) ---------- */
+async function analyze(){
+  const addr=document.getElementById('addr').value.trim();
+  if(!addr){ showStatus('⚠️ 주소를 입력해주세요','error'); hideStatus(3000); return; }
+  state.address=addr;
+  state.radius=parseInt(document.getElementById('radiusSel').value);
+  state.climate=getClimate(addr);  // 지역 연간 기후 로드
+  document.getElementById('goBtn').disabled=true;
+
+  let online=false;
+  // STEP 1: 주소 검색 (온라인 시도)
+  setStep(1,'active'); showStatus(`🔍 STEP 1 · "${addr}" 주소 검색 중...`,'loading',10);
+  let loc=null;
+  if(hasLeaflet&&navigator.onLine){
+    try{ loc=await geocode(addr); }catch(e){ loc=null; }
+  }
+
+  if(loc&&hasLeaflet){
+    // ===== 온라인 경로 =====
+    try{
+      online=true; state.mode='online'; state.center=loc;
+      document.getElementById('map').style.display='block';
+      document.getElementById('cityCanvas').style.display='none';
+      setStep(1,'done'); setStep(2,'active');
+      showStatus('🗺️ STEP 1·5 · 지도 이동 중...','loading',30);
+      map.setView([loc.lat,loc.lon],16);
+      if(centerMarker) map.removeLayer(centerMarker);
+      if(radiusCircle) map.removeLayer(radiusCircle);
+      centerMarker=L.marker([loc.lat,loc.lon]).addTo(map).bindPopup(`📍 ${addr}`);
+      radiusCircle=L.circle([loc.lat,loc.lon],{radius:state.radius,color:'#38bdf8',weight:1.5,fillColor:'#38bdf8',fillOpacity:0.05,dashArray:'8,4'}).addTo(map);
+      if(window.syncKakao) window.syncKakao(loc.lat,loc.lon,state.radius,addr);
+
+      showStatus(`🏢 STEP 2·3 · 실제 건물 데이터 수집 (반경 ${state.radius}m)...`,'loading',55);
+      const osm=await fetchBuildings(loc.lat,loc.lon,state.radius);
+      let blds=processOSM(osm);
+      if(blds.length===0) throw new Error('이 지역에서 건물을 찾지 못했습니다. 반경을 늘려보세요.');
+      if(blds.length>50){ blds.sort((a,b)=>b.area-a.area); blds=blds.slice(0,50); }
+      state.buildings=blds;
+      setStep(2,'done');
+      document.getElementById('srcCity').innerHTML=`<span class="ok">✓ 건물 데이터: OpenStreetMap 실시간 (${blds.length}개동)</span>`;
+      document.getElementById('mapModeLabel').textContent='실제 지도 모드';
+
+      // STEP 3: 건축물대장 실데이터 연동 (프록시 설정 시)
+      state.ledgerInfo=null;
+      if(LEDGER_PROXY){
+        showStatus('📋 STEP 3 · 건축물대장 조회 중 (국토부)...','loading',62);
+        const code=parseAddressToCode(addr, loc.name);
+        if(code){
+          const ledger=await fetchLedger(code);
+          if(ledger && applyLedgerData(ledger)){
+            document.getElementById('srcLand').className='ok';
+            document.getElementById('srcLand').innerHTML=`✓ 건축물대장: 국토부 실데이터 (${code.sggName} ${code.dongName}, ${ledger.length}건)`;
+          } else {
+            document.getElementById('srcLand').className='est';
+            document.getElementById('srcLand').innerHTML='◆ 건축물대장: 해당 번지 조회결과 없음 — 추정값 적용';
+          }
+        } else {
+          document.getElementById('srcLand').className='est';
+          document.getElementById('srcLand').innerHTML='◆ 건축물대장: 지역코드 미매핑 — 추정값 적용';
+        }
+      }
+      setStep(3,'done'); setStep(4,'done');
+    }catch(e){
+      online=false; // 폴백
+    }
+  }
+
+  if(!online){
+    // ===== 오프라인 경로 (자동 폴백) =====
+    state.mode='offline';
+    document.getElementById('map').style.display='none';
+    document.getElementById('cityCanvas').style.display='block';
+    setStep(1,'done'); setStep(2,'active');
+    showStatus('🏢 STEP 2 · 도시 블록 생성 중 (오프라인 모드)...','loading',50);
+    await new Promise(r=>setTimeout(r,400));
+    state.buildings=generateCity(addr,state.radius);
+    setStep(2,'done'); setStep(3,'done'); setStep(4,'done');
+    document.getElementById('srcCity').innerHTML=`<span class="est">◆ 건물 데이터: 주소 기반 생성 (오프라인 — ${state.buildings.length}개동)</span>`;
+    document.getElementById('mapModeLabel').textContent='오프라인 생성 모드';
+    if(window.syncKakao) window.syncKakao(null,null,state.radius,addr);
+  }
+
+  // STEP 5~9 공통
+  setStep(5,'done');
+  showStatus('🎨 STEP 5·6 · 디지털 트윈 생성 및 BADTM 적용...','loading',75);
+  await new Promise(r=>setTimeout(r,300));
+  setStep(6,'done'); setStep(7,'done'); setStep(8,'done');
+  showStatus('📊 STEP 7·8·9 · 성능 평가 및 시각화...','loading',92);
+  computeKPIs(); render(); updateUI();
+  setStep(9,'done'); setStep(10,'done'); allStepsDone();
+  // 거리뷰 버튼 활성화
+  // 거리뷰 버튼 3종 활성화
+  ['svKakao','svNaver','svSat'].forEach(id=>{ document.getElementById(id).disabled=false; });
+  showStatus(`✅ 분석 완료! ${state.buildings.length}개 건물 · ${state.mode==='online'?'실제 데이터':'오프라인 생성'}`,'success',100);
+  hideStatus(3500);
+  document.getElementById('goBtn').disabled=false;
+}
+
+/* ---------- STEP 10: 보고서 생성 ---------- */
+function generateReport(){
+  if(state.buildings.length===0){ showStatus('⚠️ 먼저 분석을 실행하세요','error'); hideStatus(3000); return; }
+  const c=CASE_DATA[state.case];
+  const cmp=state.compare||{};
+  const totalArea=cmp.totalArea||state.buildings.reduce((s,b)=>s+b.area,0);
+  const baseEui=CASE_DATA['A'].eui;
+  const now=new Date().toLocaleString('ko-KR');
+  const cl=state.climate||{name:'서울',temp:12.8,sun:2070,factor:1.0};
+  let ledgerSection='';
+  if(state.ledgerInfo){
+    const L=state.ledgerInfo;
+    const lr=(k,v,u='')=>(v&&v!=='-')?`<tr><td>${k}</td><td class="hi">${v}${u}</td></tr>`:'';
+    ledgerSection=`<h2>3-1. 건축물대장 실데이터 (국토교통부)</h2><p class="meta">출처: 국토교통부 건축HUB 건축물대장 표제부 · 조회 ${L.동수}건 중 대표 건물</p><table>${lr('건물명',L.건물명)}${lr('주용도',L.주용도)}${lr('지상층수',L.지상층수,'층')}${lr('연면적',L.연면적?Math.round(L.연면적).toLocaleString():'-','㎡')}${lr('용적률',L.용적률,'%')}${lr('건폐율',L.건폐율,'%')}${lr('사용승인일',L.사용승인일)}${lr('에너지효율등급',L.에너지효율등급)}</table>`;
+  }
+  // 결과 도출 과정 (계산 사슬) — 대표 건물 기준
+  const M=state.calcModel||{};
+  const repB=state.buildings.reduce((a,b)=>(b.area>a.area?b:a),state.buildings[0]);
+  const cc=repB.calc||{};
+  const fmt=(n)=>n!=null?n.toFixed(1):'-';
+  const calcSection=`<h2>3. 결과 도출 과정 (계산 사슬)</h2>
+<p class="meta">대표 건물(연면적 최대, ${repB.levels}층 ${Math.round(repB.area).toLocaleString()}㎡) 기준. 모든 계수는 본 연구 4-Case 실증값에서 도출.</p>
+<table>
+<tr><th>단계</th><th>계산 내용</th><th>적용 계수</th><th>EUI</th></tr>
+<tr><td>① 기준 EUI</td><td>Case A 정적 외피 (본 연구 baseline)</td><td>—</td><td>${fmt(cc.step1)}</td></tr>
+<tr><td>② Case 적용</td><td>${M.caseName} 절감계수 (실증값)</td><td>×${fmt(cc.caseRatio*100)}%</td><td class="hi">${fmt(cc.step2)}</td></tr>
+<tr><td>③ BADTM 가중</td><td>활성 원리 ${M.activePrinciples}/4개 반영</td><td>가중 ${fmt(cc.badtmWeight*100)}%</td><td>${fmt(cc.step3)}</td></tr>
+<tr><td>④ USS 네트워크</td><td>${(M.network&&M.isAI)?'Meso-2 활성 (추가 21.7% 절감)':'미적용'}</td><td>×${fmt(cc.netBonus*100)}%</td><td>${fmt(cc.step4)}</td></tr>
+<tr><td>⑤ 기후·규모 반영</td><td>${M.climateName} 연간기후 + 층수·면적 보정</td><td>기후 ×${fmt(cc.cf)}</td><td class="hi">${fmt(cc.step5)} kWh/m²·yr</td></tr>
+</table>
+<p class="meta">※ 본 계산은 본 연구에서 EnergyPlus·Sinergym으로 <b>실증된 절감계수</b>(②④)에 <b>${M.climateName} 지역의 연간 기후값</b>(기상청 평년값, ⑤)을 반영한 <b>투영(projection)</b>이다. 날씨는 작년 기준 연간 데이터로 고정하고 위치(주소)만 변경하여 시뮬레이션하며, 개별 주소에 대한 신규 EnergyPlus 재시뮬레이션은 아니다. 실측 실증은 본 논문 제6~7장의 4-Case 시뮬레이션(서울 TMY 기준)에서 수행되었다.</p>`;
+  const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>BADTM 분석 보고서</title>
+<style>body{font-family:'Malgun Gothic',sans-serif;max-width:840px;margin:30px auto;padding:24px;line-height:1.7;color:#1e293b}
+h1{color:#0369a1;border-bottom:3px solid #0369a1;padding-bottom:10px}h2{color:#047857;margin-top:28px;border-left:4px solid #10b981;padding-left:12px}
+table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border:1px solid #cbd5e1;padding:9px 12px;text-align:left;font-size:0.92em}
+th{background:#f0f9ff}tr:nth-child(even){background:#f8fafc}.hi{color:#0369a1;font-weight:700}.meta{color:#64748b;font-size:0.88em}</style></head><body>
+<h1>🌐 BADTM Urban Digital Twin · 분석 보고서</h1>
+<p class="meta">생성일시: ${now} · 분석 모드: ${state.mode==='online'?'실제 도시 데이터(OpenStreetMap)':'오프라인 생성'}</p>
+<h2>1. 분석 개요</h2>
+<table>
+<tr><th>분석 대상 주소</th><td class="hi">${state.address}</td></tr>
+<tr><th>분석 반경</th><td>${state.radius} m</td></tr>
+<tr><th>인식 건물 수</th><td>${state.buildings.length} 개동</td></tr>
+<tr><th>총 연면적</th><td>${Math.round(totalArea).toLocaleString()} m²</td></tr>
+<tr><th>적용 Case</th><td class="hi">${state.case} — ${c.name}</td></tr>
+<tr><th>적용 연간기후</th><td>${cl.name} (평균 ${cl.temp}℃·일조 ${cl.sun.toLocaleString()}h, 기상청 평년값)</td></tr>
+<tr><th>USS Meso-2 네트워크</th><td>${state.network?'활성화 (ON)':'비활성화 (OFF)'}</td></tr>
+</table>
+<h2>2. 키네틱 파사드 적용 효과 — 현재(Before) vs 적용(After)</h2>
+<p class="meta">현재(Before)는 키네틱 파사드가 없는 정적 외피 상태, 적용(After)은 ${c.name} 적용 후. ${cl.name} 연간기후 기준.</p>
+<table>
+<tr><th>지표</th><th>현재 (Before)</th><th>적용 후 (After)</th><th>변화</th></tr>
+<tr><td>연간 EUI</td><td>${cmp.beforeEui?cmp.beforeEui.toFixed(1):'-'} kWh/m²·yr</td><td class="hi">${cmp.afterEui?cmp.afterEui.toFixed(1):'-'} kWh/m²·yr</td><td>${state.case==='A'?'미적용':'▼ '+cmp.reductionPct.toFixed(1)+'% 절감'}</td></tr>
+<tr><td>PMV 충족률</td><td>${cmp.beforePmv?cmp.beforePmv.toFixed(1):'-'}%</td><td class="hi">${cmp.afterPmv?cmp.afterPmv.toFixed(1):'-'}%</td><td>${state.case==='A'?'—':'▲ '+(cmp.afterPmv-cmp.beforePmv).toFixed(1)+'%p'}</td></tr>
+<tr><td>UDI 충족률</td><td>${cmp.beforeUdi?cmp.beforeUdi.toFixed(1):'-'}%</td><td class="hi">${cmp.afterUdi?cmp.afterUdi.toFixed(1):'-'}%</td><td>${state.case==='A'?'—':'▲ '+(cmp.afterUdi-cmp.beforeUdi).toFixed(1)+'%p'}</td></tr>
+<tr><td>CO₂ 배출</td><td>${cmp.co2Before?cmp.co2Before.toFixed(1):'-'} tCO₂/yr</td><td class="hi">${cmp.co2After?cmp.co2After.toFixed(1):'-'} tCO₂/yr</td><td>${state.case==='A'?'—':'▼ '+cmp.co2Saved.toFixed(1)+' tCO₂'}</td></tr>
+<tr><td>연간 에너지 절감량</td><td>—</td><td class="hi">${(cmp.energySaved&&state.case!=='A')?Math.round(cmp.energySaved/1000).toLocaleString()+' MWh/yr':'—'}</td><td>블록 ${state.buildings.length}개동 합계</td></tr>
+</table>
+${calcSection}
+${ledgerSection}
+<h2>4. 본 연구 실증 근거</h2>
+<p>본 분석은 박사학위논문 「생체모방 원리 기반 집합 건물군 키네틱 파사드 네트워크 설계 이론 및 AI 자율제어 프레임워크 연구」의 실증 결과를 기반으로 한다. Case C-SAC는 EnergyPlus·Sinergym 통합 환경에서 연간 EUI <span class="hi">42.0% 절감</span>(Wilcoxon p=0.0028), PMV 91.8%, UDI 78.4%를 달성하였으며, USS Meso-2 블록 단위에서 추가 21.7% 절감이 확인되었다(Kruskal-Wallis p&lt;0.05, Dunn 사후검정).</p>
+<h2>5. 키네틱 루버 시스템 사양</h2>
+<table>
+<tr><th>항목</th><th>사양</th></tr>
+<tr><td>슬랫 폭 / 피치 / 두께</td><td>80mm / 85mm / 1mm</td></tr>
+<tr><td>회전 범위</td><td>0°(채광) ~ 90°(차단) 연속</td></tr>
+<tr><td>재질 / 반사율</td><td>알루미늄 합금 / 0.88</td></tr>
+<tr><td>제어 구역</td><td>4방위 × 5층 = 20존 독립제어</td></tr>
+<tr><td>시뮬레이션 모델</td><td>EnergyPlus Blind (Simmler et al. 1996)</td></tr>
+</table>
+<h2>6. 건물별 상세</h2>
+<table><tr><th>건물</th><th>층수</th><th>연면적</th><th>EUI</th></tr>
+${state.buildings.map(b=>`<tr><td>건물 ${b.id}</td><td>${b.levels}층</td><td>${Math.round(b.area).toLocaleString()}m²</td><td>${b.eui.toFixed(1)}</td></tr>`).join('')}
+</table>
+<p class="meta" style="margin-top:30px;text-align:center;border-top:1px solid #cbd5e1;padding-top:16px">
+조승완 · 박미애 지도 · 국민대학교 일반대학원 건축학과 · 2027.02<br>
+분석 프로토콜 OSF 등록·공개: osf.io/s385d (가설·통계 검정 방법 사전 확립)<br>
+CO₂ 환산: 한국전력공사 2022년 계통 평균 배출계수 0.4663 kgCO₂/kWh 적용 (본 논문 동일 기준)<br>
+BADTM Urban Digital Twin Platform — 건축물대장·기상 데이터는 향후 국토부·기상청 API 연동 예정</p>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`BADTM_보고서_${state.address.replace(/\s/g,'_')}.html`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showStatus('📑 STEP 10 · 보고서 생성 완료 (다운로드)','success'); hideStatus(3000);
+}
+
+function exportCSV(){
+  if(state.buildings.length===0){ showStatus('⚠️ 먼저 분석을 실행하세요','error'); hideStatus(3000); return; }
+  let csv='건물ID,층수,연면적(m2),EUI(kWh/m2yr),PMV(%),UDI(%)\n';
+  state.buildings.forEach(b=>{ csv+=`${b.id},${b.levels},${Math.round(b.area)},${b.eui.toFixed(1)},${b.pmv.toFixed(1)},${b.udi.toFixed(1)}\n`; });
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`BADTM_데이터_${state.address.replace(/\s/g,'_')}.csv`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/* ---------- 초기화 + 이벤트 ---------- */
+function detectMode(){
+  hasLeaflet=(typeof L!=='undefined');
+  if(hasLeaflet&&navigator.onLine){
+    try{
+      map=L.map('map',{zoomControl:true}).setView([37.4979,127.0276],15);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap, © CARTO'}).addTo(map);
+      state.mapReady=true;
+      document.getElementById('modeNote').className='mode-note online';
+      document.getElementById('modeNote').innerHTML='🌐 <strong>온라인 모드</strong> — 실제 도시 지도와 건물 데이터를 사용합니다. (OpenStreetMap)';
+    }catch(e){ hasLeaflet=false; setOfflineMode(); }
+  } else { setOfflineMode(); }
+}
+function setOfflineMode(){
+  hasLeaflet=false;
+  document.getElementById('map').style.display='none';
+  document.getElementById('cityCanvas').style.display='block';
+  document.getElementById('modeNote').className='mode-note offline';
+  document.getElementById('modeNote').innerHTML='💡 <strong>오프라인 모드</strong> — 인터넷 없이 작동합니다. 주소 기반으로 도시 블록을 생성하여 분석합니다.';
+}
+
+document.getElementById('goBtn').addEventListener('click',analyze);
+document.getElementById('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') analyze(); });
+document.querySelectorAll('.pbtn').forEach(b=>b.addEventListener('click',()=>{ document.getElementById('addr').value=b.dataset.a; analyze(); }));
+document.querySelectorAll('.case-btn').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('.case-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.case=b.dataset.case; recompute(); }));
+document.getElementById('netOn').addEventListener('click',()=>{ state.network=true; document.getElementById('netOn').classList.add('on'); document.getElementById('netOff').classList.remove('on'); recompute(); });
+document.getElementById('netOff').addEventListener('click',()=>{ state.network=false; document.getElementById('netOff').classList.add('on'); document.getElementById('netOn').classList.remove('on'); recompute(); });
+document.getElementById('radiusSel').addEventListener('change',e=>{ state.radius=parseInt(e.target.value); });
+// 실제 모습 보기 — 3개 지도 서비스 (모두 키 불필요, 새 탭)
+function openStreetview(service){
+  if(!state.address) return;
+  const lat=state.center&&state.center.lat?state.center.lat:null;
+  const lon=state.center&&state.center.lon?state.center.lon:null;
+  const q=encodeURIComponent(state.address);
+  let url;
+  if(service==='kakao'){
+    url=lat?`https://map.kakao.com/link/roadview/${lat},${lon}`:`https://map.kakao.com/?q=${q}`;
+  } else if(service==='naver'){
+    // 네이버 지도 검색 (거리뷰는 검색 후 파노라마 진입)
+    url=lat?`https://map.naver.com/v5/?c=${lon},${lat},18,0,0,0,dh`:`https://map.naver.com/v5/search/${q}`;
+  } else { // 위성
+    url=lat?`https://map.kakao.com/link/map/${q},${lat},${lon}`:`https://map.kakao.com/?q=${q}`;
+  }
+  window.open(url,'_blank');
+}
+document.getElementById('svKakao').addEventListener('click',()=>openStreetview('kakao'));
+document.getElementById('svNaver').addEventListener('click',()=>openStreetview('naver'));
+document.getElementById('svSat').addEventListener('click',()=>openStreetview('sat'));
+document.getElementById('reportBtn').addEventListener('click',generateReport);
+document.getElementById('csvBtn').addEventListener('click',exportCSV);
+
+window.addEventListener('DOMContentLoaded',()=>{ detectMode(); });
+</script>
+<script>
+/* ============ 카카오맵 연동 ============ */
+/* ↓↓↓ 카카오 개발자 사이트(developers.kakao.com)에서 발급받은 JavaScript 키를 넣으세요 ↓↓↓ */
+var KAKAO_JS_KEY = '484705e5abe9a1b6839a982c2ec05a81';
+/* ↑↑↑ 예: var KAKAO_JS_KEY = 'a1b2c3d4e5...'; (키 등록 전에도 나머지 기능은 정상 작동) ↑↑↑ */
+
+(function(){
+  var kmap=null,kroad=null,kroadClient=null,kmarker=null,kcircle=null,kOverlay=null;
+  var lastLat=37.4979,lastLon=127.0276,lastAddr='',ready=false;
+  window.__kkRadius=300;
+
+  function el(id){ return document.getElementById(id); }
+  function showNotice(msg){
+    var n=el('kakaoNotice'); if(!n) return;
+    if(el('kakaoMap')) el('kakaoMap').style.display='none';
+    if(el('kakaoRoad')) el('kakaoRoad').style.display='none';
+    n.style.display='block';
+    if(msg){ var h=n.querySelector('h4'); if(h) h.textContent='🗺️ '+msg; }
+  }
+  function hideNotice(){ var n=el('kakaoNotice'); if(n) n.style.display='none'; if(el('kakaoMap')) el('kakaoMap').style.display='block'; }
+
+  function placeMarker(lat,lon,label){
+    if(!ready) return;
+    var pos=new kakao.maps.LatLng(lat,lon);
+    kmap.setCenter(pos);
+    if(kmarker) kmarker.setMap(null);
+    kmarker=new kakao.maps.Marker({position:pos,map:kmap});
+    if(kcircle) kcircle.setMap(null);
+    kcircle=new kakao.maps.Circle({center:pos,radius:(window.__kkRadius||300),strokeWeight:2,strokeColor:'#22d3ee',strokeOpacity:0.9,strokeStyle:'shortdash',fillColor:'#22d3ee',fillOpacity:0.08});
+    kcircle.setMap(kmap);
+    if(kOverlay) kOverlay.setMap(null);
+    if(label){
+      var c='<div style="background:#0e1c34;border:1px solid #22d3ee;color:#eaf1fb;padding:5px 10px;border-radius:8px;font-size:12px;white-space:nowrap;font-family:sans-serif;">📍 '+label+'</div>';
+      kOverlay=new kakao.maps.CustomOverlay({position:pos,content:c,yAnchor:2.2});
+      kOverlay.setMap(kmap);
+    }
+  }
+
+  function initKakao(){
+    var box=el('kakaoMap'); if(!box) return;
+    kmap=new kakao.maps.Map(box,{center:new kakao.maps.LatLng(lastLat,lastLon),level:4});
+    kmap.addControl(new kakao.maps.ZoomControl(),kakao.maps.ControlPosition.RIGHT);
+    kroadClient=new kakao.maps.RoadviewClient();
+    kroad=new kakao.maps.Roadview(el('kakaoRoad'));
+    ready=true; hideNotice();
+    placeMarker(lastLat,lastLon,'강남 (예시 위치)');
+  }
+
+  window.syncKakao=function(lat,lon,radius,addr){
+    window.__kkRadius=radius||300; if(addr) lastAddr=addr;
+    var lbl=el('kakaoAddrLabel'); if(lbl&&addr) lbl.textContent='📍 '+addr;
+    showMap();
+    if(!ready){ if(lat&&lon){ lastLat=lat; lastLon=lon; } return; }
+    if(lat&&lon){ lastLat=lat; lastLon=lon; placeMarker(lat,lon,addr); return; }
+    if(addr && kakao.maps.services){
+      var geo=new kakao.maps.services.Geocoder();
+      geo.addressSearch(addr,function(res,status){
+        if(status===kakao.maps.services.Status.OK && res[0]){
+          lastLat=parseFloat(res[0].y); lastLon=parseFloat(res[0].x); placeMarker(lastLat,lastLon,addr);
+        } else {
+          var ps=new kakao.maps.services.Places();
+          ps.keywordSearch(addr,function(r2,s2){
+            if(s2===kakao.maps.services.Status.OK && r2[0]){ lastLat=parseFloat(r2[0].y); lastLon=parseFloat(r2[0].x); placeMarker(lastLat,lastLon,addr); }
+          });
+        }
+      });
+    }
+  };
+
+  function showRoad(){
+    // 카카오 JS 키가 없으면 임베드 로드뷰가 불가하고, 정확한 좌표도 만들 수 없습니다.
+    // → 카카오가 직접 주소를 찾도록 '주소 검색'으로 새 탭을 엽니다(위치는 정확히 표시됨).
+    //   그 화면에서 로드뷰 아이콘을 누르면 됩니다. (정확한 자동 로드뷰는 키 필요)
+    if(!ready){
+      if(lastAddr){
+        window.open('https://map.kakao.com/?q='+encodeURIComponent(lastAddr),'_blank');
+      } else {
+        window.open('https://map.kakao.com/link/roadview/37.4979,127.0276','_blank');
+      }
+      return;
+    }
+    el('kakaoMap').style.display='none'; el('kakaoRoad').style.display='block';
+    el('kkMapBtn').classList.remove('on'); el('kkRoadBtn').classList.add('on');
+    var pos=new kakao.maps.LatLng(lastLat,lastLon);
+    kroadClient.getNearestPanoId(pos,80,function(panoId){
+      if(panoId===null){ alert('이 위치 주변에는 로드뷰가 없습니다. 지도로 돌아갑니다.'); showMap(); return; }
+      kroad.setPanoId(panoId,pos);
+      setTimeout(function(){ kroad.relayout(); },120);
+    });
+  }
+  function showMap(){
+    if(el('kakaoRoad')) el('kakaoRoad').style.display='none';
+    if(ready && el('kakaoMap')) el('kakaoMap').style.display='block';
+    var mb=el('kkMapBtn'),rb=el('kkRoadBtn'); if(rb) rb.classList.remove('on'); if(mb) mb.classList.add('on');
+    if(kmap){ setTimeout(function(){ kmap.relayout(); kmap.setCenter(new kakao.maps.LatLng(lastLat,lastLon)); },80); }
+  }
+
+  function wire(){
+    var m=el('kkMapBtn'),r=el('kkRoadBtn'),o=el('kkOpenBtn');
+    if(m) m.addEventListener('click',showMap);
+    if(r) r.addEventListener('click',showRoad);
+    if(o) o.addEventListener('click',function(){
+      var q=encodeURIComponent(lastAddr||'강남');
+      var url=lastLat?('https://map.kakao.com/link/map/'+q+','+lastLat+','+lastLon):('https://map.kakao.com/?q='+q);
+      window.open(url,'_blank');
+    });
+  }
+  function loadSDK(){
+    wire();
+    if(!KAKAO_JS_KEY || KAKAO_JS_KEY==='YOUR_KAKAO_JS_KEY'){ showNotice(); return; }
+    var s=document.createElement('script');
+    s.src='//dapi.kakao.com/v2/maps/sdk.js?appkey='+KAKAO_JS_KEY+'&autoload=false&libraries=services';
+    s.onload=function(){ if(window.kakao&&kakao.maps) kakao.maps.load(initKakao); else showNotice('카카오맵 초기화 실패 — 키를 확인하세요'); };
+    s.onerror=function(){ showNotice('카카오맵 SDK 로드 실패 — 도메인 등록·키를 확인하세요'); };
+    document.head.appendChild(s);
+  }
+  if(document.readyState!=='loading') loadSDK();
+  else window.addEventListener('DOMContentLoaded',loadSDK);
+})();
+</script>
+</body>
+</html>
