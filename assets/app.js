@@ -381,7 +381,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
 
   /* ---------- router ---------- */
   const built = {};
-  const PAGES = { home: pageHome, thesis: pageThesis, framework: pageFramework, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount() };
+  const PAGES = { home: pageHome, thesis: pageThesis, framework: pageFramework, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount(), kinetic: () => window.KINETIC && window.KINETIC.mount(), verify: () => window.VERIFY && window.VERIFY.mount() };
   function route() {
     const h = location.hash.replace(/^#\/?/, ''), [r, sub] = h.split('/'); const key = PAGES[r] ? r : 'home';
     $$('.page').forEach(p => p.classList.toggle('on', p.id === 'page-' + key));
