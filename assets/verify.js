@@ -161,6 +161,21 @@
     return { items: its, trace: 'PPO의 결정론적 평가(result.json, 학습 기상 W1)와 같은 건물 ARK의 비교 기준 연간 계산(S2·S3·F0)을 직접 비교했다. 판정 규칙: 에너지 감소·열쾌적 유지/개선·주광 유지/개선을 모두 충족해야 그 기준에 대해 지지.' };
   });
 
+  add('C6-12', '6장', 'V1', '모델 가정·계산 간격 민감도: 6개 가정 × 7개 안에서 효과의 부호 유지(EUI 42/42, 최대 전력 41/42)와 표 6-14의 기준 안 값 (6.6.4항)', ['data/v/sens3.json', 'data/v/sens3_block.bin'], async c => {
+    const S = await J('v/sens3'), buf = new Float32Array(await bin(S.bin));
+    const blk = (vr, t) => { const r = vr.runs[t], A = r.area.reduce((a, b) => a + b, 0); const eui = r.EUI.reduce((a, e, k) => a + e * r.area[k], 0) / A; let pk = -1; const o = r.i * 8760; for (let h = 0; h < 8760; h++) if (buf[o + h] > pk) pk = buf[o + h]; return { eui, pk }; };
+    const eff = vr => { const b = blk(vr, 'S1'); const o = {}; S.tags.slice(1).forEach(t => { const x = blk(vr, t); o[t] = { e: 100 * (x.eui / b.eui - 1), p: 100 * (x.pk / b.pk - 1) }; }); return { b, o }; };
+    const base = eff(S.variants[0]); let nE = 0, nP = 0, tot = 0; const flips = [];
+    const paper = { base: ['142.26', '16,054'], A: ['144.83', '9,936'], T6: ['135.94', '14,896'], T10: ['136.60', '14,841'], LE: ['134.00', '15,954'], L6: ['124.05', '13,223'], C2: ['132.21', '12,930'] };
+    const items = [];
+    S.variants.forEach(vr => {
+      const e = eff(vr); items.push(item(`${vr.label}: S1 블록 EUI`, paper[vr.key][0], e.b.eui), item(`${vr.label}: S1 블록 최대 전력 kW`, paper[vr.key][1], e.b.pk));
+      if (vr.key === 'base') return;
+      S.tags.slice(1).forEach(t => { tot++; const r6 = v => Math.round(v * 100) / 100; if (Math.sign(r6(e.o[t].e)) === Math.sign(r6(base.o[t].e))) nE++; if (Math.sign(r6(e.o[t].p)) === Math.sign(r6(base.o[t].p))) nP++; else flips.push(`${vr.label} ${t} ${sg(base.o[t].p)}% → ${sg(e.o[t].p)}%`); });
+    });
+    items.push(item('부호가 유지된 비교 수(EUI, 42개 중)', '42', nE), item('부호가 유지된 비교 수(최대 전력, 42개 중)', '41', nP));
+    return { items, trace: `각 가정의 S1 대비 블록 변화율을 건물별 연간값(면적 가중 EUI)과 블록 시간별 합(최대 전력)에서 다시 계산했다. 최대 전력 부호가 바뀐 비교: ${flips.join('; ') || '없음'}. 계산 간격 15분의 기준 안 절대값은 10분·6분보다 EUI 약 4%, 최대 전력 약 7% 크다(고층 동의 설비 계산이 15분에서 수렴하지 않음).` };
+  });
   add('C7-01', '7장', 'V1', '원형 스케줄의 3개 동 블록 지표: 건물별 최대의 합·동시계수·부하율 (표 7-1)', ['data/v/det3.json'], async c => {
     const its = [], map = { 'S0 주변 건물 없음': 'S0', 'S1 기준(장치 없음)': 'S1', 'F0 블라인드 수평 고정': 'F0', 'S2 블라인드 고정 45°': 'S2', 'S3 블라인드 컷오프': 'S3' };
     c.T('표 7-1').rows.forEach(r => { const b = c.block(map[r[0]]); if (!b) return; const t = map[r[0]]; its.push(item(`${t} 블록 최대 kW`, r[1], b.peak), item(`${t} 건물별 최대 합 kW`, r[2], b.sumInd), item(`${t} 동시계수`, r[3], b.CF), item(`${t} 부하율`, r[4], b.LF), item(`${t} 블록 EUI`, r[5], b.EUI)); });

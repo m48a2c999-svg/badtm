@@ -1,5 +1,5 @@
 {
- "built": "2026-10-19T22:41:14+09:00",
+ "built": "2026-10-20T01:36:31+09:00",
  "files": [
   {
    "path": "data/block50.json",
@@ -78,6 +78,18 @@
    "bytes": 4965,
    "sha256": "e9aa5790b7e884117ba8468ece5aa120c469a5c421bd87aebf869a353972ca5a",
    "source": "PPO 결정론적 평가·학습 보상·결정 시점"
+  },
+  {
+   "path": "data/v/sens3.json",
+   "bytes": 19560,
+   "sha256": "b6b32392206b75ed8d711243ff84359523f6c1793ab1de0f1b0a675f70348d01",
+   "source": "3개 동 민감도(가정 6종 × 8개 안) 건물별 연간값"
+  },
+  {
+   "path": "data/v/sens3_block.bin",
+   "bytes": 1962240,
+   "sha256": "b4e38ca8572172890e4b4434f4bcc87be3f060118f6b5a8698cb2e19ee7500ae",
+   "source": "3개 동 민감도 블록 시간별 전력(Float32)"
   },
   {
    "path": "data/v/spa_ref.json",
