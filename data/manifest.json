@@ -1,5 +1,5 @@
 {
- "built": "2026-10-19T22:06:07+09:00",
+ "built": "2026-10-19T22:11:08+09:00",
  "files": [
   {
    "path": "data/block50.json",
@@ -69,14 +69,14 @@
   },
   {
    "path": "data/v/kinetic.json",
-   "bytes": 7278,
-   "sha256": "3371417153296aa3ddc3607da4fe6f3e7310eb8fb83fcc492e24027698e6f199",
+   "bytes": 7298,
+   "sha256": "82ea73eae78953e7259dab1d79a8c19dc3dd892152957cb88fcc7a4f319e3dd5",
    "source": "키네틱 분류·3개 동 결과"
   },
   {
    "path": "data/v/ppo.json",
-   "bytes": 4968,
-   "sha256": "52e7d5442fceaac6f7331da4d44ad5018146876224223e578f1c9866a36caf1e",
+   "bytes": 4965,
+   "sha256": "e9aa5790b7e884117ba8468ece5aa120c469a5c421bd87aebf869a353972ca5a",
    "source": "PPO 결정론적 평가·학습 보상·결정 시점"
   },
   {

@@ -170,7 +170,7 @@ async function colorBuildings() {
     const fr = aggregate(smp, res); paint(fr.map(v => v == null ? null : v * 100), 100, '% 입면');
     const tot = smp.reduce((s, x, k) => s + res[k] * x.w, 0) / smp.reduce((s, x) => s + x.w, 0);
     const facing = smp.reduce((s, x) => { const sv = S.sunVec(p.alt, p.az); return s + ((sv[0] * x.n[0] + sv[1] * x.n[1] > 0.02 && p.alt > 0.5) ? x.w : 0); }, 0) / smp.reduce((s, x) => s + x.w, 0);
-    out.innerHTML = `<div><span>블록 전체 입면 중 직달 일사</span><b>${(tot * 100).toFixed(0)}%</b></div><div><span>태양을 향한 입면 중 가려짐</span><b>${facing > 0 ? ((1 - tot / facing) * 100).toFixed(0) : 0}%</b></div>`;
+    out.innerHTML = `<div><span>블록 전체 입면 중 직달 일사</span><b>${(tot * 100).toFixed(0)}%</b></div><div><span>태양을 향한 입면 중 가려진 비율</span><b>${facing > 0 ? ((1 - tot / facing) * 100).toFixed(0) : 0}%</b></div>`;
     return;
   }
   // 하루 일조 시간: 선택한 날짜, 30분 간격
@@ -208,7 +208,7 @@ function selectBuilding(m, fly) {
   <div class="mono" style="font-size:11.5px;color:var(--muted)">OSM ${u.id} · 높이 ${f(u.h, 0)} m${u.est ? ' (정보 없음 → 3층 추정)' : ''}${t ? ` · ${t.floors}층 · 연면적 ${t.totArea.toLocaleString()} m²` : ''}</div>`;
   if (t) {
     if (t.meas && t.meas.CV != null) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td>실측 연간 전기 / 모델</td><td>${f(t.meas.EUI_meas)} / ${f(t.meas.EUI_cal)} kWh/m²</td></tr><tr><td>월 CV(RMSE) · NMBE</td><td>${f(t.meas.CV)}% · ${t.meas.NMBE > 0 ? '+' : ''}${f(t.meas.NMBE)}%</td></tr></table>`;
-    if (t.sys) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td><b>시스템(S1c 대비)</b></td><td><b>EUI · 최대 전력</b></td></tr>${[['F0c', '블라인드 수평 고정'], ['EC_DLSc', '전기변색 주광 연동'], ['BT_T300c', '블라인드 일사·수납'], ['VF_F0c', '수직 핀 고정']].map(([k, n]) => t.sys[k] ? `<tr><td>${n}</td><td>${sg(t.sys[k].dEUI)} · ${sg(t.sys[k].dP)}</td></tr>` : '').join('')}</table>`;
+    if (t.sys) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td><b>시스템(S1c 대비)</b></td><td><b>EUI · 최대 전력</b></td></tr>${[['F0c', '블라인드 수평 고정'], ['EC_DLSc', '전기변색 주광 연동'], ['BT_T300c', '블라인드 일사 기준·수납'], ['VF_F0c', '수직 핀 고정']].map(([k, n]) => t.sys[k] ? `<tr><td>${n}</td><td>${sg(t.sys[k].dEUI)} · ${sg(t.sys[k].dP)}</td></tr>` : '').join('')}</table>`;
     h += `<div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">EnergyPlus 템플릿 모델(보정 기준) 시뮬레이션 값 · <a href="#/map">지도에서 월별 비교 보기</a></div>`;
   }
   $('#s-info').innerHTML = h + '</div>';
@@ -244,7 +244,7 @@ function updateSite() {
     });
   }
   if ($('#s-color') && $('#s-color').value === 'now' && !state.playing) colorBuildings();
-  $('#s-zones').innerHTML = ['ARK', 'GFC', 'GST'].map(k => `<div><span>${k} 직달 일사 구역</span><b>${cnt[k]} / 20</b></div>`).join('') + `<div><span>태양을 향한 구역 중 가려짐</span><b>${['ARK', 'GFC', 'GST'].reduce((s, k) => s + faceOK[k] - cnt[k], 0)}</b></div>`;
+  $('#s-zones').innerHTML = ['ARK', 'GFC', 'GST'].map(k => `<div><span>${k} 직달 일사 구역</span><b>${cnt[k]} / 20</b></div>`).join('') + `<div><span>태양을 향한 구역 중 가려진 구역</span><b>${['ARK', 'GFC', 'GST'].reduce((s, k) => s + faceOK[k] - cnt[k], 0)}</b></div>`;
 }
 
 /* ================= 2. 키네틱 외피 모듈 ================= */
@@ -360,7 +360,7 @@ function updateModule() {
       const L = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b, c.z > -R.D ? c : b]), m); L.computeLineDistances(); MOD.rays.add(L);
     }
   }
-  const n = r.nx * r.nz, stTxt = st.dev == null ? '장치 없음' : st.dev === 'ec' ? (r.tint > 0.01 ? `착색 ${(r.tint * 100).toFixed(0)}%` : '투명') : !st.present ? (st.dev === 'fin300' ? '해당 입면 없음(남·북)' : '수납(걷어 올림)') : `슬랫 ${st.beta.toFixed(0)}°${st.active ? ' · 작동' : ''}`;
+  const n = r.nx * r.nz, stTxt = st.dev == null ? '장치 없음' : st.dev === 'ec' ? (r.tint > 0.01 ? `착색 ${(r.tint * 100).toFixed(0)}%` : '투명') : !st.present ? (st.dev === 'fin300' ? '이 입면에는 핀 없음(남·북)' : '수납(걷어 올림)') : `슬랫 ${st.beta.toFixed(0)}°${st.active ? ' · 작동' : ''}`;
   $('#m-hud').innerHTML = `<b>${S.MODES[mode].label}</b><br>입면 방위 ${A.toFixed(0)}° · ${dateLabel(state.doy)} ${S.fmtH(state.hour)}<br>상태: ${stTxt}`;
   $('#m-read').innerHTML = [
     ['창면 입사 일사', `${Math.round(st.Iwin)} W/m²`], ['입사각', sl[2] > 0 && p.alt > 0 ? `${(Math.acos(Math.min(1, sl[2])) * 180 / Math.PI).toFixed(0)}°` : '태양이 뒤쪽'],
@@ -419,7 +419,7 @@ function timeCtl() {
 }
 function ui(page) {
   page.innerHTML = `<div class="kicker">Simulation · 역삼 블록</div><h1 style="font-size:28px">시뮬레이션</h1>
-<p style="color:var(--ink2);margin-top:-4px">태양 위치와 서울 TMYx 기상(2011–2025)으로 대상지의 그림자와 키네틱 외피의 작동을 직접 바꿔 보는 도구입니다. 논문의 EnergyPlus 결과는 <a href="#/results">결과 데이터</a>에 있습니다.</p>
+<p style="color:var(--ink2);margin-top:-4px">태양 위치와 서울 TMYx 기상(2011–2025)으로 날짜·시각을 바꿔 가며 대상지의 그림자와 키네틱 외피의 작동을 살펴보는 도구입니다. 논문의 EnergyPlus 결과는 <a href="#/results">결과 데이터</a>에 있습니다.</p>
 <div class="tabs" id="stabs"><button class="on" data-p="sp1"><span class="mono">01</span>대상지 3D · 태양 경로</button><button data-p="sp2"><span class="mono">02</span>키네틱 외피 모듈 · 실내 조도</button></div>
 <div class="pane on" id="sp1"><div class="simwrap"><div class="simside">${timeCtl()}
 <div class="row" style="margin-top:10px"><button class="btn sun" id="s-play">▶ 하루 재생</button></div>
@@ -432,7 +432,7 @@ function ui(page) {
 <div id="s-leg"></div><div class="readout" id="s-exp"></div>
 <p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">입면 표본점: 외곽선 변(5 m 이상) 중점 × 높이 15·50·85%, 바깥 1 m. 차폐는 이 81동만 고려(조회 범위 밖 건물 제외). 하루 일조는 30분 간격 광선 추적의 기하 근사입니다.</p>
 <label class="ctl" style="margin-top:14px">상세 3개 동 · 구역(입면 4 × 층대 5) 중 직달 일사</label><div class="readout" id="s-zones"></div>
-<div class="note">구역 판정(L3)은 이렇게 시각마다 주변 건물에 가리는지를 따져 재실 시간 중 직달 일사 비율 fb를 구한 것입니다. 표본점은 등가 직사각형 입면 중앙입니다.</div>
+<div class="note">구역 판정(L3)은 이처럼 시각마다 주변 건물에 가려지는지를 따져 재실 시간 중 직달 일사 비율 fb를 구하는 방식입니다. 표본점은 등가 직사각형 입면 중앙입니다.</div>
 <div class="legend-row"><span><i style="background:#F2B33D"></i>상세 3개 동</span><span><i style="background:#B7BDC5"></i>다수 건물</span><span><i style="background:#DADDE1"></i>주변 건물</span><span><i style="background:#E8541E"></i>태양·경로</span></div>
 </div><div class="simview" id="s-view"><div class="hud" id="s-hud"></div><div id="s-tip" class="hud" style="display:none;top:0;left:0;min-width:0;font-family:var(--sans);font-size:12px"></div><div class="hud2">드래그: 회전 · 휠: 확대 · 우클릭: 이동 · 건물 클릭: 정보<br>건물 © OpenStreetMap contributors (2026-10-19)</div></div></div></div>
 <div class="pane" id="sp2"><div class="simwrap"><div class="simside">${timeCtl()}
@@ -441,7 +441,7 @@ function ui(page) {
 <label class="ctl">일사 기준(BT·LT·EC 일사) <b id="m-Tv"></b></label><input type="range" id="m-T" min="200" max="400" step="50" value="300">
 <div class="readout" id="m-read"></div>
 <label class="ctl" style="margin-top:12px">작업면 조도 색</label><div class="scale">${[30, 80, 150, 400, 900, 1600, 3000, 8000].map(v => `<i style="background:rgb(${heatColor(v)})"></i>`).join('')}</div><div class="mono" style="font-size:10.5px;display:flex;justify-content:space-between"><span>&lt;100</span><span>100–2,000 lx (UDI)</span><span>&gt;2,000</span></div>
-<div class="note">외주부 존(폭 6 m, 깊이 4.57 m, 천장 2.74 m, 창면적비 40%, 가시광 투과율 0.305)의 단순 근사입니다. 하늘·지면 확산, 직달, 내부 반사(분할 플럭스)만 다룹니다.</div>
+<div class="note">외주부 존(폭 6 m, 깊이 4.57 m, 천장고 2.74 m, 창면적비 40%, 가시광 투과율 0.305)의 단순 근사입니다. 하늘·지면 확산, 직달, 내부 반사(분할 플럭스)만 다룹니다.</div>
 </div><div class="simview" id="m-view"><div class="hud" id="m-hud"></div><div class="hud2">바닥 색 = 작업면 조도 · 주황 빗금 = 직달 일사<br>점선 = 태양 광선</div></div></div>
 <div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">연간 지도 — 선택한 입면에서 제어 방식 비교</h3><button class="btn sun" id="m-run">연간 계산 (약 5–15초)</button></div><div id="m-annual" style="margin-top:10px"><p style="font-size:13px;color:var(--muted)">버튼을 누르면 8,760시간의 창면 일사·작동 비율과 재실 시간 2,610시간의 조도 지표를 계산합니다.</p></div></div></div>`;
 }

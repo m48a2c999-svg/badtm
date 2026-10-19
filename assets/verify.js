@@ -63,7 +63,7 @@
       if (ea > ma) { ma = ea; worstCase = [doy, h, p.alt, el]; } mz = Math.max(mz, ez);
     }
     return { items: [lim('최대 고도 오차 (°)', 0.5, ma), lim('최대 방위 오차 (°)', 0.5, mz)],
-      trace: `기준: ${esc(c.spa.method)}. 12개 날짜 × 7개 시각 = ${c.spa.cases.length}개 경우를 사이트 계산식(SOLAR.sunPos, NOAA 근사)과 비교했다. 실제 최대 오차는 고도 ${ma.toFixed(3)}°, 방위 ${mz.toFixed(3)}°이다(가장 큰 고도 오차: ${worstCase[0]}일째 ${worstCase[1]}시, 계산 ${worstCase[2].toFixed(2)}° / SPA ${worstCase[3].toFixed(2)}°). 판정 기준은 0.5° 이내이다(사이트의 3D 일조·외피 모듈 계산용 근사식이며, 논문의 EnergyPlus 계산은 EnergyPlus 자체의 태양 위치를 쓴다).` };
+      trace: `기준: ${esc(c.spa.method)}. 12개 날짜 × 7개 시각 = ${c.spa.cases.length}개 경우를 사이트 계산식(SOLAR.sunPos, NOAA 근사)과 비교했다. 실제 최대 오차는 고도 ${ma.toFixed(3)}°, 방위 ${mz.toFixed(3)}°이다(가장 큰 고도 오차: 연중 ${worstCase[0]}일째 ${worstCase[1]}시, 계산 ${worstCase[2].toFixed(2)}° / SPA ${worstCase[3].toFixed(2)}°). 판정 기준은 0.5° 이내이다(사이트의 3D 일조·외피 모듈 계산용 근사식이며, 논문의 EnergyPlus 계산은 EnergyPlus 자체의 태양 위치를 쓴다).` };
   });
 
   add('C6-01', '6장', 'V2', '구역 판정(L3): 60개 구역 S 19 · R 30 · A 11 (표 6-3)', ['data/v/zones3.json'], async c => {
@@ -88,7 +88,7 @@
       const p = c.row('표 6-1', r => r[0].startsWith('열쾌적')); its.push(item(`${n} 열쾌적 %`, p[j + 1], R[n].PMV_ok));
       const hv = c.row('표 6-1', r => r[0].startsWith('냉난방')); its.push(item(`${n} 냉난방·공조 관련 kWh/m²`, hv[j + 1].split('(')[0], R[n].HVAC));
     });
-    return { items: its, trace: '건물별 EnergyPlus 연간 계산(태그 S1)의 연간 미터 합을 연면적(모델 바닥면적)으로 나눈 값. 최대 전력은 시간별 전력의 연중 최대값, 부하율 = 평균 ÷ 최대.' };
+    return { items: its, trace: '건물별 EnergyPlus 연간 계산(태그 S1)의 연간 미터 합을 연면적(모델 바닥면적)으로 나눈 값. 최대 전력은 시간별 전력의 연중 최댓값, 부하율 = 평균 ÷ 최대.' };
   });
 
   add('C6-03', '6장', 'V1', '주변 건물 차폐의 영향: S1 대 S0의 건물별 EUI −0.4~+2.1% (표 6-2)', ['data/v/det3.json'], async c => {
@@ -231,18 +231,18 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
     const c = await ctx(), B = c.ppo.baselines;
     const cond = (s, t) => { const W = c.ppo.rl[s].W1; return [W.EUI < B[t].EUI, W.PMV_ok >= B[t].PMV_ok, W.UDI >= B[t].UDI]; };
     const mk = v => v ? '<span class="vb ok">충족</span>' : '<span class="vb bad">미충족</span>';
-    const rows = [['S2', 'Case A 고정 45°'], ['S3', 'Case B 컷오프'], ['F0', '고정 θ = 0°']].map(([t, l]) => ['PPO_s0', 'PPO_s1'].map(s => { const k = cond(s, t); return `<tr><td>${l}</td><td class="mono">${s.replace('PPO_s', '시드 ')}</td><td>${mk(k[0])}</td><td>${mk(k[1])}</td><td>${mk(k[2])}</td><td>${k.every(Boolean) ? '<span class="vb ok">지지</span>' : '<span class="vb bad">불지지</span>'}</td></tr>`; }).join('')).join('');
+    const rows = [['S2', 'Case A 고정 45°'], ['S3', 'Case B 컷오프'], ['F0', '고정 θ = 0°']].map(([t, l]) => ['PPO_s0', 'PPO_s1'].map(s => { const k = cond(s, t); return `<tr><td>${l}</td><td class="mono">${s.replace('PPO_s', '시드 ')}</td><td>${mk(k[0])}</td><td>${mk(k[1])}</td><td>${mk(k[2])}</td><td>${k.every(Boolean) ? '<span class="vb ok">지지</span>' : '<span class="vb bad">비지지</span>'}</td></tr>`; }).join('')).join('');
     const curve = s => { const r = c.ppo.rl[s].reward, mn = Math.min(...r), mx = Math.max(...r); return `<polyline fill="none" stroke="${s.endsWith('0') ? '#E8541E' : '#1E2A38'}" stroke-width="1.4" points="${r.map((v, i) => `${(i / (r.length - 1) * 300).toFixed(1)},${(70 - (v - mn) / (mx - mn || 1) * 64).toFixed(1)}`).join(' ')}"/>`; };
     $('#v-hypo').innerHTML = `
 <div class="hgrid">
- <div class="card"><div class="hk">H₁ 에너지 절감 <span class="vb bad">기각</span></div><p class="small">"SAC와 PPO 모두" 세 조건(에너지 감소·열쾌적 유지·주광 유지)을 세 기준 모두에 대해 충족해야 지지. 아래 표는 결정론적 평가 결과로 브라우저가 판정을 다시 내린 것이다. PPO가 충족하지 못했으므로 SAC 결과와 관계없이 기각.</p>
+ <div class="card"><div class="hk">H₁ 에너지 절감 <span class="vb bad">기각</span></div><p class="small">"SAC와 PPO 모두"가 세 조건(에너지 감소·열쾌적 유지·주광 유지)을 세 비교 기준 모두에 대해 충족해야 지지된다. 아래 표는 결정론적 평가 결과로 브라우저가 판정을 다시 내린 것이다. PPO가 충족하지 못했으므로 SAC 결과와 관계없이 기각.</p>
   <div class="tblwrap"><table class="tbl"><thead><tr><th>비교 기준</th><th>PPO</th><th>에너지</th><th>열쾌적</th><th>주광</th><th>판정</th></tr></thead><tbody>${rows}</tbody></table></div>
   <svg viewBox="0 0 300 74" class="spark"><text x="0" y="10" class="mono">학습 보상(에피소드별, 정규화)</text>${curve('PPO_s0')}${curve('PPO_s1')}</svg></div>
- <div class="card"><div class="hk">H₂ 알고리즘 독립성 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">SAC와 PPO를 같은 인터페이스에서 같은 학습량으로 학습해 개선 방향이 같은지 비교해야 시험된다. SAC를 실행하지 않아 채택도 기각도 하지 않는다. 미완료 중간 산출물은 분석에 쓰지 않았다.</p><p class="small"><b>향후 시험 설계</b>: 같은 학습량·충분한 시드 수의 SAC 대 PPO(8.4절 ③).</p></div>
- <div class="card"><div class="hk">H₃ 네트워크 효과 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">이웃 건물 정보를 공유하는 협조 제어와 건물별 독립 제어를 같은 블록에서 비교해야 시험된다. 실험을 실행하지 않았다. 7장은 이를 시험할 때 확인할 항목(조정 가능한 부하, 새 최대 시각, 열쾌적 제약)을 제시한다.</p><p class="small"><b>향후 시험 설계</b>: 주광 유지 제어로 행동 공간을 한정하고 열쾌적 제약을 두어, 운전 스케줄이 분산된 블록에서 독립 제어와 비교(7.6.1항).</p></div>
+ <div class="card"><div class="hk">H₂ 알고리즘 독립성 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">SAC와 PPO를 같은 인터페이스에서 같은 학습량으로 학습해 개선 방향이 같은지 비교해야 시험할 수 있다. SAC를 실행하지 않아 채택도 기각도 하지 않는다. 미완료 중간 산출물은 분석에 쓰지 않았다.</p><p class="small"><b>향후 시험 설계</b>: 같은 학습량·충분한 시드 수의 SAC 대 PPO(8.4절 ③).</p></div>
+ <div class="card"><div class="hk">H₃ 네트워크 효과 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">이웃 건물 정보를 공유하는 협조 제어와 건물별 독립 제어를 같은 블록에서 비교해야 시험할 수 있다. 실험을 실행하지 않았다. 7장은 이를 시험할 때 확인할 항목(조정 가능한 부하, 새로 생기는 최대 전력 시각, 열쾌적 제약)을 제시한다.</p><p class="small"><b>향후 시험 설계</b>: 주광 유지 제어로 행동 공간을 한정하고 열쾌적 제약을 두어, 운전 스케줄이 분산된 블록에서 독립 제어와 비교(7.6.1항).</p></div>
 </div>
 <div class="card"><div class="hk">결정 시점 기록</div><ol class="tl">${c.ppo.timeline.map(([t, s]) => `<li><span class="mono">${esc(t)}</span> ${esc(s)}</li>`).join('')}</ol>
-<p class="small">기록 원문: "${esc(c.ppo.scope_note)}" (기록 파일은 평가 출력 생성 뒤인 16:28에 저장되었고, 결정 시각은 기록 내용 기준이다.)</p></div>`;
+<p class="small">기록 원문: "${esc(c.ppo.scope_note)}" (기록 파일은 평가 출력 생성 뒤인 16:28에 저장되었고, 결정 시각은 기록에 적힌 시각을 따랐다.)</p></div>`;
   }
 
   /* ---------- 무결성 ---------- */
@@ -269,7 +269,7 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
     const P = $('#page-verify'); if (P.dataset.ok) return; P.dataset.ok = 1;
     P.innerHTML = `
 <div class="vhead"><div><div class="kicker">Verification ledger</div><h1>검증 원장</h1>
-<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장은 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에서 정한 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p></div>
+<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장에는 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에 맞춘 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p></div>
 <div class="vbtns"><button class="btn primary" id="v-run">전체 재계산 실행</button><button class="btn" id="v-csv">결과 CSV 내려받기</button></div></div>
 <div id="v-sum" class="vsum"></div>
 <div class="lvlegend">${Object.entries(LV).map(([k, v]) => `<div><span class="lv lv${k[1]}">${k} ${v[0]}</span><span class="small">${v[1]}</span></div>`).join('')}</div>

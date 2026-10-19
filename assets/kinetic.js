@@ -40,7 +40,7 @@ ${B.map(b => `<tr><th><span class="kdot" style="background:${FC[b[0]]}"></span><
 ${s.dEUI != null ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>3개 동 블록</th><th>EUI 변화</th><th>최대 전력 변화</th><th>동시계수</th><th>분류</th></tr></thead><tbody><tr><td>S1 대비</td><td class="mono">${sg(s.dEUI)}%</td><td class="mono">${sg(s.dP)}%</td><td class="mono">${s.CF.toFixed(3)}</td><td>${esc(s.day)}</td></tr></tbody></table></div>
 <div class="tblwrap"><table class="tbl"><thead><tr><th>건물</th>${K.buildings.map(n => `<th>${n}</th>`).join('')}</tr></thead><tbody><tr><td>UDI 변화 (%p)</td>${s.dUDI.map(v => `<td class="mono">${sg(v, 1)}</td>`).join('')}</tr><tr><td>열쾌적 변화 (%p)</td>${s.dPMV.map(v => `<td class="mono">${sg(v, 1)}</td>`).join('')}</tr></tbody></table></div>` : `<p class="small">${esc(s.note || '')}</p>`}
 ${sb ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>4개 대블록 ${SB.n}동(건물별 값)</th><th>EUI 변화 중앙값</th><th>최대 전력 변화 중앙값</th><th>EUI 감소 동수</th></tr></thead><tbody><tr><td>보정 기준 S1c 대비</td><td class="mono">${sg(sb.dEUI_med)}%</td><td class="mono">${sg(sb.dP_med)}%</td><td class="mono">${sb.n_dec}/${SB.n}</td></tr></tbody></table></div>` : ''}
-<p class="small"><a href="#/verify">검증 원장</a>에서 이 값이 원자료에서 다시 계산되는지 확인할 수 있습니다.</p></div>`;
+<p class="small"><a href="#/verify">검증 원장</a>에서 이 값을 원자료로 다시 계산해 확인할 수 있습니다.</p></div>`;
   }
   async function mount() {
     const P = $('#page-kinetic'); if (P.dataset.ok) return; P.dataset.ok = 1;

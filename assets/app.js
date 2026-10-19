@@ -178,7 +178,7 @@ ${fig('new_4_1_framework.png', '그림 4-1. 프레임워크의 6개 층과 층�
   async function pageResults() {
     const el = $('#page-results');
     el.innerHTML = `<div class="kicker">Results · 시뮬레이션 결과 자료</div><h1 style="font-size:28px">결과 데이터</h1>
-<p style="color:var(--ink2)">모든 값은 EnergyPlus 23.2(서울 TMYx 2011–2025) 시뮬레이션입니다. 최대 전력은 1시간 평균 전력의 연간 최댓값이며, 같은 모델 안의 안 사이 상대 비교로만 해석합니다.</p>
+<p style="color:var(--ink2)">모든 값은 EnergyPlus 23.2(서울 TMYx 2011–2025) 시뮬레이션 값입니다. 최대 전력은 1시간 평균 전력의 연간 최댓값이며, 같은 모델 안에서 계산 안끼리 비교하는 상대 값으로만 해석합니다.</p>
 <div class="tabs" id="rtabs"><button data-p="r1" class="on"><span class="mono">01</span>3개 동 시스템 비교</button><button data-p="r2"><span class="mono">02</span>50동 블록</button><button data-p="r3"><span class="mono">03</span>블록 전력 탐색기</button><button data-p="r4"><span class="mono">04</span>논문 표 29개</button><button data-p="r5"><span class="mono">05</span>그림</button></div>
 <div class="pane on" id="r1"></div><div class="pane" id="r2"></div><div class="pane" id="r3"></div><div class="pane" id="r4"></div><div class="pane" id="r5"></div>`;
     $$('#rtabs button').forEach(b => b.onclick = () => { $$('#rtabs button').forEach(x => x.classList.toggle('on', x === b)); $$('#page-results .pane').forEach(p => p.classList.toggle('on', p.id === b.dataset.p)); });
@@ -188,14 +188,14 @@ ${fig('new_4_1_framework.png', '그림 4-1. 프레임워크의 6개 층과 층�
     const pts = t65.rows.filter(r => r[0] !== 'S1').map(r => ({ k: r[0], t: r[1], x: num(r[3]), y: num(r[5]), c: KEEP.has(r[0]) ? '#F2B33D' : (r[0].startsWith('EC') ? '#FBD98C' : '#E8541E') }));
     $('#r1').innerHTML = `<div class="grid g2"><div class="card"><h3>블록 EUI 변화 vs 블록 최대 전력 변화 (3개 동, S1 대비)</h3>${scatterSVG(pts, { xl: '블록 EUI 변화', yl: '블록 최대 전력 변화' })}
 <div class="legend-row"><span><i style="background:#E8541E"></i>주광을 잃는 제어</span><span><i style="background:#F2B33D"></i>주광 유지 제어(EC 주광 연동·BT_T 수납)</span><span><i style="background:#FBD98C"></i>전기변색 일사 기준·피크 착색</span></div></div>
-<div class="card"><h3>읽는 법</h3><ul style="font-size:13.5px;padding-left:18px"><li>오른쪽 아래(에너지 감소·피크 감소)에 놓인 안이 없습니다. 에너지를 가장 줄인 수평 고정 장치(F0, LH_F0)는 피크를 올렸습니다.</li><li>피크를 올리지 않은 것은 주광을 유지한 제어뿐이며(−0.08~−0.29%), 이 제어는 열쾌적 비율을 1.3~9.2%p 낮췄습니다.</li><li>피크 시간 차단(PK, EC_PK)은 조명 증가가 공조 전력 감소를 넘어 +3.2% 이상 올렸습니다.</li><li>전기변색 연중 제어(EC_DL, EC_SOL)는 겨울 일사 이득을 잃어 EUI가 늘었습니다.</li></ul>
+<div class="card"><h3>읽는 법</h3><ul style="font-size:13.5px;padding-left:18px"><li>에너지와 피크를 함께 줄인 왼쪽 아래에는 주광 유지 제어(EC_DLS, BT_T300)만 놓이며, 감소 폭은 작습니다. 에너지를 가장 줄인 수평 고정 장치(F0, LH_F0)는 피크를 올렸습니다.</li><li>피크를 올리지 않은 것은 주광을 유지한 제어뿐이며(−0.08~−0.29%), 이 제어는 열쾌적 비율을 1.3~9.2%p 낮췄습니다.</li><li>피크 시간 차단(PK, EC_PK)은 조명 증가가 공조 전력 감소를 넘어 피크를 +3.2% 이상 올렸습니다.</li><li>전기변색 연중 제어(EC_DL, EC_SOL)는 겨울 일사 이득을 잃어 EUI가 늘었습니다.</li></ul>
 <div class="note">창면적비 40%, 가시광 투과율 0.305인 DOE 원형 외피 조건의 값입니다.</div></div></div>
 <div style="height:14px"></div>${tableHTML(t65)}`;
     // r2: 50동 block bars
     const t77 = tabs.find(t => t.caption.startsWith('표 7-7')), t610 = tabs.find(t => t.caption.startsWith('표 6-10'));
     const bars = t77.rows.filter(r => r[2] !== '—').map(r => ({ k: r[0], v: num(r[2]), c: r[0].includes('시차') ? '#3E8E7E' : (r[0].includes('주광 연동') || r[0].includes('걷어 올림') ? '#F2B33D' : '#E8541E') }));
     $('#r2').innerHTML = `<div class="card"><h3>50동 블록 최대 전력 변화 (보정 기준 S1c 대비)</h3>${barsSVG(bars, { xl: '블록 최대 전력 변화 (%)' })}
-<div class="note">주광 유지 제어(−0.01~−0.02%)는 기본 15분 계산의 값이며, 전기변색 주광 연동을 10분 간격으로 다시 계산하면 −0.35%로 달라져 크기는 계산 설정에 민감합니다. ±2시간 시차의 3개 동 블록 EUI는 약 0.38% 늘었고, 50동 시차의 EUI는 산출하지 않았습니다.</div></div>
+<div class="note">주광 유지 제어(−0.01~−0.02%)는 기본 15분 간격 계산의 값이며, 전기변색 주광 연동을 10분 간격으로 다시 계산하면 −0.35%로 달라져 크기는 계산 설정에 민감합니다. ±2시간 시차의 3개 동 블록 EUI는 약 0.38% 늘었고, 50동 시차의 EUI는 산출하지 않았습니다.</div></div>
 <div style="height:14px"></div>${tableHTML(t77)}<div style="height:14px"></div>${tableHTML(t610)}`;
     // r3: explorer
     renderExplorer($('#r3'), blk);
@@ -221,7 +221,7 @@ ${fig('new_4_1_framework.png', '그림 4-1. 프레임워크의 6개 층과 층�
 <div style="height:12px"></div><div class="card"><h3>연간 요약 (50동 블록)</h3><div class="scroll" style="max-height:none"><table class="tbl"><thead><tr><th>안</th><th>블록 최대 전력 (kW)</th><th>S1c 대비</th><th>동시계수</th><th>최대 시각</th></tr></thead><tbody>
 ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h = r.hour % 24; return `<tr><td>${SCN[s][0]}</td><td class="num">${Math.round(r.peak).toLocaleString()}</td><td class="num">${s === 'S1c' ? '—' : sgn(r.dP) + '%'}</td><td class="num">${r.CF.toFixed(3)}</td><td class="num">${md(d)} ${h}시</td></tr>`; }).join('')}</tbody></table></div></div>
 <div style="height:12px"></div><div class="card"><h3>직접 해 보기 — 운전 시각 이동의 단순 근사</h3>
-<p style="font-size:13px;color:var(--ink2);margin-top:0">7월 31일 각 건물의 기준 전력 곡선을 시간축으로 옮겨 합한 값입니다. EnergyPlus 재계산과 비교하면, 단순 이동은 효과를 크게 보입니다(공조·축열과 설계일 용량이 함께 움직이지 않기 때문).</p>
+<p style="font-size:13px;color:var(--ink2);margin-top:0">7월 31일 각 건물의 기준 전력 곡선을 시간축으로 옮겨 합한 값입니다. EnergyPlus 재계산과 비교하면, 단순 이동은 효과가 크게 나타납니다(공조·축열과 설계일 용량이 함께 움직이지 않기 때문).</p>
 <div class="row"><select id="shp"><option value="D1">논문의 D1 배정(±1시간)</option><option value="D2" selected>논문의 D2 배정(±2시간)</option><option value="R1">무작위 ±1시간</option><option value="R2">무작위 ±2시간</option><option value="R3">무작위 ±3시간</option></select><button class="btn ghost" id="shgo">계산</button></div>
 <div id="shout" style="margin-top:10px"></div></div></div></div>`;
     const draw = () => {
@@ -243,7 +243,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
       const pb = Math.max(...base), pt = Math.max(...tot), dP = 100 * (pt / pb - 1);
       const simv = (k === 'D1' || k === 'D2') ? B.summary['S1c_' + k] : null;
       $('#shout', el).innerHTML = `${lineSVG([{ v: base, c: '#1E2A38', w: 2.6 }, { v: tot, c: '#E8541E', dash: '6 4' }], { xl: '시각', yl: 'kW', xstep: 2 })}
-<div class="readout" style="grid-template-columns:repeat(3,1fr)"><div><span>단순 이동 근사</span><b>${sgn(dP)}% · CF ${(pt / ind).toFixed(3)}</b></div><div><span>EnergyPlus 재계산(공조 용량 고정)</span><b>${simv ? sgn(simv.dP) + '% · CF ' + simv.CF.toFixed(3) : '해당 없음(무작위 배정)'}</b></div><div><span>기준 블록 최대</span><b>${Math.round(pb).toLocaleString()} kW</b></div></div>`;
+<div class="readout" style="grid-template-columns:repeat(3,1fr)"><div><span>단순 이동 근사</span><b>${sgn(dP)}% · CF ${(pt / ind).toFixed(3)}</b></div><div><span>EnergyPlus 재계산(공조 용량 고정)</span><b>${simv ? sgn(simv.dP) + '% · CF ' + simv.CF.toFixed(3) : '해당 없음(무작위 배정)'}</b></div><div><span>기준 블록 최대 전력</span><b>${Math.round(pb).toLocaleString()} kW</b></div></div>`;
     };
     $('#shgo', el).onclick = shift; shift();
   }
@@ -254,7 +254,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
     const el = $('#page-map');
     if (MAP) { setTimeout(() => MAP.invalidateSize(), 50); return; }
     el.innerHTML = `<div class="kicker">Map · 역삼역 일대</div><h1 style="font-size:28px">대상지 지도</h1>
-<p style="color:var(--ink2);margin-top:-4px">상세 분석 3개 동과 다수 건물 50동. 건물을 누르면 실측 비교(월 전기)와 시스템별 효과(템플릿 모델 시뮬레이션)를 볼 수 있습니다.</p>
+<p style="color:var(--ink2);margin-top:-4px">상세 분석 3개 동을 포함한 다수 건물 50동. 건물을 누르면 실측 비교(월 전기)와 시스템별 효과(템플릿 모델 시뮬레이션)를 볼 수 있습니다.</p>
 <div class="mapwrap"><div id="lmap"></div><div class="mapside">
 <label class="ctl">색상 기준</label><select id="mmetric" style="width:100%">
 <option value="role">구분(상세·보정용·시험용)</option><option value="F0c.dP">블라인드 수평 고정 — 최대 전력 변화</option><option value="F0c.dEUI">블라인드 수평 고정 — EUI 변화</option><option value="EC_DLSc.dP">전기변색 주광 연동 — 최대 전력 변화</option><option value="BT_T300c.dP">블라인드 일사 기준·수납 — 최대 전력 변화</option><option value="VF_F0c.dP">수직 핀 고정 — 최대 전력 변화</option><option value="cv">실측 비교 월 CV(RMSE)</option><option value="height">높이</option></select>
@@ -286,7 +286,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
         else { const [s, k] = m.split('.'); const v = t.sys && t.sys[s] ? t.sys[s][k] : null; c = div(v, k === 'dP' ? 3 : 1.5); }
         p.setStyle({ fillColor: c });
       });
-      if (m === 'role') leg = `<div class="maplegend"><div><i style="background:#E8541E"></i>상세 분석 3개 동</div><div><i style="background:#F2B33D"></i>보정용</div><div><i style="background:#C98A10"></i>시험용·홀드아웃</div><div><i style="background:#FBD98C"></i>계산 대상(실측 없음)</div><div><i style="background:#8C949E;opacity:.4"></i>주변 건물(차폐 입력)</div></div>`;
+      if (m === 'role') leg = `<div class="maplegend"><div><i style="background:#E8541E"></i>상세 분석 3개 동</div><div><i style="background:#F2B33D"></i>보정용</div><div><i style="background:#C98A10"></i>시험용(홀드아웃)</div><div><i style="background:#FBD98C"></i>계산 대상(실측 없음)</div><div><i style="background:#8C949E;opacity:.4"></i>주변 건물(차폐 입력)</div></div>`;
       else if (m === 'cv') leg = `<div class="maplegend">월 CV(RMSE) 15% → 80%<div class="scale" style="margin-top:4px">${[0, .25, .5, .75, 1].map(x => `<i style="background:${ramp(15 + 65 * x, 15, 80)}"></i>`).join('')}</div>ASHRAE G14 월 기준 15%</div>`;
       else if (m === 'height') leg = `<div class="maplegend">높이 30 m → 210 m<div class="scale" style="margin-top:4px">${[0, .25, .5, .75, 1].map(x => `<i style="background:${ramp(30 + 180 * x, 30, 210)}"></i>`).join('')}</div></div>`;
       else { const a = m.endsWith('dP') ? 3 : 1.5; leg = `<div class="maplegend">S1c 대비 변화 (%)<div class="scale" style="margin-top:4px">${[-1, -.5, 0, .5, 1].map(x => `<i style="background:${div(x * a, a)}"></i>`).join('')}</div><div style="display:flex;justify-content:space-between"><span>−${a}% 감소</span><span>+${a}% 증가</span></div></div>`; }
@@ -302,7 +302,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
     setTimeout(() => MAP.invalidateSize(), 80);
   }
   function popupHTML(t, b) {
-    const SN = { F0c: '블라인드 수평 고정', LH_F0c: '대형 루버 고정', VF_F0c: '수직 핀 고정', EC_DLSc: '전기변색 주광 연동', BT_T300c: '블라인드 일사·수납', LT_T300c: '대형 루버 일사 기준' };
+    const SN = { F0c: '블라인드 수평 고정', LH_F0c: '대형 루버 고정', VF_F0c: '수직 핀 고정', EC_DLSc: '전기변색 주광 연동', BT_T300c: '블라인드 일사 기준·수납', LT_T300c: '대형 루버 일사 기준' };
     let h = `<h4>${esc(t.name || '(이름 없음)')}</h4><div style="font:12px var(--mono);color:#6B7480">${t.floors}층 · ${t.height} m · 대장 연면적 ${t.totArea.toLocaleString()} m² · ${t.role === 'detailed' ? '상세 분석' : '다수 건물'} ${t.split ? '· ' + (t.split === 'calib' ? '보정용' : '시험용') : ''}</div>`;
     if (t.meas && t.meas.m_meas && t.meas.m_meas.some(v => v != null)) {
       const mm = t.meas.m_meas, ms = t.meas.m_sim, all = [...mm, ...ms].filter(v => v != null), hi = Math.max(...all) * 1.1, W = 300, H = 110, L = 26;
@@ -364,7 +364,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
 <li><b>지도</b> — 50동의 실측 비교와 시스템별 효과(템플릿 모델).</li>
 <li><b>결과 데이터</b> — 논문의 결과 표 29개, 50동 블록 시간별 전력 탐색.</li>
 <li><b>문헌</b> — 참고문헌 255편, 해외 문헌 DB 660편 검색.</li></ul>
-<div class="warn">시뮬레이션 탭의 실내 조도·작동 계산은 이 사이트에서 직접 도는 <b>단순 근사(교육용)</b>이며, 논문의 EnergyPlus 결과가 아닙니다. 논문 결과는 "결과 데이터"와 "지도"에 있습니다.</div></div>
+<div class="warn">시뮬레이션 탭의 실내 조도·작동 계산은 이 사이트가 브라우저에서 직접 계산하는 <b>단순 근사(교육용)</b>이며, 논문의 EnergyPlus 결과가 아닙니다. 논문 결과는 "결과 데이터"와 "지도"에 있습니다.</div></div>
 <div class="card"><h3>자료 출처</h3><table class="tbl"><tbody>
 <tr><td>건물 외곽선·층수</td><td>© OpenStreetMap contributors (ODbL), Overpass API, 2026-10-12 기준</td></tr>
 <tr><td>건축물 정보</td><td>국토교통부 건축물대장(공공데이터포털)</td></tr>
@@ -373,7 +373,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
 <tr><td>시뮬레이션</td><td>EnergyPlus 23.2, DOE 대형 사무소 원형 모델 기반</td></tr>
 <tr><td>지도 타일</td><td>© OpenStreetMap contributors</td></tr>
 <tr><td>3D 표현</td><td>three.js · Leaflet</td></tr></tbody></table>
-<p style="font-size:12.5px;color:var(--muted)">이 사이트의 대상지 3D·선경로 표현은 Andrew Marsh의 Sun-Path 3D·Daylight Box 같은 교육용 도구의 작동 방식을 참고해 새로 만든 것입니다.</p></div>
+<p style="font-size:12.5px;color:var(--muted)">이 사이트의 대상지 3D·태양 경로 표현은 Andrew Marsh의 Sun-Path 3D·Daylight Box 같은 교육용 도구의 작동 방식을 참고해 새로 만든 것입니다.</p></div>
 <div class="card"><h3>논문 정보</h3><p style="font-size:14px">${esc(C.meta.titleKo)} — ${esc(C.meta.subKo)}<br>${esc(C.meta.author)} · ${esc(C.meta.school)} · 지도교수 ${esc(C.meta.advisor)}</p><p class="mono" style="font-size:12px;color:var(--muted)">${esc(C.meta.version)}</p><div class="note">${esc(C.meta.status)}</div></div>
 <div class="card"><h3>이전 사이트</h3><p style="font-size:13.5px">2026년 7월의 이전 BADTM 사이트 파일은 저장소의 <code>old/</code> 폴더에 보존했습니다. 이전 사이트의 수치(예: EUI 절감 40% 내외)는 현재 논문과 맞지 않으므로 인용하지 마십시오.</p></div>
 </div>`;
