@@ -195,7 +195,7 @@ ${fig('new_4_1_framework.png', '그림 4-1. 프레임워크의 6개 층과 층�
     const t77 = tabs.find(t => t.caption.startsWith('표 7-7')), t610 = tabs.find(t => t.caption.startsWith('표 6-10'));
     const bars = t77.rows.filter(r => r[2] !== '—').map(r => ({ k: r[0], v: num(r[2]), c: r[0].includes('시차') ? '#3E8E7E' : (r[0].includes('주광 연동') || r[0].includes('걷어 올림') ? '#F2B33D' : '#E8541E') }));
     $('#r2').innerHTML = `<div class="card"><h3>50동 블록 최대 전력 변화 (보정 기준 S1c 대비)</h3>${barsSVG(bars, { xl: '블록 최대 전력 변화 (%)' })}
-<div class="note">주광 유지 제어(−0.01~−0.02%)는 기본 15분 간격 계산의 값이며, 전기변색 주광 연동을 10분 간격으로 다시 계산하면 −0.35%로 달라져 크기는 계산 설정에 민감합니다. ±2시간 시차의 3개 동 블록 EUI는 약 0.38% 늘었고, 50동 시차의 EUI는 산출하지 않았습니다.</div></div>
+<div class="note">주광 유지 제어(−0.01~−0.02%)는 기본 15분 간격 계산의 값이며, 전기변색 주광 연동을 10분 간격으로 다시 계산하면 −0.35%로 달라져 크기는 계산 설정에 민감합니다. ±2시간 시차의 3개 동 블록 EUI는 약 0.38% 늘었고, 50동 시차의 EUI는 산출하지 않았습니다. 운전 시차는 장치 없이 운전 시각만 바꾼 운영 변수로, 외피 효과와 구분해 읽어야 합니다. 최대 전력은 1시간 평균 전력의 연간 최대값(시간평균 기준)이며 15분 최대수요와 다릅니다.</div></div>
 <div style="height:14px"></div>${tableHTML(t77)}<div style="height:14px"></div>${tableHTML(t610)}`;
     // r3: explorer
     renderExplorer($('#r3'), blk);

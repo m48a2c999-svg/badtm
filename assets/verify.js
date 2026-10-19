@@ -6,9 +6,9 @@
   const bin = (() => { const c = {}; return f => c[f] || (c[f] = fetch('data/v/' + f).then(r => r.arrayBuffer())); })();
   const LV = {
     V0: ['보고값 대조', '원자료를 공개하지 않은 값. 논문 본문과 표 사이의 일치만 확인'],
-    V1: ['출력 재집계', 'EnergyPlus 출력(건물별 연간·시간별 값)을 브라우저가 다시 합산·비교'],
+    V1: ['출력 재집계', 'EnergyPlus 출력(건물별 연간·시간별 값)을 브라우저가 다시 합산·비교. 공개 출력의 산술 재현이며 모델 자체의 타당성 검증은 아님'],
     V2: ['원자료 재계산', '실측 월별 사용량·선별 계산 원자료에서 지표를 처음부터 다시 계산'],
-    V3: ['독립 재현', '논문과 다른 독립 모델(이 사이트의 계산식)로 같은 결론을 재현']
+    V3: ['모듈 별도 구현 비교', '계산의 한 모듈(현재는 태양 위치 계산 하나)을 다른 구현으로 계산해 비교. 에너지 성능 전체를 독립적으로 재현한 것은 아님']
   };
   const ST = { ok: ['일치', 'ok'], rd: ['반올림 차이', 'rd'], chk: ['확인 필요', 'chk'], bad: ['불일치', 'bad'], na: ['대조 대상 없음', 'na'] };
 
@@ -123,12 +123,12 @@
     return { items: its, trace: 'UDI = 기준점 조도 100~2,000 lx 비율(재실 시간 기준), 열쾌적 = PMV ±0.5 비율.' };
   });
 
-  add('C6-07', '6장', 'V1', '"창면적비 40%의 3개 동에서 연간 EUI 감소는 모든 시스템에서 1.2% 이하" (6.2.1항)', ['data/v/det3.json'], async c => {
+  add('C6-07', '6장', 'V1', '"창면적비 40%의 상세 3개 동 블록에서 연간 EUI 감소는 모든 시스템에서 1.2% 이하, 건물별 최대는 GST 수평 고정 1.35%" (6.2.1항, 외부 검토 반영 문구)', ['data/v/det3.json'], async c => {
     const s1 = c.block('S1'); let mb = 0, mbT = '', mi = 0, miT = '';
     TAG65.forEach(t => { const b = c.block(t); const d = 100 * (b.EUI / s1.EUI - 1); if (-d > mb) { mb = -d; mbT = t; } c.N.forEach(n => { const R = c.det3.runs[t][n], dd = 100 * (R.EUI / c.det3.runs.S1[n].EUI - 1); if (-dd > mi) { mi = -dd; miT = `${t} ${n}`; } }); });
     const it1 = lim('블록 기준 최대 EUI 감소 %', 1.2, +mb.toFixed(1)); it1.calc = mb;
-    const it2 = lim('건물 기준 최대 EUI 감소 %', 1.2, +mi.toFixed(1), true); it2.calc = mi;
-    return { items: [it1, it2], trace: `블록 기준 최대 감소는 ${mbT} ${mb.toFixed(2)}%로 문장과 맞는다. 건물 기준 최대 감소는 ${miT} ${mi.toFixed(2)}%로 1.2%를 넘으므로, 문장의 범위를 "블록 기준"으로 밝히는 것이 정확하다.` };
+    const it2 = item('건물 기준 최대 EUI 감소 %', '1.35', mi);
+    return { items: [it1, it2], trace: `블록 기준 최대 감소는 ${mbT} ${mb.toFixed(2)}%로 "블록 기준 1.2% 이하"와 맞는다. 건물 기준 최대 감소는 ${miT} ${mi.toFixed(2)}%이므로 "1.2% 이하"는 블록 기준으로만 성립한다(문구를 이에 맞게 한정함).` };
   });
 
   add('C6-08', '6장', 'V1', '주광을 잃는 제어는 블록 최대 전력 +0.19~+3.27%, 주광을 유지한 제어만 올리지 않음', ['data/v/det3.json'], async c => {
@@ -167,7 +167,7 @@
     return { items: its, trace: '동시계수 = 블록 최대 ÷ 건물별 최대의 합, 부하율 = 블록 평균 ÷ 블록 최대.' };
   });
 
-  add('C7-02', '7장', 'V1', '운전 스케줄 시차: D2(±2시간)에서 블록 최대 전력 −3.61%, 동시계수 0.980 (표 7-5)', ['data/v/det3.json', 'data/v/det3_ind_S1D.bin'], async c => {
+  add('C7-02', '7장', 'V1', '운전 스케줄 시차(장치 없음, 운영 변수): D2(±2시간)에서 블록 최대 전력 −3.61%, 동시계수 0.980 (표 7-5)', ['data/v/det3.json', 'data/v/det3_ind_S1D.bin'], async c => {
     const s1 = c.block('S1'), its = [];
     [['원형(시차 없음)', 'S1'], ['D1(±1시간)', 'S1_D1'], ['D2(±2시간)', 'S1_D2']].forEach(([lab, t]) => {
       const r = c.row('표 7-5', lab), b = c.block(t);
@@ -235,7 +235,7 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
     const curve = s => { const r = c.ppo.rl[s].reward, mn = Math.min(...r), mx = Math.max(...r); return `<polyline fill="none" stroke="${s.endsWith('0') ? '#E8541E' : '#1E2A38'}" stroke-width="1.4" points="${r.map((v, i) => `${(i / (r.length - 1) * 300).toFixed(1)},${(70 - (v - mn) / (mx - mn || 1) * 64).toFixed(1)}`).join(' ')}"/>`; };
     $('#v-hypo').innerHTML = `
 <div class="hgrid">
- <div class="card"><div class="hk">H₁ 에너지 절감 <span class="vb bad">기각</span></div><p class="small">"SAC와 PPO 모두"가 세 조건(에너지 감소·열쾌적 유지·주광 유지)을 세 비교 기준 모두에 대해 충족해야 지지된다. 아래 표는 결정론적 평가 결과로 브라우저가 판정을 다시 내린 것이다. PPO가 충족하지 못했으므로 SAC 결과와 관계없이 기각.</p>
+ <div class="card"><div class="hk">H₁ 에너지 절감 <span class="vb bad">사전 조건 미충족</span></div><p class="small">"SAC와 PPO 모두"가 세 조건(에너지 감소·열쾌적 유지·주광 유지)을 세 비교 기준 모두에 대해 충족해야 지지된다. 아래 표는 결정론적 평가 결과로 브라우저가 판정을 다시 내린 것이다. <b>시험한 PPO 설정</b>(ARK 1개 동, 2개 시드 × 100회 학습)에서 사전 정의한 조건을 충족하지 못했으므로 SAC 결과와 관계없이 H₁은 기각된다. 이 판정은 시험한 설정에 한정되며, 다른 학습량·보상 설계·알고리즘의 강화학습 제어 일반으로 넓히지 않는다.</p>
   <div class="tblwrap"><table class="tbl"><thead><tr><th>비교 기준</th><th>PPO</th><th>에너지</th><th>열쾌적</th><th>주광</th><th>판정</th></tr></thead><tbody>${rows}</tbody></table></div>
   <svg viewBox="0 0 300 74" class="spark"><text x="0" y="10" class="mono">학습 보상(에피소드별, 정규화)</text>${curve('PPO_s0')}${curve('PPO_s1')}</svg></div>
  <div class="card"><div class="hk">H₂ 알고리즘 독립성 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">SAC와 PPO를 같은 인터페이스에서 같은 학습량으로 학습해 개선 방향이 같은지 비교해야 시험할 수 있다. SAC를 실행하지 않아 채택도 기각도 하지 않는다. 미완료 중간 산출물은 분석에 쓰지 않았다.</p><p class="small"><b>향후 시험 설계</b>: 같은 학습량·충분한 시드 수의 SAC 대 PPO(8.4절 ③).</p></div>
@@ -269,7 +269,7 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
     const P = $('#page-verify'); if (P.dataset.ok) return; P.dataset.ok = 1;
     P.innerHTML = `
 <div class="vhead"><div><div class="kicker">Verification ledger</div><h1>검증 원장</h1>
-<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장에는 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에 맞춘 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p></div>
+<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장에는 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에 맞춘 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p><p class="small vscope"><b>이 원장이 확인하는 것과 확인하지 않는 것</b>: 논문 수치가 공개한 계산 출력과 산술적으로 일치하는지(재현성)를 확인합니다. 모델이 실제 건물을 잘 나타내는지(타당성)는 확인하지 않습니다. 모델의 타당성은 월별 실측 비교(5.4절, 기준 충족 보정용 1/31동·시험용 0/16동)와 민감도 계산으로 따로 판단해야 합니다.</p></div>
 <div class="vbtns"><button class="btn primary" id="v-run">전체 재계산 실행</button><button class="btn" id="v-csv">결과 CSV 내려받기</button></div></div>
 <div id="v-sum" class="vsum"></div>
 <div class="lvlegend">${Object.entries(LV).map(([k, v]) => `<div><span class="lv lv${k[1]}">${k} ${v[0]}</span><span class="small">${v[1]}</span></div>`).join('')}</div>
