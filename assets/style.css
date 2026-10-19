@@ -140,3 +140,7 @@ label.ctl b{color:var(--ink);float:right}
 .chart text{font-family:var(--mono);font-size:11px;fill:var(--ink2)}
 .chart .axis line,.chart .axis path{stroke:var(--line)}
 .bar-label{font-family:var(--mono)}
+
+.xgrid{grid-template-columns:280px minmax(0,1fr)}
+@media (max-width:900px){.xgrid{grid-template-columns:1fr}}
+.tbl .tag{line-height:1.45;white-space:normal}

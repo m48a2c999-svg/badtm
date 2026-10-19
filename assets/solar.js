@@ -37,7 +37,8 @@
   }
   function cutoffAngle(w, s, phiDeg) { // 직달을 막는 최소 슬랫각
     const phi = phiDeg * D2R; const x = (s / w) * Math.cos(phi);
-    if (x >= 1) return 0; const b = Math.asin(x) * R2D - phiDeg; return Math.max(0, Math.min(89, b));
+    if (x >= 1) return 89; // 슬랫 폭이 간격보다 좁아 낮은 태양을 완전히 막을 수 없을 때는 최대로 닫는다
+    const b = Math.asin(x) * R2D - phiDeg; return Math.max(0, Math.min(89, b));
   }
   const DEV = {
     blind80: { w: 0.080, s: 0.085, label: '외부 블라인드 80 mm' },

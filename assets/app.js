@@ -73,7 +73,7 @@ ${rays}
 <div class="kicker">Research questions</div>
 <div class="grid g3">${C.questions.map(q => `<div class="card"><span class="tag sun">${q[0]}</span><h3 style="margin-top:8px">${esc(q[1])}</h3><p style="font-size:13.5px;color:var(--ink2);margin:0">${esc(q[2])}</p></div>`).join('')}</div>
 <div style="height:28px"></div>
-<div class="kicker">Framework · 6 layers</div>
+<div class="kicker">Framework · 6 layers — <a href="#/framework" style="letter-spacing:0">프레임워크로 말할 수 있는 범위 →</a></div>
 <div class="layers">${C.layers.map(l => `<div><b>${l[0]}</b><strong>${esc(l[1])}</strong><small>${esc(l[2])}</small><small style="color:#8a5a06">생물 원리: ${esc(l[3])}</small></div>`).join('')}</div>
 <div style="height:28px"></div>
 <div class="kicker">Hypotheses</div>
@@ -96,6 +96,30 @@ ${C.hypotheses.map(h => `<tr><td><b>${h[0]}</b> ${esc(h[1])}</td><td>${esc(h[2])
     ${c.figs.length ? `<div class="grid ${c.figs.length > 1 ? 'g2' : ''}">${c.figs.map(f => fig(f[0], f[1])).join('')}</div>` : ''}</article>`).join('')}</div>
 </div>`;
     $$('#page-thesis [data-jump]').forEach(a => a.onclick = e => { e.preventDefault(); document.getElementById(a.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  }
+
+
+  function pageFramework() {
+    const F = C.framework, cls = { ok: 'kin', warn: 'sun' };
+    $('#page-framework').innerHTML = `<div class="kicker">Framework · 무엇을 프레임워크라고 말할 수 있는가</div>
+<h1 style="font-size:28px">데이터 기반 성능 평가 프레임워크의 범위</h1>
+<p style="color:var(--ink2);max-width:80ch">${esc(F.def)}</p>
+<div style="height:10px"></div>
+<div class="kicker">층별 구현과 확인 상태</div>
+<div class="scroll" style="max-height:none"><table class="tbl"><thead><tr><th>층</th><th>이번 연구에서 실제로 한 것</th><th>확인 방법과 결과</th><th>상태</th></tr></thead><tbody>
+${F.rows.map(r => `<tr><td><b class="mono" style="color:var(--sun)">${r[0]}</b><br>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td><span class="tag ${cls[r[5]]}">${esc(r[4])}</span></td></tr>`).join('')}
+</tbody></table></div>
+<div style="height:18px"></div>
+<div class="grid g2">
+<div class="card tick"><h3>프레임워크라고 말할 수 있는 근거</h3><ol style="font-size:14px;padding-left:20px;margin:0">${F.can.map(x => `<li style="margin:6px 0">${esc(x)}</li>`).join('')}</ol></div>
+<div class="card"><h3>프레임워크로 주장할 수 없는 것</h3><ul style="font-size:14px;padding-left:20px;margin:0">${F.cannot.map(x => `<li style="margin:6px 0">${esc(x)}</li>`).join('')}</ul></div>
+</div>
+<div style="height:16px"></div>
+<div class="card"><h3>발표·논문에서 쓸 표현</h3><table class="tbl"><tbody>${F.say.map(s => `<tr><td style="width:70px"><span class="tag ${s[0] === '권장' ? 'kin' : 'mut'}">${s[0]}</span></td><td>${esc(s[1])}</td></tr>`).join('')}</tbody></table></div>
+<div style="height:16px"></div>
+<div class="grid g2"><div class="card"><h3>6개 층과 생물 원리</h3><div class="layers" style="grid-template-columns:repeat(2,minmax(0,1fr))">${C.layers.map(l => `<div><b>${l[0]}</b><strong>${esc(l[1])}</strong><small>${esc(l[2])}</small><small style="color:#8a5a06">생물 원리: ${esc(l[3])}</small></div>`).join('')}</div></div>
+${fig('new_4_1_framework.png', '그림 4-1. 프레임워크의 6개 층과 층별 확인 방법')}</div>
+<p class="note">근거: 논문 표 4-1(층별 입력·처리·출력과 채택한 기존 방법), 표 4-9(층별 검증 방법과 판단 기준), 5.4절·6.3절·6.5절·7.4절, 8.3절(한계).</p>`;
   }
 
   /* ---------- SVG chart helpers ---------- */
@@ -179,7 +203,7 @@ ${C.hypotheses.map(h => `<tr><td><b>${h[0]}</b> ${esc(h[1])}</td><td>${esc(h[2])
   }
   function renderExplorer(el, B) {
     const md = d => { const x = window.SOLAR.doyToDate(d + 1); return `${x.m}/${x.d}`; };
-    el.innerHTML = `<div class="grid" style="grid-template-columns:280px minmax(0,1fr)">
+    el.innerHTML = `<div class="grid xgrid">
 <div class="card"><label class="ctl">날짜 <b id="xdate"></b></label><input type="range" id="xday" min="0" max="364" value="211">
 <div class="row" style="margin-top:6px">${B.peak_days.slice(0, 4).map(d => `<button class="btn ghost" style="padding:5px 8px;font-size:12px" data-d="${d}">${md(d)}</button>`).join('')}</div>
 <label class="ctl">안 선택</label>${B.scenarios.map(s => `<label class="chk"><input type="checkbox" value="${s}" ${['S1c', 'F0c', 'EC_DLSc', 'S1c_D2'].includes(s) ? 'checked' : ''}><i style="width:12px;height:3px;background:${SCN[s][1]};display:inline-block"></i>${SCN[s][0]}</label>`).join('')}
@@ -348,7 +372,7 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
 
   /* ---------- router ---------- */
   const built = {};
-  const PAGES = { home: pageHome, thesis: pageThesis, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount() };
+  const PAGES = { home: pageHome, thesis: pageThesis, framework: pageFramework, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount() };
   function route() {
     const h = location.hash.replace(/^#\/?/, ''), [r, sub] = h.split('/'); const key = PAGES[r] ? r : 'home';
     $$('.page').forEach(p => p.classList.toggle('on', p.id === 'page-' + key));
