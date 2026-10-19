@@ -58,7 +58,7 @@ ${rays}
 <div class="hero">
   <div>
     <div class="kicker">Doctoral research · 2026</div>
-    <h1>${esc(m.titleKo)}</h1>
+    <h1 class="htitle">${(m.titleParts || [m.titleKo]).map(s => `<span>${esc(s)}</span>`).join(' ')}</h1>
     <p class="lead">— ${esc(m.subKo)} —</p>
     <p style="color:var(--muted);font-size:13.5px;margin:-4px 0 14px">${esc(m.titleEn)}</p>
     <p class="lead">서울 역삼역 일대 업무시설을 대상으로, 공개 자료로 만든 건물 모델 위에서 기존 키네틱 외피(블라인드·루버·핀·전기변색 유리)와 제어 방식이 건물과 건물군의 에너지·최대 전력·주광·열쾌적을 어떻게 바꾸는지 같은 기준으로 비교한 연구입니다.</p>
@@ -95,7 +95,7 @@ ${C.hypotheses.map(h => `<tr><td><b>${h[0]}</b> ${esc(h[1])}</td><td>${esc(h[2])
     const m = C.meta;
     $('#page-thesis').innerHTML = `
 <div class="kicker">Thesis · 장별 요약</div>
-<h1 style="font-size:28px">${esc(m.titleKo)}</h1>
+<h1 class="htitle" style="font-size:clamp(24px,2.4vw,32px)">${(m.titleParts || [m.titleKo]).map(s => `<span>${esc(s)}</span>`).join(" ")}</h1>
 <p style="color:var(--ink2)">${esc(m.author)} · ${esc(m.school)} · 지도교수 ${esc(m.advisor)} · <span class="mono" style="font-size:12px">${esc(m.version)}</span></p>
 <div class="warn">${esc(m.status)} 아래 글은 논문 본문을 옮긴 것이 아니라 이 사이트를 위해 다시 쓴 요약입니다.</div>
 <div style="height:18px"></div>

@@ -214,3 +214,11 @@ h2.sec{margin-top:28px;padding-top:10px;border-top:1.5px solid var(--ink)}
 .vs.chk{display:block;cursor:auto;margin:0;font-size:inherit}
 .vtab tr.chk{display:table-row;cursor:auto;margin:0}
 .hgrid>*{min-width:0}
+/* 한글 줄바꿈: 단어 단위로만 끊기(글자 중간에서 끊지 않음) */
+body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+.tbl td,.tbl th{word-break:keep-all}
+h1,h2,h3{text-wrap:balance}
+.htitle{font-size:clamp(26px,2.7vw,38px);line-height:1.28;letter-spacing:-.015em}
+.htitle span{white-space:nowrap}
+@media (max-width:420px){.htitle span{white-space:normal}}
+.lead,.small,p{text-wrap:pretty}
