@@ -14,7 +14,7 @@
     const A = K.axes.device, B = K.axes.family;
     return `<div class="tblwrap kmatwrap"><table class="tbl kmat"><thead><tr><th>제어 계열 \\ 외피 요소</th>${A.map(a => `<th><span class="mono">${a[0]}</span><br>${esc(a[1])}</th>`).join('')}</tr></thead><tbody>
 ${B.map(b => `<tr><th><span class="kdot" style="background:${FC[b[0]]}"></span><span class="mono">${b[0]}</span> ${esc(b[1])}</th>${A.map(a => `<td>${K.systems.filter(s => s.dev === a[0] && s.fam === b[0]).map(chip).join('') || '<span class="na">—</span>'}</td>`).join('')}</tr>`).join('')}
-</tbody></table></div><p class="small">칸 안의 값: 에너지(EUI) = 3개 동 블록의 연간 에너지 사용 강도 변화, 최대 전력 = 블록의 연중 최대 1시간 전력 변화(모두 기준 안 S1 대비, %, −는 감소). 진한 테두리 = 주광 유지형(3개 동 모두 UDI 변화 > −2%p), 연한 칸 = 주광 손실형.</p>`;
+</tbody></table></div><p class="small">칸 안의 값: 에너지(EUI) = 3개 동 블록의 연간 에너지 사용 강도 변화, 최대 전력 = 블록의 연중 최대 1시간 전력 변화(모두 기준 안 S1 대비, %, −는 감소). 진한 테두리 = 주광 유지형(설정으로 구분: 주광 조도에 맞춘 연속 착색, 또는 일사 기준 초과 시만 차단각으로 작동하고 그 밖에는 걷어 올림), 연한 칸 = 주광 손실형.</p>`;
   }
   function scatter() {
     const S = K.systems.filter(s => s.dEUI != null), W = 640, H = 380, m = { l: 56, r: 16, t: 16, b: 44 };
@@ -52,7 +52,7 @@ ${sb ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>4개 대블록 ${
  <div class="card"><div class="hk">A 외피 요소</div>${K.axes.device.map(a => `<div class="kax"><span class="mono">${a[0]}</span><b>${esc(a[1])}</b><span class="small">${esc(a[2])}</span></div>`).join('')}</div>
  <div class="card"><div class="hk">B 제어 계열</div>${K.axes.family.map(b => `<div class="kax"><span class="mono"><i class="kdot" style="background:${FC[b[0]]}"></i>${b[0]}</span><b>${esc(b[1])}</b><span class="small">${esc(b[2])}</span></div>`).join('')}</div>
  <div class="card"><div class="hk">미작동 시 상태 — 결과를 가르는 변수</div>${K.axes.idle.map(x => `<div class="kax wide"><b>${esc(x[0])}</b><span class="small">${esc(x[1])}</span></div>`).join('')}
- <p class="small" style="margin-top:.8em">계산한 안 가운데 블록 최대 전력을 올리지 않은 것은 미작동 시 창에서 빠지거나 투명해지는 <b>주광 유지형</b>뿐이었습니다(EC_DL·EC_DLS·BT_T300). 같은 일사 역치 제어라도 미작동 시 창 앞에 남는 대형 루버(LT_T300)는 최대 전력을 올렸습니다.</p></div>
+ <p class="small" style="margin-top:.8em">계산한 안 가운데 블록 최대 전력을 올리지 않은 것은 <b>주광 유지형</b>뿐이었습니다(EC_DL·EC_DLS·BT_T300). 주광 유지형은 결과가 아니라 설정으로 구분합니다: 작동 중에도 주광을 남기고(연속 착색 또는 직사광 차단각) 미작동 시 창에서 빠지거나 투명해지는 제어입니다. 미작동 시 투명해도 작동 중 완전 착색하는 전기변색(EC_SOLS·EC_PK)과, 같은 일사 역치라도 미작동 시 창 앞에 남는 대형 루버(LT_T300)는 최대 전력을 올렸습니다. 이 구분을 분석 축으로 삼은 것은 결과를 본 뒤이므로 탐색적 정리입니다.</p></div>
 </div>
 <h2 class="sec">분류 매트릭스</h2>${matrix()}
 <div class="kgrid"><div><h2 class="sec">에너지 대 최대 전력</h2>${scatter()}</div><div id="k-det" class="card"><p class="small">매트릭스나 그래프에서 안을 누르면 작동 방식과 결과가 여기에 표시됩니다.</p></div></div>`;

@@ -1,5 +1,5 @@
 {
- "built": "2026-10-19T22:11:08+09:00",
+ "built": "2026-10-19T22:41:14+09:00",
  "files": [
   {
    "path": "data/block50.json",
@@ -69,8 +69,8 @@
   },
   {
    "path": "data/v/kinetic.json",
-   "bytes": 7298,
-   "sha256": "82ea73eae78953e7259dab1d79a8c19dc3dd892152957cb88fcc7a4f319e3dd5",
+   "bytes": 7749,
+   "sha256": "81f967fbea4ba09979cde8cb8f499f814f52e1f7cf465bbc56a9cb0b9752b810",
    "source": "키네틱 분류·3개 동 결과"
   },
   {
