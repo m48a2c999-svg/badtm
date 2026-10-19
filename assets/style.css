@@ -144,3 +144,4 @@ label.ctl b{color:var(--ink);float:right}
 .xgrid{grid-template-columns:280px minmax(0,1fr)}
 @media (max-width:900px){.xgrid{grid-template-columns:1fr}}
 .tbl .tag{line-height:1.45;white-space:normal}
+.blist div.on{background:#FFE9C7;font-weight:600}

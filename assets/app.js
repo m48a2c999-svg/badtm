@@ -65,8 +65,17 @@ ${rays}
     <div class="row" style="margin:16px 0 10px"><a class="btn sun" href="#/sim">시뮬레이션 열기</a><a class="btn" href="#/map">지도에서 보기</a><a class="btn ghost" href="#/thesis">논문 요약</a></div>
     <div class="note">${esc(m.status)}</div>
   </div>
-  <div>${heroSVG()}</div>
+  <div class="card tick" style="align-self:start"><div class="kicker" style="margin-bottom:6px">At a glance</div>
+    <table class="tbl" style="font-size:13px"><tbody>
+    <tr><td>대상지</td><td>서울 강남구 역삼역 일대 업무시설</td></tr>
+    <tr><td>상세 분석</td><td>아크플레이스(24층) · 강남파이낸스센터(45층) · GS타워(38층)</td></tr>
+    <tr><td>다수 건물</td><td>공개 자료로 자동 생성한 50동 (실측 비교 47동)</td></tr>
+    <tr><td>주변 건물</td><td>OpenStreetMap 814동 (모델의 차폐 입력은 높은 건물 81동)</td></tr>
+    <tr><td>시스템</td><td>외부 블라인드 80 mm · 대형 루버 300 mm · 수직 핀 · 전기변색 유리</td></tr>
+    <tr><td>계산</td><td>EnergyPlus 23.2 · 서울 TMYx 2011–2025</td></tr>
+    <tr><td>실측</td><td>건축HUB 월 전기·가스 2023–2024</td></tr></tbody></table></div>
 </div>
+<figure style="margin:0 0 26px"><img src="figs/concept_yeoksam.svg" alt="같은 태양 아래의 역삼 블록 개념도 — 측정·분석한 50동, 주변 건물, 7월 31일 태양 경로, 프레임워크 6개 층" style="cursor:zoom-in"><figcaption>개념도 — 실제 역삼 블록(OpenStreetMap 외곽선)에 측정·분석한 건물을 색으로 구분하고, 같은 태양(7월 31일 경로) 아래에서 6개 층의 절차로 비교한다. 오른쪽 아래 곡선은 50동 블록의 7월 31일 시간별 전력(EnergyPlus, 원형 스케줄 vs ±2시간 시차).</figcaption></figure>
 <div class="kicker">Key results · 시뮬레이션 값</div>
 <div class="grid g4">${C.stats.map(s => `<div class="card stat tick"><b class="${s.c}">${esc(s.v)}</b><span>${esc(s.l)}</span><em>${esc(s.e)}</em></div>`).join('')}</div>
 <div style="height:28px"></div>
@@ -271,13 +280,13 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
       const m = $('#mmetric').value; let leg = '';
       polys.forEach(({ p, t }) => {
         let c = '#8C949E';
-        if (m === 'role') c = t.role === 'detailed' ? '#E8541E' : t.split === 'calib' ? '#F2B33D' : t.split === 'test' ? '#1E2A38' : '#B6BCC4';
+        if (m === 'role') c = t.role === 'detailed' ? '#E8541E' : t.split === 'calib' ? '#F2B33D' : t.split === 'test' ? '#C98A10' : '#FBD98C';
         else if (m === 'cv') c = t.meas && t.meas.CV != null ? ramp(t.meas.CV, 15, 80) : '#E3E5E8';
         else if (m === 'height') c = ramp(t.height, 30, 210);
         else { const [s, k] = m.split('.'); const v = t.sys && t.sys[s] ? t.sys[s][k] : null; c = div(v, k === 'dP' ? 3 : 1.5); }
         p.setStyle({ fillColor: c });
       });
-      if (m === 'role') leg = `<div class="maplegend"><div><i style="background:#E8541E"></i>상세 분석 3개 동</div><div><i style="background:#F2B33D"></i>보정용(31동)</div><div><i style="background:#1E2A38"></i>시험용·홀드아웃(16동)</div><div><i style="background:#B6BCC4"></i>실측 없음</div><div><i style="background:#8C949E;opacity:.4"></i>주변 건물(차폐 입력)</div></div>`;
+      if (m === 'role') leg = `<div class="maplegend"><div><i style="background:#E8541E"></i>상세 분석 3개 동</div><div><i style="background:#F2B33D"></i>보정용</div><div><i style="background:#C98A10"></i>시험용·홀드아웃</div><div><i style="background:#FBD98C"></i>계산 대상(실측 없음)</div><div><i style="background:#8C949E;opacity:.4"></i>주변 건물(차폐 입력)</div></div>`;
       else if (m === 'cv') leg = `<div class="maplegend">월 CV(RMSE) 15% → 80%<div class="scale" style="margin-top:4px">${[0, .25, .5, .75, 1].map(x => `<i style="background:${ramp(15 + 65 * x, 15, 80)}"></i>`).join('')}</div>ASHRAE G14 월 기준 15%</div>`;
       else if (m === 'height') leg = `<div class="maplegend">높이 30 m → 210 m<div class="scale" style="margin-top:4px">${[0, .25, .5, .75, 1].map(x => `<i style="background:${ramp(30 + 180 * x, 30, 210)}"></i>`).join('')}</div></div>`;
       else { const a = m.endsWith('dP') ? 3 : 1.5; leg = `<div class="maplegend">S1c 대비 변화 (%)<div class="scale" style="margin-top:4px">${[-1, -.5, 0, .5, 1].map(x => `<i style="background:${div(x * a, a)}"></i>`).join('')}</div><div style="display:flex;justify-content:space-between"><span>−${a}% 감소</span><span>+${a}% 증가</span></div></div>`; }

@@ -5,7 +5,7 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 const S = window.SOLAR, A = window.APP, $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const COL = { ink: 0x1E2A38, sun: 0xE8541E, kin: 0xF2B33D, mesh: 0x8C949E, ctx: 0xDADDE1, tgt: 0xB7BDC5, ground: 0xEFEDE7 };
 const state = { doy: 212, hour: 16.5, playing: false };
-let WX = null, BLD = null, TG = null, mounted = false;
+let WX = null, BLD = null, TG = null, ALL = null, mounted = false;
 
 function dateLabel(doy) { const d = S.doyToDate(doy); return `${d.m}월 ${d.d}일`; }
 function wxAt(doy, hour) { const i = Math.max(0, Math.min(8759, (doy - 1) * 24 + Math.floor(hour))); return { DNI: WX.DNI[i], DHI: WX.DHI[i], GHI: WX.GHI[i], T: WX.T[i], i }; }
@@ -16,6 +16,13 @@ function label3(text, color = '#1E2A38', size = 64) {
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true })); sp.scale.set(40, 20, 1); return sp;
 }
 
+function labelName(text, strong) {
+  const c = document.createElement('canvas'), g = c.getContext('2d'); const fs = strong ? 34 : 26; g.font = `600 ${fs}px IBM Plex Sans KR, sans-serif`;
+  const w = Math.ceil(g.measureText(text).width) + 24; c.width = w; c.height = fs + 20; const g2 = c.getContext('2d');
+  g2.fillStyle = strong ? 'rgba(232,84,30,.95)' : 'rgba(255,255,255,.92)'; g2.fillRect(0, 0, w, c.height); g2.strokeStyle = '#1E2A38'; g2.lineWidth = 2; g2.strokeRect(1, 1, w - 2, c.height - 2);
+  g2.font = `600 ${fs}px IBM Plex Sans KR, sans-serif`; g2.fillStyle = strong ? '#fff' : '#1E2A38'; g2.textBaseline = 'middle'; g2.fillText(text, 12, c.height / 2 + 1);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true })); const k = strong ? 0.42 : 0.36; sp.scale.set(w * k, c.height * k, 1); sp.renderOrder = 10; return sp;
+}
 /* ================= 1. 대상지 3D ================= */
 const SITE = {};
 function buildSite(el) {
@@ -38,20 +45,34 @@ function buildSite(el) {
   const gnd = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600), new THREE.MeshLambertMaterial({ color: COL.ground }));
   gnd.rotation.x = -Math.PI / 2; gnd.receiveShadow = true; scene.add(gnd);
   const grid = new THREE.GridHelper(1600, 80, 0xC9CDD2, 0xDDE0E3); grid.position.y = 0.2; scene.add(grid);
-  // buildings
-  const mats = { context: new THREE.MeshLambertMaterial({ color: COL.ctx }), target: new THREE.MeshLambertMaterial({ color: COL.tgt }), detailed: new THREE.MeshLambertMaterial({ color: COL.kin }) };
-  const edgeM = new THREE.LineBasicMaterial({ color: COL.ink, transparent: true, opacity: 0.55 });
-  SITE.meshes = []; SITE.ctxGroup = new THREE.Group(); root.add(SITE.ctxGroup);
-  BLD.buildings.forEach(b => {
-    const sh = new THREE.Shape(b.xy.map(p => new THREE.Vector2(p[0], p[1])));
-    const geo = new THREE.ExtrudeGeometry(sh, { depth: b.h, bevelEnabled: false }); geo.rotateX(-Math.PI / 2);
-    const m = new THREE.Mesh(geo, mats[b.role]); m.castShadow = true; m.receiveShadow = true; m.userData = b; m.userData.mat0 = mats[b.role];
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), edgeM);
-    const g = new THREE.Group(); g.add(m); g.add(e);
-    (b.role === 'context' ? SITE.ctxGroup : root).add(g); SITE.meshes.push(m);
+  // buildings: 대상지 OSM 전체 814동 — 측정·분석한 건물만 색으로 구분
+  const ROLE = {
+    detailed: { c: 0xE8541E, t: '상세 분석 3개 동' }, calib: { c: 0xF2B33D, t: '실측 비교 · 보정용' }, test: { c: 0xC98A10, t: '실측 비교 · 시험용(홀드아웃)' },
+    nodata: { c: 0xFBD98C, t: '계산 대상(실측 자료 없음)' }, shade: { c: 0xC5CAD1, t: '주변 건물 · 차폐 입력' }, other: { c: 0xF1EFEA, t: '그 밖의 건물(OSM)' } };
+  SITE.ROLE = ROLE;
+  const mats = Object.fromEntries(Object.entries(ROLE).map(([k, v]) => [k, new THREE.MeshLambertMaterial({ color: v.c })]));
+  const edgeM = new THREE.LineBasicMaterial({ color: COL.ink, transparent: true, opacity: 0.5 }), edgeL = new THREE.LineBasicMaterial({ color: COL.mesh, transparent: true, opacity: 0.45 });
+  SITE.meshes = []; SITE.all = []; SITE.ctxGroup = new THREE.Group(); SITE.lowGroup = new THREE.Group(); root.add(SITE.ctxGroup); root.add(SITE.lowGroup);
+  const b81 = Object.fromEntries(BLD.buildings.map(b => [b.id, b]));
+  ALL.buildings.forEach(a => {
+    const sh = new THREE.Shape(a.xy.map(p => new THREE.Vector2(p[0], p[1])));
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: a.h, bevelEnabled: false }); geo.rotateX(-Math.PI / 2);
+    const m = new THREE.Mesh(geo, mats[a.r]); m.castShadow = true; m.receiveShadow = true;
+    const b = b81[a.id];
+    m.userData = Object.assign({}, b || {}, { id: a.id, name: a.n, h: b ? b.h : a.h, xy: b ? b.xy : a.xy, r: a.r, est: a.est, kind: a.k, sim: a.sim, role: b ? b.role : 'low', mat0: mats[a.r] });
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), a.r === 'other' ? edgeL : edgeM);
+    const g = new THREE.Group(); g.add(m); g.add(e); m.userData.group = g;
+    if (a.r === 'other') SITE.lowGroup.add(g); else if (a.r === 'shade') SITE.ctxGroup.add(g); else root.add(g);
+    if (b) SITE.meshes.push(m);   // 차폐·광선 추적은 논문의 차폐 입력과 같은 81동
+    SITE.all.push(m);
   });
-  // labels for detailed
-  det.forEach(b => { const c = b.xy.reduce((s, p) => [s[0] + p[0] / b.xy.length, s[1] + p[1] / b.xy.length], [0, 0]); const lb = label3(b.sim, '#B23A0E', 56); lb.position.set(c[0], b.h + 18, -c[1]); root.add(lb); });
+  // labels
+  SITE.labels = new THREE.Group(); root.add(SITE.labels);
+  SITE.all.filter(m => m.userData.r !== 'other' && m.userData.r !== 'shade').forEach(m => {
+    const u = m.userData, c = u.xy.reduce((s, p) => [s[0] + p[0] / u.xy.length, s[1] + p[1] / u.xy.length], [0, 0]);
+    const det = u.r === 'detailed', lb = labelName(det ? `${u.sim} · ${u.name}` : u.name, det);
+    lb.position.set(c[0], u.h + (det ? 22 : 12), -c[1]); lb.visible = det; lb.userData.det = det; SITE.labels.add(lb); u.center = [c[0], -c[1]];
+  });
   // sun path dome
   const R = 430; SITE.R = R; const dome = new THREE.Group(); scene.add(dome); SITE.dome = dome;
   const ring = (r, y, col, op = 1) => { const pts = []; for (let a = 0; a <= 360; a += 3) pts.push(new THREE.Vector3(r * Math.sin(a * Math.PI / 180), y, -r * Math.cos(a * Math.PI / 180))); return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: col, transparent: op < 1, opacity: op })); };
@@ -69,7 +90,18 @@ function buildSite(el) {
   const halo = new THREE.Mesh(new THREE.RingGeometry(16, 19, 40), new THREE.MeshBasicMaterial({ color: COL.sun, side: THREE.DoubleSide })); scene.add(halo);
   const ray = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: COL.sun, dashSize: 8, gapSize: 6 })); scene.add(ray);
   Object.assign(SITE, { renderer, scene, cam, ctl, sunL, sun, halo, ray, root, el, cen });
-  fitAll();
+  fitAll(); sitePanels();
+  const rc = new THREE.Raycaster(), mv = new THREE.Vector2(); let down = null;
+  renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', e => {
+    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return; const r = renderer.domElement.getBoundingClientRect();
+    mv.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); rc.setFromCamera(mv, cam);
+    const hit = rc.intersectObjects(SITE.all.filter(m => m.userData.group.parent.visible), false); if (hit.length) selectBuilding(hit[0].object, false);
+  });
+  renderer.domElement.addEventListener('pointermove', e => { const r = renderer.domElement.getBoundingClientRect(); mv.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); rc.setFromCamera(mv, cam);
+    const hit = rc.intersectObjects(SITE.all.filter(m => m.userData.group.parent.visible), false); const tip = $('#s-tip');
+    if (hit.length) { const u = hit[0].object.userData; tip.style.display = 'block'; tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top + 10) + 'px'; tip.innerHTML = `<b>${A.esc(u.name || '(이름 없음)')}</b><br>${SITE.ROLE[u.r].t}`; renderer.domElement.style.cursor = 'pointer'; }
+    else { tip.style.display = 'none'; renderer.domElement.style.cursor = ''; } });
   const onR = () => { const w = el.clientWidth, h = el.clientHeight; if (!w || !h) return; renderer.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); };
   new ResizeObserver(onR).observe(el);
   const loop = () => { requestAnimationFrame(loop); if (state.playing && SITE.visible) { state.hour += 0.04; if (state.hour > 20.5) state.hour = 5; syncTime(); } if (SITE.visible) renderer.render(scene, cam); };
@@ -89,12 +121,12 @@ function zoneSamples() { // 상세 3개 동의 입면 4 × 층대 5 표본점(�
   return out;
 }
 function fitAll() { // 81동 전체가 한 화면에 들어오도록
-  const box = new THREE.Box3(); SITE.meshes.forEach(m => { if (m.visible) box.expandByObject(m); });
+  const box = new THREE.Box3(); SITE.all.forEach(m => { if (m.userData.group.parent && m.userData.group.parent.visible) box.expandByObject(m); });
   const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2;
   const d = r / Math.sin(SITE.cam.fov * Math.PI / 360) * 1.12;
   SITE.cam.position.set(c.x - d * 0.42, c.y + d * 0.62, c.z + d * 0.66); SITE.ctl.target.copy(c); SITE.ctl.update();
 }
-function topView() { const box = new THREE.Box3(); SITE.meshes.forEach(m => box.expandByObject(m)); const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2; SITE.cam.position.set(c.x, r / Math.tan(SITE.cam.fov * Math.PI / 360) * 0.95, c.z + 1); SITE.ctl.target.copy(c); SITE.ctl.update(); }
+function topView() { const box = new THREE.Box3(); SITE.all.forEach(m => box.expandByObject(m)); const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2; SITE.cam.position.set(c.x, r / Math.tan(SITE.cam.fov * Math.PI / 360) * 0.95, c.z + 1); SITE.ctl.target.copy(c); SITE.ctl.update(); }
 // 모든 건물의 입면 표본점: 외곽선의 변(5 m 이상) 중점 × 높이 3단
 function facadeSamples() {
   if (SITE.samples) return SITE.samples;
@@ -152,6 +184,35 @@ async function colorBuildings() {
   const nm = x => (TG.targets.find(t => t.osm === x.b.id) || {}).name || x.b.name || x.b.id;
   out.innerHTML = `<div><span>${dateLabel(state.doy)} 입면 평균 일조 — 블록 평균</span><b>${(hrs.filter(v => v != null).reduce((a, b) => a + b, 0) / hrs.filter(v => v != null).length).toFixed(1)} h</b></div><div><span>대상 50동 최대·최소</span><b>${t[0].v.toFixed(1)} · ${t[t.length - 1].v.toFixed(1)} h</b></div>
   <div style="grid-column:1/-1"><span>일조가 긴 대상 건물</span><b>${t.slice(0, 3).map(x => nm(x) + ' ' + x.v.toFixed(1) + 'h').join(' · ')}</b></div><div style="grid-column:1/-1"><span>일조가 짧은 대상 건물</span><b>${t.slice(-3).map(x => nm(x) + ' ' + x.v.toFixed(1) + 'h').join(' · ')}</b></div>`;
+}
+function sitePanels() {
+  const cnt = {}; SITE.all.forEach(m => cnt[m.userData.r] = (cnt[m.userData.r] || 0) + 1);
+  $('#s-roles').innerHTML = Object.entries(SITE.ROLE).map(([k, v]) => `<div style="display:flex;align-items:center;gap:7px;font-size:12.5px;margin:3px 0"><i style="width:13px;height:13px;border:1px solid #1E2A38;background:#${v.c.toString(16).padStart(6, '0')}"></i>${v.t}<span class="mono" style="margin-left:auto;color:var(--muted)">${cnt[k] || 0}</span></div>`).join('')
+    + `<div style="font-size:11px;color:var(--muted);margin-top:4px">실측 비교 47동 = 보정용 31 + 시험용 16(상세 3개 동 포함). 높이 정보가 없는 OSM 건물은 3층(9 m)으로 표시.</div>`;
+  const rows = SITE.all.filter(m => ['detailed', 'calib', 'test', 'nodata'].includes(m.userData.r)).sort((a, b) => (a.userData.r === 'detailed' ? -1 : 0) - (b.userData.r === 'detailed' ? -1 : 0) || b.userData.h - a.userData.h);
+  const draw = () => { const q = $('#s-q').value.trim();
+    $('#s-blist').innerHTML = rows.filter(m => !q || (m.userData.name || '').includes(q)).map(m => `<div data-id="${m.userData.id}"><span><i style="display:inline-block;width:9px;height:9px;margin-right:6px;background:#${SITE.ROLE[m.userData.r].c.toString(16).padStart(6, '0')};border:1px solid #1E2A38"></i>${A.esc(m.userData.name)}</span><small>${Math.round(m.userData.h)} m</small></div>`).join('');
+    $$('#s-blist div').forEach(d => d.onclick = () => selectBuilding(SITE.all.find(m => m.userData.id === d.dataset.id), true)); };
+  $('#s-q').oninput = draw; draw();
+}
+let SEL = null;
+function flyTo(m) { const u = m.userData, c = new THREE.Vector3(u.center ? u.center[0] : 0, u.h * 0.5, u.center ? u.center[1] : 0).add(SITE.root.position);
+  const from = SITE.ctl.target.clone(), p0 = SITE.cam.position.clone(), dir = p0.clone().sub(from).normalize(), dist = Math.max(160, u.h * 2.6), p1 = c.clone().add(dir.multiplyScalar(dist)); let t = 0;
+  const step = () => { t = Math.min(1, t + 0.06); const k = t * t * (3 - 2 * t); SITE.ctl.target.lerpVectors(from, c, k); SITE.cam.position.lerpVectors(p0, p1, k); SITE.ctl.update(); if (t < 1) requestAnimationFrame(step); }; step(); }
+function selectBuilding(m, fly) {
+  if (SEL) { SEL.material = SEL.userData.matSel0 || SEL.userData.mat0; SEL.material.emissive && SEL.material.emissive.setHex(0); }
+  SEL = m; m.userData.matSel0 = m.material; m.material = m.material.clone(); m.material.emissive = new THREE.Color(0x553300);
+  if (fly) flyTo(m);
+  const u = m.userData, t = TG.targets.find(x => x.osm === u.id), f = (v, d = 1) => v == null ? '—' : (+v).toFixed(d), sg = v => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%';
+  let h = `<div class="card" style="padding:10px 12px;margin-top:8px"><b style="font-size:15px">${A.esc(u.name || '(이름 없음)')}</b> <span class="tag ${u.r === 'detailed' ? 'sun' : t ? 'kin' : 'mut'}">${SITE.ROLE[u.r].t}</span>
+  <div class="mono" style="font-size:11.5px;color:var(--muted)">OSM ${u.id} · 높이 ${f(u.h, 0)} m${u.est ? ' (정보 없음 → 3층 추정)' : ''}${t ? ` · ${t.floors}층 · 연면적 ${t.totArea.toLocaleString()} m²` : ''}</div>`;
+  if (t) {
+    if (t.meas && t.meas.CV != null) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td>실측 연간 전기 / 모델</td><td>${f(t.meas.EUI_meas)} / ${f(t.meas.EUI_cal)} kWh/m²</td></tr><tr><td>월 CV(RMSE) · NMBE</td><td>${f(t.meas.CV)}% · ${t.meas.NMBE > 0 ? '+' : ''}${f(t.meas.NMBE)}%</td></tr></table>`;
+    if (t.sys) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td><b>시스템(S1c 대비)</b></td><td><b>EUI · 최대 전력</b></td></tr>${[['F0c', '블라인드 수평 고정'], ['EC_DLSc', '전기변색 주광 연동'], ['BT_T300c', '블라인드 일사·수납'], ['VF_F0c', '수직 핀 고정']].map(([k, n]) => t.sys[k] ? `<tr><td>${n}</td><td>${sg(t.sys[k].dEUI)} · ${sg(t.sys[k].dP)}</td></tr>` : '').join('')}</table>`;
+    h += `<div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">EnergyPlus 템플릿 모델(보정 기준) 시뮬레이션 값 · <a href="#/map">지도에서 월별 비교 보기</a></div>`;
+  }
+  $('#s-info').innerHTML = h + '</div>';
+  $$('#s-blist div').forEach(d => d.classList.toggle('on', d.dataset.id === u.id));
 }
 function updateSite() {
   if (!SITE.renderer) return;
@@ -363,15 +424,17 @@ function ui(page) {
 <div class="pane on" id="sp1"><div class="simwrap"><div class="simside">${timeCtl()}
 <div class="row" style="margin-top:10px"><button class="btn sun" id="s-play">▶ 하루 재생</button></div>
 <label class="ctl" style="margin-top:14px">표시</label>
-<label class="chk"><input type="checkbox" id="s-shadow" checked>그림자</label><label class="chk"><input type="checkbox" id="s-ctx" checked>주변 건물(차폐 입력)</label><label class="chk"><input type="checkbox" id="s-dome" checked>태양 경로 돔</label>
+<label class="chk"><input type="checkbox" id="s-shadow" checked>그림자</label><label class="chk"><input type="checkbox" id="s-ctx" checked>주변 건물 · 차폐 입력(31동)</label><label class="chk"><input type="checkbox" id="s-low" checked>그 밖의 건물(OSM 733동)</label><label class="chk"><input type="checkbox" id="s-lab">측정 건물 이름 모두 표시</label><label class="chk"><input type="checkbox" id="s-dome" checked>태양 경로 돔</label>
 <div class="row" style="margin-top:12px;gap:6px"><button class="btn ghost" id="s-fit" style="padding:6px 9px;font-size:12px">전체 보기</button><button class="btn ghost" id="s-top" style="padding:6px 9px;font-size:12px">위에서 보기</button></div>
+<label class="ctl" style="margin-top:14px">건물 구분 (대상지 OSM 814동)</label><div id="s-roles"></div>
+<label class="ctl" style="margin-top:10px">측정·분석한 50동 — 누르면 이동</label><input type="search" id="s-q" placeholder="건물 이름" style="width:100%;padding:6px 8px;font-size:13px"><div class="blist" id="s-blist" style="max-height:190px;overflow:auto;border:1px solid var(--line);margin-top:4px"></div><div id="s-info"></div>
 <label class="ctl" style="margin-top:14px">건물 색 — 같은 태양 아래 81동 비교</label><select id="s-color" style="width:100%"><option value="none">기본(상세·대상·주변 구분)</option><option value="now">현재 시각의 입면 직달 일사 비율</option><option value="day">선택한 날의 입면 평균 일조 시간</option></select>
 <div id="s-leg"></div><div class="readout" id="s-exp"></div>
 <p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">입면 표본점: 외곽선 변(5 m 이상) 중점 × 높이 15·50·85%, 바깥 1 m. 차폐는 이 81동만 고려(조회 범위 밖 건물 제외). 하루 일조는 30분 간격 광선 추적의 기하 근사입니다.</p>
 <label class="ctl" style="margin-top:14px">상세 3개 동 · 구역(입면 4 × 층대 5) 중 직달 일사</label><div class="readout" id="s-zones"></div>
 <div class="note">구역 판정(L3)은 이렇게 시각마다 주변 건물에 가리는지를 따져 재실 시간 중 직달 일사 비율 fb를 구한 것입니다. 표본점은 등가 직사각형 입면 중앙입니다.</div>
 <div class="legend-row"><span><i style="background:#F2B33D"></i>상세 3개 동</span><span><i style="background:#B7BDC5"></i>다수 건물</span><span><i style="background:#DADDE1"></i>주변 건물</span><span><i style="background:#E8541E"></i>태양·경로</span></div>
-</div><div class="simview" id="s-view"><div class="hud" id="s-hud"></div><div class="hud2">드래그: 회전 · 휠: 확대 · 우클릭: 이동<br>© OpenStreetMap contributors</div></div></div></div>
+</div><div class="simview" id="s-view"><div class="hud" id="s-hud"></div><div id="s-tip" class="hud" style="display:none;top:0;left:0;min-width:0;font-family:var(--sans);font-size:12px"></div><div class="hud2">드래그: 회전 · 휠: 확대 · 우클릭: 이동 · 건물 클릭: 정보<br>건물 © OpenStreetMap contributors (2026-10-19)</div></div></div></div>
 <div class="pane" id="sp2"><div class="simwrap"><div class="simside">${timeCtl()}
 <label class="ctl">입면 (상세 3개 동, 등가 직사각형)</label><select id="m-face" style="width:100%"></select>
 <label class="ctl">제어 방식</label><select id="m-mode" style="width:100%">${Object.entries(S.MODES).map(([k, v]) => `<option value="${k}" ${k === 'BT' ? 'selected' : ''}>${v.label}</option>`).join('')}</select>
@@ -386,7 +449,7 @@ async function mount() {
   const page = $('#page-sim');
   if (!mounted) {
     mounted = true; page.innerHTML = '<p class="mono">불러오는 중…</p>';
-    [WX, BLD, TG] = await Promise.all([A.load('weather'), A.load('buildings'), A.load('targets50')]);
+    [WX, BLD, TG, ALL] = await Promise.all([A.load('weather'), A.load('buildings'), A.load('targets50'), A.load('buildings_all')]);
     ui(page);
     $('#m-face').innerHTML = facadeOptions().map(o => `<option value="${o.A}" ${o.k.startsWith('ARK') && Math.abs(o.A - 248) < 10 ? 'selected' : ''}>${o.label}</option>`).join('');
     if (!$('#m-face').value || !$('#m-face').selectedOptions.length) $('#m-face').selectedIndex = 0;
@@ -397,6 +460,8 @@ async function mount() {
     $('#s-play').onclick = () => { state.playing = !state.playing; $('#s-play').textContent = state.playing ? '❚❚ 정지' : '▶ 하루 재생'; };
     $('#s-shadow').onchange = updateSite; $('#s-ctx').onchange = () => { SITE.ctxGroup.visible = $('#s-ctx').checked; SITE.meshes.forEach(m => { if (m.userData.role === 'context') m.visible = $('#s-ctx').checked; }); updateSite(); };
     $('#s-dome').onchange = () => { SITE.dome.visible = $('#s-dome').checked; };
+    $('#s-low').onchange = () => { SITE.lowGroup.visible = $('#s-low').checked; };
+    $('#s-lab').onchange = () => { SITE.labels.children.forEach(l => l.visible = l.userData.det || $('#s-lab').checked); };
     $('#s-fit').onclick = () => fitAll(); $('#s-top').onclick = () => topView(); $('#s-color').onchange = colorBuildings;
     ['m-face', 'm-mode'].forEach(id => $('#' + id).onchange = updateModule); $('#m-T').oninput = updateModule;
     $('#m-run').onclick = annual;
