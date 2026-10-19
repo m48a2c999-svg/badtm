@@ -381,13 +381,14 @@ ${B.scenarios.map(s => { const r = B.summary[s], d = Math.floor(r.hour / 24), h 
 
   /* ---------- router ---------- */
   const built = {};
-  const PAGES = { home: pageHome, thesis: pageThesis, framework: pageFramework, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount(), kinetic: () => window.KINETIC && window.KINETIC.mount(), verify: () => window.VERIFY && window.VERIFY.mount() };
+  const PAGES = { home: pageHome, thesis: pageThesis, framework: pageFramework, results: pageResults, map: pageMap, lit: pageLit, about: pageAbout, sim: () => window.SIM && window.SIM.mount(), kinetic: () => window.KINETIC && window.KINETIC.mount(), verify: () => window.VERIFY && window.VERIFY.mount(), terms: () => window.GLOSS && window.GLOSS.mount() };
   function route() {
     const h = location.hash.replace(/^#\/?/, ''), [r, sub] = h.split('/'); const key = PAGES[r] ? r : 'home';
     $$('.page').forEach(p => p.classList.toggle('on', p.id === 'page-' + key));
     $$('nav a').forEach(a => a.classList.toggle('on', a.dataset.r === key));
     document.body.classList.remove('navopen');
     if (!built[key] || key === 'map' || key === 'sim') { built[key] = true; PAGES[key](); }
+    window.GLOSS && window.GLOSS.schedule(document.getElementById('page-' + key));
     if (key === 'thesis' && sub) setTimeout(() => { const t = document.getElementById(sub); t && t.scrollIntoView({ block: 'start' }); }, 30);
     else window.scrollTo(0, 0);
   }

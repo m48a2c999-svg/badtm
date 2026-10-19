@@ -8,13 +8,13 @@
 
   function chip(s) {
     const cls = s.day === '주광 유지' ? 'keep' : 'loss';
-    return `<button class="kchip ${cls}" data-t="${s.tag}" title="${esc(s.logic)}"><b>${s.tag}</b>${s.dEUI != null ? `<span>E ${sg(s.dEUI)}</span><span>P ${sg(s.dP)}</span>` : '<span>표 6-13</span>'}</button>`;
+    return `<button class="kchip ${cls}" data-t="${s.tag}" title="${esc(s.logic)}"><b>${s.tag}</b>${s.dEUI != null ? `<span>에너지(EUI) ${sg(s.dEUI)}%</span><span>최대 전력 ${sg(s.dP)}%</span>` : '<span>표 6-13</span>'}</button>`;
   }
   function matrix() {
     const A = K.axes.device, B = K.axes.family;
     return `<div class="tblwrap kmatwrap"><table class="tbl kmat"><thead><tr><th>제어 계열 \\ 외피 요소</th>${A.map(a => `<th><span class="mono">${a[0]}</span><br>${esc(a[1])}</th>`).join('')}</tr></thead><tbody>
 ${B.map(b => `<tr><th><span class="kdot" style="background:${FC[b[0]]}"></span><span class="mono">${b[0]}</span> ${esc(b[1])}</th>${A.map(a => `<td>${K.systems.filter(s => s.dev === a[0] && s.fam === b[0]).map(chip).join('') || '<span class="na">—</span>'}</td>`).join('')}</tr>`).join('')}
-</tbody></table></div><p class="small">칸 안의 값: E = 3개 동 블록 EUI 변화, P = 블록 최대 전력 변화(S1 대비, %). 진한 테두리 = 주광 유지형(3개 동 모두 UDI 변화 > −2%p), 연한 칸 = 주광 손실형.</p>`;
+</tbody></table></div><p class="small">칸 안의 값: 에너지(EUI) = 3개 동 블록의 연간 에너지 사용 강도 변화, 최대 전력 = 블록의 연중 최대 1시간 전력 변화(모두 기준 안 S1 대비, %, −는 감소). 진한 테두리 = 주광 유지형(3개 동 모두 UDI 변화 > −2%p), 연한 칸 = 주광 손실형.</p>`;
   }
   function scatter() {
     const S = K.systems.filter(s => s.dEUI != null), W = 640, H = 380, m = { l: 56, r: 16, t: 16, b: 44 };

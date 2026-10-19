@@ -222,3 +222,19 @@ h1,h2,h3{text-wrap:balance}
 .htitle span{white-space:nowrap}
 @media (max-width:420px){.htitle span{white-space:normal}}
 .lead,.small,p{text-wrap:pretty}
+/* 기호·약어 풀이 */
+.gloss{background:#fff;border:1px solid var(--line);border-left:4px solid var(--kin);margin:14px 0 18px;padding:0}
+.gloss summary{cursor:pointer;padding:9px 14px;font:600 13px/1.4 var(--sans);color:var(--ink);list-style:none}
+.gloss summary::-webkit-details-marker{display:none}
+.gloss summary:before{content:"＋ ";color:var(--sun)}.gloss[open] summary:before{content:"－ "}
+.gloss summary .mono{font-size:11px;color:var(--muted);margin-left:6px}
+.gloss dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 18px;margin:0;padding:4px 14px 12px}
+.gloss dl div{display:grid;grid-template-columns:86px 1fr;gap:8px;font-size:12.5px;line-height:1.45;padding:4px 0;border-top:1px solid var(--hair)}
+.gloss dt{font:600 12px/1.45 var(--mono);color:var(--sun);word-break:keep-all;overflow-wrap:anywhere}
+.gloss dd{margin:0;color:var(--ink2)}.gloss dd b{color:var(--ink);font-weight:600}
+@media (max-width:640px){.gloss dl{grid-template-columns:1fr}}
+.kchip span{white-space:nowrap}
+.tq{width:100%;max-width:520px;font:15px var(--sans);padding:10px 12px;border:1.5px solid var(--ink);background:#fff;margin:6px 0 12px}
+.gloss.full dl{padding-top:10px}
+.gloss:not(.full) dl{max-height:236px;overflow:auto}
+.gloss .glink{float:right;font-weight:500;font-size:12px}
