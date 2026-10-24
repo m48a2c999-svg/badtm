@@ -3,7 +3,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const sg = (v, d = 2) => v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
-  const FC = { B0: '#8C949E', B1: '#1E2A38', B2: '#E8541E', B3: '#F2B33D', B4: '#7A4DA8', B5: '#2C7A6B', B6: '#5E7FA8' };
+  const FC = { B0: '#8C949E', B1: '#1E2A38', B2: '#E8541E', B3: '#F2B33D', B4: '#7A4DA8', B5: '#2C7A6B', B6: '#5E7FA8', B7: '#C2185B' };
   let K = null, SB = null, sel = null;
 
   function chip(s) {
@@ -52,7 +52,7 @@ ${sb ? `<div class="tblwrap"><table class="tbl"><thead><tr><th>4개 대블록 ${
  <div class="card"><div class="hk">A 외피 요소</div>${K.axes.device.map(a => `<div class="kax"><span class="mono">${a[0]}</span><b>${esc(a[1])}</b><span class="small">${esc(a[2])}</span></div>`).join('')}</div>
  <div class="card"><div class="hk">B 제어 계열</div>${K.axes.family.map(b => `<div class="kax"><span class="mono"><i class="kdot" style="background:${FC[b[0]]}"></i>${b[0]}</span><b>${esc(b[1])}</b><span class="small">${esc(b[2])}</span></div>`).join('')}</div>
  <div class="card"><div class="hk">미작동 시 상태 — 결과를 가르는 변수</div>${K.axes.idle.map(x => `<div class="kax wide"><b>${esc(x[0])}</b><span class="small">${esc(x[1])}</span></div>`).join('')}
- <p class="small" style="margin-top:.8em">계산한 안 가운데 블록 최대 전력을 올리지 않은 것은 <b>주광 유지형</b>뿐이었습니다(EC_DL·EC_DLS·BT_T300). 주광 유지형은 결과가 아니라 설정으로 구분합니다: 작동 중에도 주광을 남기고(연속 착색 또는 직사광 차단각) 미작동 시 창에서 빠지거나 투명해지는 제어입니다. 미작동 시 투명해도 작동 중 완전 착색하는 전기변색(EC_SOLS·EC_PK)과, 같은 일사 역치라도 미작동 시 창 앞에 남는 대형 루버(LT_T300)는 최대 전력을 올렸습니다. 이 구분을 분석 축으로 삼은 것은 결과를 본 뒤이므로 탐색적 정리입니다.</p></div>
+ <p class="small" style="margin-top:.8em">계산한 안 가운데 블록 최대 전력을 올리지 않은 것은 <b>주광 유지형</b>뿐이었습니다(EC_DL·EC_DLS·BT_T300·BT_TS300). 주광 유지형은 결과가 아니라 설정으로 구분합니다: 작동 중에도 주광을 남기고(연속 착색 또는 직사광 차단각) 미작동 시 창에서 빠지거나 투명해지는 제어입니다. 미작동 시 투명해도 작동 중 완전 착색하는 전기변색(EC_SOLS·EC_PK)과, 같은 일사 역치라도 미작동 시 창 앞에 남는 대형 루버(LT_T300)는 최대 전력을 올렸습니다. 이 구분을 분석 축으로 삼은 것은 결과를 본 뒤이므로 탐색적 정리입니다.</p></div>
 </div>
 <h2 class="sec">분류 매트릭스</h2>${matrix()}
 <div class="kgrid"><div><h2 class="sec">에너지 대 최대 전력</h2>${scatter()}</div><div id="k-det" class="card"><p class="small">매트릭스나 그래프에서 안을 누르면 작동 방식과 결과가 여기에 표시됩니다.</p></div></div>`;

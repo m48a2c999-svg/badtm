@@ -63,7 +63,7 @@ function buildSite(el) {
     const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), a.r === 'other' ? edgeL : edgeM);
     const g = new THREE.Group(); g.add(m); g.add(e); m.userData.group = g;
     if (a.r === 'other') SITE.lowGroup.add(g); else if (a.r === 'shade') SITE.ctxGroup.add(g); else root.add(g);
-    if (b) SITE.meshes.push(m);   // 차폐·광선 추적은 논문의 차폐 입력과 같은 81동
+    if (b) SITE.meshes.push(m);   // 차폐·광선 추적은 논문 v10 모델의 차폐 입력과 같은 건물(3개 동 기준 합집합)
     SITE.all.push(m);
   });
   // labels
@@ -120,7 +120,7 @@ function zoneSamples() { // 상세 3개 동의 입면 4 × 층대 5 표본점(�
   });
   return out;
 }
-function fitAll() { // 81동 전체가 한 화면에 들어오도록
+function fitAll() { // 차폐 입력 건물 전체가 한 화면에 들어오도록
   const box = new THREE.Box3(); SITE.all.forEach(m => { if (m.userData.group.parent && m.userData.group.parent.visible) box.expandByObject(m); });
   const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2;
   const d = r / Math.sin(SITE.cam.fov * Math.PI / 360) * 1.12;
@@ -182,7 +182,7 @@ async function colorBuildings() {
   const hrs = aggregate(smp, acc); paint(hrs, 8, '시간');
   const t = SITE.meshes.map((m, i) => ({ b: m.userData, v: hrs[i] })).filter(x => x.b.role !== 'context' && x.v != null).sort((a, b) => b.v - a.v);
   const nm = x => (TG.targets.find(t => t.osm === x.b.id) || {}).name || x.b.name || x.b.id;
-  out.innerHTML = `<div><span>${dateLabel(state.doy)} 입면 평균 일조 — 블록 평균</span><b>${(hrs.filter(v => v != null).reduce((a, b) => a + b, 0) / hrs.filter(v => v != null).length).toFixed(1)} h</b></div><div><span>대상 50동 최대·최소</span><b>${t[0].v.toFixed(1)} · ${t[t.length - 1].v.toFixed(1)} h</b></div>
+  out.innerHTML = `<div><span>${dateLabel(state.doy)} 입면 평균 일조 — 블록 평균</span><b>${(hrs.filter(v => v != null).reduce((a, b) => a + b, 0) / hrs.filter(v => v != null).length).toFixed(1)} h</b></div><div><span>대상 건물 최대·최소</span><b>${t[0].v.toFixed(1)} · ${t[t.length - 1].v.toFixed(1)} h</b></div>
   <div style="grid-column:1/-1"><span>일조가 긴 대상 건물</span><b>${t.slice(0, 3).map(x => nm(x) + ' ' + x.v.toFixed(1) + 'h').join(' · ')}</b></div><div style="grid-column:1/-1"><span>일조가 짧은 대상 건물</span><b>${t.slice(-3).map(x => nm(x) + ' ' + x.v.toFixed(1) + 'h').join(' · ')}</b></div>`;
 }
 function sitePanels() {
@@ -205,9 +205,9 @@ function selectBuilding(m, fly) {
   if (fly) flyTo(m);
   const u = m.userData, t = TG.targets.find(x => x.osm === u.id), f = (v, d = 1) => v == null ? '—' : (+v).toFixed(d), sg = v => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%';
   let h = `<div class="card" style="padding:10px 12px;margin-top:8px"><b style="font-size:15px">${A.esc(u.name || '(이름 없음)')}</b> <span class="tag ${u.r === 'detailed' ? 'sun' : t ? 'kin' : 'mut'}">${SITE.ROLE[u.r].t}</span>
-  <div class="mono" style="font-size:11.5px;color:var(--muted)">OSM ${u.id} · 높이 ${f(u.h, 0)} m${u.est ? ' (정보 없음 → 3층 추정)' : ''}${t ? ` · ${t.floors}층 · 연면적 ${t.totArea.toLocaleString()} m²` : ''}</div>`;
+  <div class="mono" style="font-size:11.5px;color:var(--muted)">OSM ${u.id} · 높이 ${f(u.h, 0)} m${u.est ? ' (정보 없음 → 3층 추정)' : ''}${t ? ` · 대블록 ${t.q} · ${t.floors}층 · 연면적 ${t.totArea ? t.totArea.toLocaleString() : '—'} m²` : ''}</div>`;
   if (t) {
-    if (t.meas && t.meas.CV != null) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td>실측 연간 전기 / 모델</td><td>${f(t.meas.EUI_meas)} / ${f(t.meas.EUI_cal)} kWh/m²</td></tr><tr><td>월 CV(RMSE) · NMBE</td><td>${f(t.meas.CV)}% · ${t.meas.NMBE > 0 ? '+' : ''}${f(t.meas.NMBE)}%</td></tr></table>`;
+    if (t.meas && t.meas.CV != null) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td>월 CV(RMSE) 보정 전 → 후</td><td>${f(t.meas.CV_uncal)}% → ${f(t.meas.CV)}%</td></tr><tr><td>월 CV(RMSE) · NMBE</td><td>${f(t.meas.CV)}% · ${t.meas.NMBE > 0 ? '+' : ''}${f(t.meas.NMBE)}%</td></tr></table>`;
     if (t.sys) h += `<table class="pop-tbl" style="margin-top:6px"><tr><td><b>시스템(S1c 대비)</b></td><td><b>EUI · 최대 전력</b></td></tr>${[['F0c', '블라인드 수평 고정'], ['EC_DLSc', '전기변색 주광 연동'], ['BT_T300c', '블라인드 일사 기준·수납'], ['VF_F0c', '수직 핀 고정']].map(([k, n]) => t.sys[k] ? `<tr><td>${n}</td><td>${sg(t.sys[k].dEUI)} · ${sg(t.sys[k].dP)}</td></tr>` : '').join('')}</table>`;
     h += `<div class="mono" style="font-size:11px;color:var(--muted);margin-top:4px">EnergyPlus 템플릿 모델(보정 기준) 시뮬레이션 값 · <a href="#/map">지도에서 월별 비교 보기</a></div>`;
   }
@@ -427,10 +427,10 @@ function ui(page) {
 <label class="chk"><input type="checkbox" id="s-shadow" checked>그림자</label><label class="chk"><input type="checkbox" id="s-ctx" checked>주변 건물 · 차폐 입력(31동)</label><label class="chk"><input type="checkbox" id="s-low" checked>그 밖의 건물(OSM 733동)</label><label class="chk"><input type="checkbox" id="s-lab">측정 건물 이름 모두 표시</label><label class="chk"><input type="checkbox" id="s-dome" checked>태양 경로 돔</label>
 <div class="row" style="margin-top:12px;gap:6px"><button class="btn ghost" id="s-fit" style="padding:6px 9px;font-size:12px">전체 보기</button><button class="btn ghost" id="s-top" style="padding:6px 9px;font-size:12px">위에서 보기</button></div>
 <label class="ctl" style="margin-top:14px">건물 구분 (대상지 OSM 814동)</label><div id="s-roles"></div>
-<label class="ctl" style="margin-top:10px">측정·분석한 50동 — 누르면 이동</label><input type="search" id="s-q" placeholder="건물 이름" style="width:100%;padding:6px 8px;font-size:13px"><div class="blist" id="s-blist" style="max-height:190px;overflow:auto;border:1px solid var(--line);margin-top:4px"></div><div id="s-info"></div>
-<label class="ctl" style="margin-top:14px">건물 색 — 같은 태양 아래 81동 비교</label><select id="s-color" style="width:100%"><option value="none">기본(상세·대상·주변 구분)</option><option value="now">현재 시각의 입면 직달 일사 비율</option><option value="day">선택한 날의 입면 평균 일조 시간</option></select>
+<label class="ctl" style="margin-top:10px">측정·분석한 업무시설(이 3D 범위 안) — 누르면 이동</label><input type="search" id="s-q" placeholder="건물 이름" style="width:100%;padding:6px 8px;font-size:13px"><div class="blist" id="s-blist" style="max-height:190px;overflow:auto;border:1px solid var(--line);margin-top:4px"></div><div id="s-info"></div>
+<label class="ctl" style="margin-top:14px">건물 색 — 같은 태양 아래 차폐 입력 건물 비교</label><select id="s-color" style="width:100%"><option value="none">기본(상세·대상·주변 구분)</option><option value="now">현재 시각의 입면 직달 일사 비율</option><option value="day">선택한 날의 입면 평균 일조 시간</option></select>
 <div id="s-leg"></div><div class="readout" id="s-exp"></div>
-<p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">입면 표본점: 외곽선 변(5 m 이상) 중점 × 높이 15·50·85%, 바깥 1 m. 차폐는 이 81동만 고려(조회 범위 밖 건물 제외). 하루 일조는 30분 간격 광선 추적의 기하 근사입니다.</p>
+<p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">입면 표본점: 외곽선 변(5 m 이상) 중점 × 높이 15·50·85%, 바깥 1 m. 차폐는 이 차폐 입력 건물만 고려(조회 범위 밖 건물 제외). 하루 일조는 30분 간격 광선 추적의 기하 근사입니다.</p>
 <label class="ctl" style="margin-top:14px">상세 3개 동 · 구역(입면 4 × 층대 5) 중 직달 일사</label><div class="readout" id="s-zones"></div>
 <div class="note">구역 판정(L3)은 이처럼 시각마다 주변 건물에 가려지는지를 따져 재실 시간 중 직달 일사 비율 fb를 구하는 방식입니다. 표본점은 등가 직사각형 입면 중앙입니다.</div>
 <div class="legend-row"><span><i style="background:#F2B33D"></i>상세 3개 동</span><span><i style="background:#B7BDC5"></i>다수 건물</span><span><i style="background:#DADDE1"></i>주변 건물</span><span><i style="background:#E8541E"></i>태양·경로</span></div>
@@ -449,7 +449,7 @@ async function mount() {
   const page = $('#page-sim');
   if (!mounted) {
     mounted = true; page.innerHTML = '<p class="mono">불러오는 중…</p>';
-    [WX, BLD, TG, ALL] = await Promise.all([A.load('weather'), A.load('buildings'), A.load('targets50'), A.load('buildings_all')]);
+    [WX, BLD, TG, ALL] = await Promise.all([A.load('weather'), A.load('buildings'), A.load('targets257'), A.load('buildings_all')]);
     ui(page);
     $('#m-face').innerHTML = facadeOptions().map(o => `<option value="${o.A}" ${o.k.startsWith('ARK') && Math.abs(o.A - 248) < 10 ? 'selected' : ''}>${o.label}</option>`).join('');
     if (!$('#m-face').value || !$('#m-face').selectedOptions.length) $('#m-face').selectedIndex = 0;

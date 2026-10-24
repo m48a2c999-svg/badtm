@@ -32,7 +32,7 @@
   let CTX = null;
   async function ctx() {
     if (CTX) return CTX;
-    const [tables, det3, ppo, spa, zones, refs, lit] = await Promise.all([J('tables'), J('v/det3'), J('v/ppo'), J('v/spa_ref'), J('v/zones3'), J('references'), J('literature')]);
+    const [tables, det3, ppo, spa, zones, refs, lit, tg257, blk257] = await Promise.all([J('tables'), J('v/det3'), J('v/rl'), J('v/spa_ref'), J('v/zones3'), J('references'), J('literature'), J('targets257'), J('block257')]);
     const raw = new Float32Array(await bin(det3.bin));
     const blkRow = t => { const i = det3.tags.indexOf(t); return i < 0 ? null : raw.subarray(i * 8760, (i + 1) * 8760); };
     const N = det3.buildings;
@@ -45,7 +45,7 @@
     };
     const T = no => tables.find(t => t.caption.startsWith(no + '.'));
     const row = (no, pred) => { const t = T(no); return t && t.rows.find(r => typeof pred === 'function' ? pred(r) : r[0] === pred); };
-    CTX = { tables, det3, ppo, spa, zones, refs, lit, N, block, T, row, blkRow };
+    CTX = { tables, det3, ppo, spa, zones, refs, lit, tg257, blk257, N, block, T, row, blkRow };
     return CTX;
   }
   const hourLabel = i => { const d = new Date(Date.UTC(2021, 0, 1) + i * 3600e3); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}시`; };
@@ -66,13 +66,13 @@
       trace: `기준: ${esc(c.spa.method)}. 12개 날짜 × 7개 시각 = ${c.spa.cases.length}개 경우를 사이트 계산식(SOLAR.sunPos, NOAA 근사)과 비교했다. 실제 최대 오차는 고도 ${ma.toFixed(3)}°, 방위 ${mz.toFixed(3)}°이다(가장 큰 고도 오차: 연중 ${worstCase[0]}일째 ${worstCase[1]}시, 계산 ${worstCase[2].toFixed(2)}° / SPA ${worstCase[3].toFixed(2)}°). 판정 기준은 0.5° 이내이다(사이트의 3D 일조·외피 모듈 계산용 근사식이며, 논문의 EnergyPlus 계산은 EnergyPlus 자체의 태양 위치를 쓴다).` };
   });
 
-  add('C6-01', '6장', 'V2', '구역 판정(L3): 60개 구역 S 19 · R 30 · A 11 (표 6-3)', ['data/v/zones3.json'], async c => {
+  add('C6-01', '6장', 'V2', '구역 판정(L3): 60개 구역 S 19 · R 31 · A 10 (표 6-3)', ['data/v/zones3.json'], async c => {
     const occ = c.zones.occ_hours, cls = fb => fb < 0.15 ? 'S' : fb < 0.45 ? 'R' : 'A', cnt = { S: 0, R: 0, A: 0 }, its = [];
     const F = { 남: 'S', 동: 'E', 북: 'N', 서: 'W' };
     for (const n of c.N) for (const z in c.zones.zones[n]) cnt[cls(c.zones.zones[n][z].hrs_beam_occ / occ)]++;
     const t = c.T('표 6-3'); let cellOk = 0, cellN = 0, firstBad = '';
     t.rows.forEach(r => { for (let b = 1; b <= 5; b++) { const fb = c.zones.zones[r[0]][`B${b}_${F[r[1]]}`].hrs_beam_occ / occ; const [k, v] = r[b + 1].split(' '); cellN++; const okk = k === cls(fb) && Math.abs(fb - +v) <= tolOf(v); if (okk) cellOk++; else if (!firstBad) firstBad = `${r[0]} ${r[1]} B${b}: 표 ${r[b + 1]}, 계산 ${cls(fb)} ${fb.toFixed(4)}`; } });
-    its.push(item('S 구역 수', '19', cnt.S), item('R 구역 수', '30', cnt.R), item('A 구역 수', '11', cnt.A)); const ci = item('표 6-3 등급·fb 표기 일치 칸 (60칸)', '60', cellOk); if (cellOk < 60) ci.st = 'chk'; its.push(ci);
+    its.push(item('S 구역 수', '19', cnt.S), item('R 구역 수', '31', cnt.R), item('A 구역 수', '10', cnt.A)); const ci = item('표 6-3 등급·fb 표기 일치 칸 (60칸)', '60', cellOk); if (cellOk < 60) ci.st = 'chk'; its.push(ci);
     return { items: its, trace: `fb = (재실 2,610시간 중 직달 일사 노출 시간) ÷ ${occ}. 경계값 S < 0.15 ≤ R < 0.45 ≤ A. ${firstBad ? '표기 차이: ' + esc(firstBad) + '. 등급 판정(R)은 같다. fb 0.4498은 반올림하면 0.450이 되어 A 경계값(0.45)과 같아 보이므로, 표에는 0.4498처럼 네 자리로 쓰는 편이 정확하다.' : '60칸 모두 등급과 fb가 표 6-3과 같다.'}` };
   });
 
@@ -91,7 +91,7 @@
     return { items: its, trace: '건물별 EnergyPlus 연간 계산(태그 S1)의 연간 미터 합을 연면적(모델 바닥면적)으로 나눈 값. 최대 전력은 시간별 전력의 연중 최댓값, 부하율 = 평균 ÷ 최대.' };
   });
 
-  add('C6-03', '6장', 'V1', '주변 건물 차폐의 영향: S1 대 S0의 건물별 EUI −0.4~+2.1% (표 6-2)', ['data/v/det3.json'], async c => {
+  add('C6-03', '6장', 'V1', '주변 건물 차폐의 영향: S1 대 S0의 건물별 EUI·구성·최대 전력·주광·열쾌적 변화 (표 6-2)', ['data/v/det3.json'], async c => {
     const A = c.det3.runs.S0, B = c.det3.runs.S1, its = [];
     const pct = (n, k) => 100 * (B[n][k] / A[n][k] - 1);
     const m = [['EUI', 'EUI', pct], ['냉방', 'Cooling:Electricity', pct], ['난방', 'Heating:NaturalGas', pct], ['실내 조명', 'InteriorLights:Electricity', pct], ['팬', 'Fans:Electricity', pct], ['연간 최대 전력', 'peak_kW', pct],
@@ -123,28 +123,28 @@
     return { items: its, trace: 'UDI = 기준점 조도 100~2,000 lx 비율(재실 시간 기준), 열쾌적 = PMV ±0.5 비율.' };
   });
 
-  add('C6-07', '6장', 'V1', '"창면적비 40%의 상세 3개 동 블록에서 연간 EUI 감소는 모든 시스템에서 1.2% 이하, 건물별 최대는 GST 수평 고정 1.35%" (6.2.1항, 외부 검토 반영 문구)', ['data/v/det3.json'], async c => {
+  add('C6-07', '6장', 'V1', '"창면적비 40%의 상세 3개 동 블록에서 연간 EUI 감소는 모든 시스템에서 1.4% 이하, 건물별 최대는 GST 수평 고정 1.72%" (6.2.1항)', ['data/v/det3.json'], async c => {
     const s1 = c.block('S1'); let mb = 0, mbT = '', mi = 0, miT = '';
     TAG65.forEach(t => { const b = c.block(t); const d = 100 * (b.EUI / s1.EUI - 1); if (-d > mb) { mb = -d; mbT = t; } c.N.forEach(n => { const R = c.det3.runs[t][n], dd = 100 * (R.EUI / c.det3.runs.S1[n].EUI - 1); if (-dd > mi) { mi = -dd; miT = `${t} ${n}`; } }); });
-    const it1 = lim('블록 기준 최대 EUI 감소 %', 1.2, +mb.toFixed(1)); it1.calc = mb;
-    const it2 = item('건물 기준 최대 EUI 감소 %', '1.35', mi);
-    return { items: [it1, it2], trace: `블록 기준 최대 감소는 ${mbT} ${mb.toFixed(2)}%로 "블록 기준 1.2% 이하"와 맞는다. 건물 기준 최대 감소는 ${miT} ${mi.toFixed(2)}%이므로 "1.2% 이하"는 블록 기준으로만 성립한다(문구를 이에 맞게 한정함).` };
+    const it1 = lim('블록 기준 최대 EUI 감소 %', 1.4, +mb.toFixed(1)); it1.calc = mb;
+    const it2 = item('건물 기준 최대 EUI 감소 %', '1.72', mi);
+    return { items: [it1, it2], trace: `블록 기준 최대 감소는 ${mbT} ${mb.toFixed(2)}%로 "블록 기준 1.4% 이하"와 맞는다. 건물 기준 최대 감소는 ${miT} ${mi.toFixed(2)}%이므로 "1.4% 이하"는 블록 기준으로만 성립한다(문구를 이에 맞게 한정함).` };
   });
 
-  add('C6-08', '6장', 'V1', '주광을 잃는 제어는 블록 최대 전력 +0.19~+3.27%, 주광을 유지한 제어만 올리지 않음', ['data/v/det3.json'], async c => {
+  add('C6-08', '6장', 'V1', '주광을 잃는 제어는 블록 최대 전력 +0.02~+3.58%, 주광을 유지한 제어만 올리지 않음(−0.28~−0.60%)', ['data/v/det3.json'], async c => {
     const s1 = c.block('S1'), its = [];
     const loss = ['F0', 'S3', 'LH_F0', 'LH_C', 'VF_F0', 'VF_C', 'HV_F0', 'HV_C', 'EC_SOL', 'EC_SOLS', 'PK', 'EC_PK', 'LT_T300'], keep = ['EC_DL', 'EC_DLS', 'BT_T200', 'BT_T250', 'BT_T300', 'BT_T350', 'BT_T400'];
     const d = t => 100 * (c.block(t).peak / s1.peak - 1);
     const L = loss.map(d), K = keep.filter(t => c.block(t)).map(d);
-    its.push(item('주광 손실형 최소 변화 %', '+0.19', Math.min(...L)), item('주광 손실형 최대 변화 %', '+3.27', Math.max(...L)), item('주광 유지형 최대 변화 %', '−0.08', Math.max(...K)), item('주광 유지형 최소 변화 %', '−0.29', Math.min(...K)));
+    its.push(item('주광 손실형 최소 변화 %', '+0.02', Math.min(...L)), item('주광 손실형 최대 변화 %', '+3.58', Math.max(...L)), item('주광 유지형 최대 변화 %', '−0.28', Math.max(...K)), item('주광 유지형 최소 변화 %', '−0.60', Math.min(...K)));
     return { items: its, trace: `주광 손실형: ${loss.join(', ')}. 주광 유지형: ${keep.join(', ')}(5~9월 일사 역치 200~400 W/m² 포함). 변화 = 블록 최대 전력 ÷ S1 − 1.` };
   });
 
-  add('C6-09', '6장', 'V1', '주광 유지 제어의 열쾌적 비율 저하: 전기변색 3.0~9.2%p, 블라인드 일사 기준 1.3~1.9%p (6.2.4항)', ['data/v/det3.json'], async c => {
+  add('C6-09', '6장', 'V1', '주광 유지 제어의 열쾌적 비율 저하: 전기변색 2.7~11.6%p, 블라인드 일사 기준 1.3~2.4%p (6.2.4항)', ['data/v/det3.json'], async c => {
     const S1 = c.det3.runs.S1, its = [];
     const dl = (ts) => { const v = []; ts.forEach(t => c.N.forEach(n => v.push(S1[n].PMV_ok - c.det3.runs[t][n].PMV_ok))); return v; };
     const e = dl(['EC_DL', 'EC_DLS']), b = dl(['BT_T300']);
-    its.push(item('전기변색 최소 저하 %p', '3.0', Math.min(...e)), item('전기변색 최대 저하 %p', '9.2', Math.max(...e)), item('블라인드 일사 기준 최소 저하 %p', '1.3', Math.min(...b)), item('블라인드 일사 기준 최대 저하 %p', '1.9', Math.max(...b)));
+    its.push(item('전기변색 최소 저하 %p', '2.7', Math.min(...e)), item('전기변색 최대 저하 %p', '11.6', Math.max(...e)), item('블라인드 일사 기준 최소 저하 %p', '1.3', Math.min(...b)), item('블라인드 일사 기준 최대 저하 %p', '2.4', Math.max(...b)));
     return { items: its, trace: '저하 = S1의 열쾌적 비율 − 해당 안의 열쾌적 비율(건물별). 전기변색은 EC_DL·EC_DLS, 블라인드는 BT_T300.' };
   });
 
@@ -154,27 +154,34 @@
     return { items: its, trace: 'ZA: S 구역 장치 없음, R·A 구역 컷오프. ZB: S 구역 수평 고정, R·A 구역 컷오프.' };
   });
 
-  add('C6-11', '6장', 'V1', '가설 H₁ 판정표: PPO 2개 시드 대 고정 45°·컷오프·수평 고정 (표 6-13)', ['data/v/ppo.json'], async c => {
-    const B = c.ppo.baselines, its = [];
-    const rows = [['Case A: 고정 45°(S2)', 'S2'], ['Case B: 컷오프(S3)', 'S3'], ['고정 θ = 0°(F0)', 'F0']];
-    rows.forEach(([lab, t]) => { const r = c.row('표 6-13', lab); ['PPO_s0', 'PPO_s1'].forEach((s, k) => { const W = c.ppo.rl[s].W1; its.push(item(`${t} 대비 ${s} EUI %`, r[1].split('/')[k], 100 * (W.EUI / B[t].EUI - 1)), item(`${t} 대비 ${s} 열쾌적 %p`, r[2].split('/')[k], W.PMV_ok - B[t].PMV_ok), item(`${t} 대비 ${s} UDI %p`, r[3].split('/')[k], W.UDI - B[t].UDI)); }); });
-    return { items: its, trace: 'PPO의 결정론적 평가(result.json, 학습 기상 W1)와 같은 건물 ARK의 비교 기준 연간 계산(S2·S3·F0)을 직접 비교했다. 판정 규칙: 에너지 감소·열쾌적 유지/개선·주광 유지/개선을 모두 충족해야 그 기준에 대해 지지.' };
+  add('C6-11', '6장', 'V1', '강화학습(PPO·SAC 각 3개 시드) 정책과 비교 기준의 결정론적 평가 — 학습 기상 W1·비학습 기상 W2 (표 6-9)', ['data/v/rl.json'], async c => {
+    const its = [], B = c.ppo.baselines, BL = { '장치 없음(S1)': 'S1', '수평 고정 θ = 0°(F0)': 'F0', '고정 θ = 45°(S2)': 'S2', '컷오프(S3)': 'S3' };
+    c.T('표 6-9').rows.forEach(r => {
+      const m = r[0].match(/^(PPO|SAC) 시드 (\d)$/);
+      let w1, w2;
+      if (m) { const R = c.ppo.rl[`${m[1]}_s${m[2]}`]; w1 = { EUI: R.W1.EUI, P: R.W1.peak, U: R.W1.UDI, C: R.W1.PMV_ok }; w2 = { EUI: R.W2.EUI, U: R.W2.UDI, C: R.W2.PMV_ok }; }
+      else if (BL[r[0]]) { const t = BL[r[0]], a = B.W1[t], b = B.W2[t]; w1 = { EUI: a.EUI, P: a.peak_kW, U: a.UDI, C: a.PMV_ok }; w2 = { EUI: b.EUI, U: b.UDI, C: b.PMV_ok }; }
+      else return;
+      its.push(item(`${r[0]} EUI W1`, r[1], w1.EUI), item(`${r[0]} 최대 전력 W1 kW`, r[2], w1.P), item(`${r[0]} UDI W1`, r[3], w1.U), item(`${r[0]} 열쾌적 W1`, r[4], w1.C),
+               item(`${r[0]} EUI W2`, r[5], w2.EUI), item(`${r[0]} UDI W2`, r[6], w2.U), item(`${r[0]} 열쾌적 W2`, r[7], w2.C));
+    });
+    return { items: its, trace: '강화학습 정책의 결정론적 평가(result.json)와 같은 건물 ARK의 비교 기준 연간 계산(S1·F0·S2·S3, W1과 비학습 기상 W2)을 표 6-9와 대조했다. H₁ 판정 규칙: 세 비교 기준(S2·S3·F0) 각각에 대해 에너지 감소·열쾌적 유지 이상·주광 유지 이상을 모두 충족해야 하고, PPO와 SAC 모두여야 채택.' };
   });
 
-  add('C6-12', '6장', 'V1', '모델 가정·계산 간격 민감도: 6개 가정 × 7개 안에서 효과의 부호 유지(EUI 42/42, 최대 전력 41/42)와 표 6-14의 기준 안 값 (6.6.4항)', ['data/v/sens3.json', 'data/v/sens3_block.bin'], async c => {
+  add('C6-12', '6장', 'V1', '모델 가정·계산 간격 민감도: 6개 가정 × 7개 안에서 효과의 부호 유지(EUI 40/42, 최대 전력 41/42)와 표 6-14의 기준 안 값 (6.6.4항)', ['data/v/sens3.json', 'data/v/sens3_block.bin'], async c => {
     const S = await J('v/sens3'), buf = new Float32Array(await bin(S.bin));
     const blk = (vr, t) => { const r = vr.runs[t], A = r.area.reduce((a, b) => a + b, 0); const eui = r.EUI.reduce((a, e, k) => a + e * r.area[k], 0) / A; let pk = -1; const o = r.i * 8760; for (let h = 0; h < 8760; h++) if (buf[o + h] > pk) pk = buf[o + h]; return { eui, pk }; };
     const eff = vr => { const b = blk(vr, 'S1'); const o = {}; S.tags.slice(1).forEach(t => { const x = blk(vr, t); o[t] = { e: 100 * (x.eui / b.eui - 1), p: 100 * (x.pk / b.pk - 1) }; }); return { b, o }; };
     const base = eff(S.variants[0]); let nE = 0, nP = 0, tot = 0; const flips = [];
-    const paper = { base: ['142.26', '16,054'], A: ['144.83', '9,936'], T6: ['135.94', '14,896'], T10: ['136.60', '14,841'], LE: ['134.00', '15,954'], L6: ['124.05', '13,223'], C2: ['132.21', '12,930'] };
+    const paper = { base: ['145.58', '9,875'], O: ['136.09', '14,921'], T10: ['146.91', '9,816'], T4: ['145.15', '9,914'], LE: ['136.38', '9,924'], L6: ['134.30', '8,883'], C2: ['137.41', '7,993'] };
     const items = [];
     S.variants.forEach(vr => {
       const e = eff(vr); items.push(item(`${vr.label}: S1 블록 EUI`, paper[vr.key][0], e.b.eui), item(`${vr.label}: S1 블록 최대 전력 kW`, paper[vr.key][1], e.b.pk));
       if (vr.key === 'base') return;
       S.tags.slice(1).forEach(t => { tot++; const r6 = v => Math.round(v * 100) / 100; if (Math.sign(r6(e.o[t].e)) === Math.sign(r6(base.o[t].e))) nE++; if (Math.sign(r6(e.o[t].p)) === Math.sign(r6(base.o[t].p))) nP++; else flips.push(`${vr.label} ${t} ${sg(base.o[t].p)}% → ${sg(e.o[t].p)}%`); });
     });
-    items.push(item('부호가 유지된 비교 수(EUI, 42개 중)', '42', nE), item('부호가 유지된 비교 수(최대 전력, 42개 중)', '41', nP));
-    return { items, trace: `각 가정의 S1 대비 블록 변화율을 건물별 연간값(면적 가중 EUI)과 블록 시간별 합(최대 전력)에서 다시 계산했다. 최대 전력 부호가 바뀐 비교: ${flips.join('; ') || '없음'}. 계산 간격 15분의 기준 안 절대값은 10분·6분보다 EUI 약 4%, 최대 전력 약 7% 크다(고층 동의 설비 계산이 15분에서 수렴하지 않음).` };
+    items.push(item('부호가 유지된 비교 수(EUI, 42개 중)', '40', nE), item('부호가 유지된 비교 수(최대 전력, 42개 중)', '41', nP));
+    return { items, trace: `각 가정의 S1 대비 블록 변화율을 건물별 연간값(면적 가중 EUI)과 블록 시간별 합(최대 전력)에서 다시 계산했다. 최대 전력 부호가 바뀐 비교: ${flips.join('; ') || '없음'}. 새 기준(대장 면적 보정)에서 계산 간격 6분·15분의 기준 안 블록 EUI와 최대 전력은 10분과 1% 이내로 다르다.` };
   });
   add('C7-01', '7장', 'V1', '원형 스케줄의 3개 동 블록 지표: 건물별 최대의 합·동시계수·부하율 (표 7-1)', ['data/v/det3.json'], async c => {
     const its = [], map = { 'S0 주변 건물 없음': 'S0', 'S1 기준(장치 없음)': 'S1', 'F0 블라인드 수평 고정': 'F0', 'S2 블라인드 고정 45°': 'S2', 'S3 블라인드 컷오프': 'S3' };
@@ -182,14 +189,14 @@
     return { items: its, trace: '동시계수 = 블록 최대 ÷ 건물별 최대의 합, 부하율 = 블록 평균 ÷ 블록 최대.' };
   });
 
-  add('C7-02', '7장', 'V1', '운전 스케줄 시차(장치 없음, 운영 변수): D2(±2시간)에서 블록 최대 전력 −3.61%, 동시계수 0.980 (표 7-5)', ['data/v/det3.json', 'data/v/det3_ind_S1D.bin'], async c => {
+  add('C7-02', '7장', 'V1', '운전 스케줄 시차(장치 없음, 운영 변수): D2(±2시간)에서 블록 최대 전력 −4.54%, 동시계수 0.979 (표 7-5)', ['data/v/det3.json', 'data/v/det3_ind_S1D.bin'], async c => {
     const s1 = c.block('S1'), its = [];
     [['원형(시차 없음)', 'S1'], ['D1(±1시간)', 'S1_D1'], ['D2(±2시간)', 'S1_D2']].forEach(([lab, t]) => {
       const r = c.row('표 7-5', lab), b = c.block(t);
       c.N.forEach((n, j) => its.push(item(`${t} ${n} 최대 kW`, r[1 + j].split('(')[0], c.det3.runs[t][n].peak_kW)));
       its.push(item(`${t} 블록 최대 kW`, r[4].split('(')[0], b.peak), item(`${t} 건물별 최대 합`, r[5], b.sumInd), item(`${t} 동시계수`, r[6], b.CF), item(`${t} 부하율`, r[7], b.LF));
     });
-    const d2 = c.block('S1_D2'); its.push(item('D2 블록 최대 변화 %', '−3.61', 100 * (d2.peak / s1.peak - 1)));
+    const d2 = c.block('S1_D2'); its.push(item('D2 블록 최대 변화 %', '−4.54', 100 * (d2.peak / s1.peak - 1)));
     return { items: its, trace: `D1: GFC −1시간, ARK 0, GST +1시간. D2: GFC −2, ARK 0, GST +2. 공조 용량은 원형과 같다. D2의 블록 최대 시각: ${hourLabel(d2.idx)} 구간(원형 ${hourLabel(s1.idx)}).` };
   });
 
@@ -207,9 +214,50 @@
     return { items: its, trace: '같은 시차 조건의 장치 없음 대비 변화와 원형 S1 대비 변화를 함께 확인한다.' };
   });
 
-  add('C2-01', '2장·부록', 'V1', '참고문헌 255편, 해외 문헌 DB 660편 · 선정 500편 · A 328편 · B 172편', ['data/references.json', 'data/literature.json'], async c => {
+  add('C5-01', '5장', 'V1', '257동 실측 비교: ASHRAE Guideline 14 월 기준 충족 보정용 2/31·시험용 1/215, 월 CV(RMSE) 중앙값 보정용 28.5%·시험용 45.4% (표 5-6)', ['data/targets257.json'], async c => {
+    const med = a => { const b = [...a].sort((x, y) => x - y), n = b.length; return n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2; };
+    const M = c.tg257.targets.filter(t => t.meas && t.meas.CV != null), cal = M.filter(t => t.split === 'calib'), tst = M.filter(t => t.split === 'test');
+    const pass = a => a.filter(t => t.meas.CV <= 15 && Math.abs(t.meas.NMBE) <= 5).length;
+    const its = [item('보정용 동수', '31', cal.length), item('시험용 동수', '215', tst.length), item('보정용 G14 충족 동수', '2', pass(cal)), item('시험용 G14 충족 동수', '1', pass(tst)),
+      item('보정용 월 CV(RMSE) 중앙값 %', '28.5', med(cal.map(t => t.meas.CV))), item('시험용 월 CV(RMSE) 중앙값 %', '45.4', med(tst.map(t => t.meas.CV))),
+      item('시험용 보정 전 월 CV(RMSE) 중앙값 %', '54.8', med(tst.map(t => t.meas.CV_uncal)))];
+    return { items: its, trace: '건물별 월 CV(RMSE)·NMBE(2023–2024 월별 전기, 연면적 정규화)를 내보낸 값에서 동수와 중앙값을 다시 셌다. 판정: 월 CV(RMSE) ≤ 15%, |NMBE| ≤ 5%. 건물별 지표 자체의 재계산(월별 원자료)은 이 원장에 포함하지 않는다.' };
+  });
+
+  add('C6-13', '6장', 'V1', '두 신호 제어(기공 원리, P₃): 창면 일사 + 실온 대 창면 일사 한 신호 (표 6-5b)', ['data/v/det3.json', 'data/v/det3_block.bin'], async c => {
+    const s1 = c.block('S1'), its = [];
+    c.T('표 6-5b').rows.forEach(r => {
+      const t = r[0].split(' ')[0], b = c.block(t); if (!b) return;
+      its.push(item(`${t} 블록 EUI`, r[2], b.EUI), item(`${t} 블록 최대 전력 kW`, r[4], b.peak));
+      if (t !== 'S1') its.push(item(`${t} EUI 변화 %`, r[3], 100 * (b.EUI / s1.EUI - 1)), item(`${t} 최대 전력 변화 %`, r[5], 100 * (b.peak / s1.peak - 1)));
+      nums(r[6]).forEach((u, j) => its.push(item(`${t} ${c.N[j]} UDI`, u.toFixed(1), c.det3.runs[t][c.N[j]].UDI)));
+      nums(r[7]).forEach((u, j) => its.push(item(`${t} ${c.N[j]} 열쾌적`, u.toFixed(1), c.det3.runs[t][c.N[j]].PMV_ok)));
+      nums(r[8]).forEach((u, j) => its.push(item(`${t} ${c.N[j]} 구역당 작동 횟수`, String(u), c.det3.runs[t][c.N[j]].moves)));
+    });
+    return { items: its, trace: 'TS: 창면 일사 300 W/m² 초과이고 실온 23.5 °C 초과일 때만 작동, TO: 실온 대신 외기 26 °C. 5~9월. 작동 횟수 = 구역별 슬랫각이 0.5° 넘게 바뀐 횟수의 연간 평균(20개 구역).' };
+  });
+
+  add('C7-05', '7장', 'V1', '257동 블록 지표: 블록 최대 전력·S1c 대비 변화·동시계수·부하율 (표 7-7)', ['data/block257.json'], async c => {
+    const B = c.blk257, its = [];
+    c.T('표 7-7').rows.forEach((r, i) => { const s = B.scenarios[i], x = B.summary[s]; if (!x) return;
+      its.push(item(`${s} 블록 최대 전력 kW`, r[1], x.peak), item(`${s} 동시계수`, r[4], x.CF), item(`${s} 부하율`, r[5], x.LF));
+      if (r[2] !== '—') its.push(item(`${s} S1c 대비 %`, r[2], x.dP)); });
+    return { items: its, trace: '블록 = 257동 시간별 전력의 합(block257.json). 표 7-7의 행 순서는 S1c, F0c, LH_F0c, VF_F0c, EC_DLSc, BT_T300c, LT_T300c, S1c_D1, S1c_D2이다. 동시계수 = 블록 최대 ÷ 건물별 최대의 합.' };
+  });
+
+  add('C8-01', '8장', 'V1', '생물 원리에서 유도한 전이 가설 P₁~P₃의 판정을 공통 기준으로 다시 내림 (표 8-2)', ['data/v/det3.json', 'data/v/det3_block.bin', 'data/v/principles.json'], async c => {
+    const judge = (a, b) => { const A = c.block(a), Bb = c.block(b); const tol = 1e-9;
+      const notWorse = [A.EUI <= Bb.EUI + tol, A.peak <= Bb.peak + tol, ...c.N.map(n => c.det3.runs[a][n].UDI >= c.det3.runs[b][n].UDI - tol), ...c.N.map(n => c.det3.runs[a][n].PMV_ok >= c.det3.runs[b][n].PMV_ok - tol)];
+      const better = [A.EUI < Bb.EUI, A.peak < Bb.peak, ...c.N.map(n => c.det3.runs[a][n].UDI > c.det3.runs[b][n].UDI), ...c.N.map(n => c.det3.runs[a][n].PMV_ok > c.det3.runs[b][n].PMV_ok)];
+      return notWorse.every(Boolean) && better.some(Boolean); };
+    const cases = [['P₁', 'ZB', 'S3', '채택'], ['P₁', 'ZA', 'S3', '기각'], ['P₂', 'S3', 'F0', '기각'], ['P₂', 'LH_C', 'LH_F0', '기각'], ['P₂', 'VF_C', 'VF_F0', '기각'], ['P₃', 'EC_TS300', 'EC_SOLS', '채택'], ['P₃', 'BT_TS300', 'BT_T300', '기각']];
+    const its = cases.map(([p, a, b, paper]) => { const ok = judge(a, b), calc = ok ? '채택' : '기각'; return { label: `${p} ${a} 대 ${b}`, paper, pv: NaN, calc, tol: 0, d: NaN, st: calc === paper ? 'ok' : 'bad', unit: '' }; });
+    return { items: its, trace: '판정 기준(3.4절): 원리 적용 안이 비적용 안보다 블록 EUI·블록 최대 전력을 높이지 않고, 3개 동 모두 UDI·열쾌적 비율을 낮추지 않으면서, 넷 가운데 하나 이상을 개선하면 채택. P₁~P₃은 탐색적 가설(기준은 결과 일부를 본 뒤 정식화). P₄(역치 분산)는 C7-03과 표 7-4 참조.' };
+  });
+
+  add('C2-01', '2장·부록', 'V1', '참고문헌 256편, 해외 문헌 DB 660편 · 선정 500편 · A 328편 · B 172편', ['data/references.json', 'data/literature.json'], async c => {
     const sel = c.lit.filter(d => d.sel === '선정500');
-    return { items: [item('참고문헌 수', '255', c.refs.length), item('문헌 DB 수', '660', c.lit.length), item('선정 문헌 수', '500', sel.length), item('A 등급', '328', sel.filter(d => d.rel === 'A').length), item('B 등급', '172', sel.filter(d => d.rel === 'B').length)], trace: '공개한 목록 파일의 항목 수를 센다.' };
+    return { items: [item('참고문헌 수', '256', c.refs.length), item('문헌 DB 수', '660', c.lit.length), item('선정 문헌 수', '500', sel.length), item('A 등급', '328', sel.filter(d => d.rel === 'A').length), item('B 등급', '172', sel.filter(d => d.rel === 'B').length)], trace: '공개한 목록 파일의 항목 수를 센다.' };
   });
 
   /* ---------- 실행·렌더 ---------- */
@@ -243,21 +291,37 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
 
   /* ---------- 가설 판정 추적 ---------- */
   async function hypo() {
-    const c = await ctx(), B = c.ppo.baselines;
-    const cond = (s, t) => { const W = c.ppo.rl[s].W1; return [W.EUI < B[t].EUI, W.PMV_ok >= B[t].PMV_ok, W.UDI >= B[t].UDI]; };
+    const c = await ctx(), B = c.ppo.baselines, SEEDS = ['s0', 's1', 's2'];
+    const cond = (k, w, t) => { const W = c.ppo.rl[k][w], b = B[w][t]; return [W.EUI < b.EUI, W.PMV_ok >= b.PMV_ok, W.UDI >= b.UDI]; };
     const mk = v => v ? '<span class="vb ok">충족</span>' : '<span class="vb bad">미충족</span>';
-    const rows = [['S2', 'Case A 고정 45°'], ['S3', 'Case B 컷오프'], ['F0', '고정 θ = 0°']].map(([t, l]) => ['PPO_s0', 'PPO_s1'].map(s => { const k = cond(s, t); return `<tr><td>${l}</td><td class="mono">${s.replace('PPO_s', '시드 ')}</td><td>${mk(k[0])}</td><td>${mk(k[1])}</td><td>${mk(k[2])}</td><td>${k.every(Boolean) ? '<span class="vb ok">지지</span>' : '<span class="vb bad">비지지</span>'}</td></tr>`; }).join('')).join('');
-    const curve = s => { const r = c.ppo.rl[s].reward, mn = Math.min(...r), mx = Math.max(...r); return `<polyline fill="none" stroke="${s.endsWith('0') ? '#E8541E' : '#1E2A38'}" stroke-width="1.4" points="${r.map((v, i) => `${(i / (r.length - 1) * 300).toFixed(1)},${(70 - (v - mn) / (mx - mn || 1) * 64).toFixed(1)}`).join(' ')}"/>`; };
+    const vd = v => v ? '<span class="vb ok">채택</span>' : '<span class="vb bad">기각</span>';
+    let h1 = { PPO: true, SAC: true };
+    const rows1 = [['S2', 'Case A 고정 45°'], ['S3', 'Case B 컷오프'], ['F0', '고정 θ = 0°']].map(([t, l]) => ['PPO', 'SAC'].map(a => {
+      const ks = SEEDS.map(s => cond(`${a}_${s}`, 'W1', t)), all = j => ks.every(k => k[j]), ok = [0, 1, 2].every(all);
+      if (!ok) h1[a] = false;
+      return `<tr><td>${l}</td><td class="mono">${a}</td><td>${mk(all(0))}</td><td>${mk(all(1))}</td><td>${mk(all(2))}</td><td>${ok ? mk(true) : mk(false)}</td></tr>`; }).join('')).join('');
+    const H1 = h1.PPO && h1.SAC;
+    let h2 = { PPO: true, SAC: true };
+    const rows2 = ['PPO', 'SAC'].map(a => SEEDS.map(s => ['W1', 'W2'].map(w => { const k = cond(`${a}_${s}`, w, 'S3'), ok = k.every(Boolean); if (!ok) h2[a] = false;
+      const W = c.ppo.rl[`${a}_${s}`][w], b = B[w].S3;
+      return `<tr><td class="mono">${a}</td><td class="mono">${s.slice(1)}</td><td class="mono">${w}</td><td class="mono">${sg(100 * (W.EUI / b.EUI - 1), 2)}%</td><td class="mono">${sg(W.PMV_ok - b.PMV_ok, 1)}%p</td><td class="mono">${sg(W.UDI - b.UDI, 1)}%p</td><td>${mk(ok)}</td></tr>`; }).join('')).join('')).join('');
+    const H2 = h2.PPO && h2.SAC;
+    const pal = ['#E8541E', '#F08A5D', '#F6B99A', '#1E2A38', '#4A5A6E', '#8A98AA'];
+    const curve = (k, i) => { const r = c.ppo.rl[k].reward, mn = Math.min(...r), mx = Math.max(...r); return `<polyline fill="none" stroke="${pal[i]}" stroke-width="1.2" points="${r.map((v, j) => `${(j / (r.length - 1) * 300).toFixed(1)},${(70 - (v - mn) / (mx - mn || 1) * 60).toFixed(1)}`).join(' ')}"/>`; };
+    const P = c.T('표 8-2');
     $('#v-hypo').innerHTML = `
-<div class="hgrid">
- <div class="card"><div class="hk">H₁ 에너지 절감 <span class="vb bad">사전 조건 미충족</span></div><p class="small">"SAC와 PPO 모두"가 세 조건(에너지 감소·열쾌적 유지·주광 유지)을 세 비교 기준 모두에 대해 충족해야 지지된다. 아래 표는 결정론적 평가 결과로 브라우저가 판정을 다시 내린 것이다. <b>시험한 PPO 설정</b>(ARK 1개 동, 2개 시드 × 100회 학습)에서 사전 정의한 조건을 충족하지 못했으므로 SAC 결과와 관계없이 H₁은 기각된다. 이 판정은 시험한 설정에 한정되며, 다른 학습량·보상 설계·알고리즘의 강화학습 제어 일반으로 넓히지 않는다.</p>
-  <div class="tblwrap"><table class="tbl"><thead><tr><th>비교 기준</th><th>PPO</th><th>에너지</th><th>열쾌적</th><th>주광</th><th>판정</th></tr></thead><tbody>${rows}</tbody></table></div>
-  <svg viewBox="0 0 300 74" class="spark"><text x="0" y="10" class="mono">학습 보상(에피소드별, 정규화)</text>${curve('PPO_s0')}${curve('PPO_s1')}</svg></div>
- <div class="card"><div class="hk">H₂ 알고리즘 독립성 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">SAC와 PPO를 같은 인터페이스에서 같은 학습량으로 학습해 개선 방향이 같은지 비교해야 시험할 수 있다. SAC를 실행하지 않아 채택도 기각도 하지 않는다. 미완료 중간 산출물은 분석에 쓰지 않았다.</p><p class="small"><b>향후 시험 설계</b>: 같은 학습량·충분한 시드 수의 SAC 대 PPO(8.4절 ③).</p></div>
- <div class="card"><div class="hk">H₃ 네트워크 효과 <span class="vb na">미검토 · 판정 보류</span></div><p class="small">이웃 건물 정보를 공유하는 협조 제어와 건물별 독립 제어를 같은 블록에서 비교해야 시험할 수 있다. 실험을 실행하지 않았다. 7장은 이를 시험할 때 확인할 항목(조정 가능한 부하, 새로 생기는 최대 전력 시각, 열쾌적 제약)을 제시한다.</p><p class="small"><b>향후 시험 설계</b>: 주광 유지 제어로 행동 공간을 한정하고 열쾌적 제약을 두어, 운전 스케줄이 분산된 블록에서 독립 제어와 비교(7.6.1항).</p></div>
+<div class="hgrid hg2">
+ <div class="card"><div class="hk">H₁ 에너지 절감 ${vd(H1)}</div><p class="small">"SAC와 PPO 모두"가 세 조건(에너지 감소·열쾌적 유지 이상·주광 유지 이상)을 세 비교 기준 모두에 대해, 3개 시드 모두에서 충족해야 채택된다. 아래 표는 결정론적 평가 결과(학습 기상 W1)로 브라우저가 판정을 다시 내린 것이다(PPO ${h1.PPO ? '충족' : '미충족'}, SAC ${h1.SAC ? '충족' : '미충족'}). 시험한 설정은 ARK 1개 동, PPO·SAC 각 3개 시드 × 100회 학습이며, 이 판정을 강화학습 일반으로 넓히지 않는다.</p>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th>비교 기준</th><th>알고리즘</th><th>에너지</th><th>열쾌적</th><th>주광</th><th>3개 시드</th></tr></thead><tbody>${rows1}</tbody></table></div>
+  <svg viewBox="0 0 300 80" class="spark"><text x="0" y="8" class="mono" style="font-size:7px">학습 보상(에피소드별, 시드별 정규화) — 주황 PPO · 남색 SAC</text>${['PPO', 'SAC'].flatMap((a, ai) => SEEDS.map((s, si) => curve(`${a}_${s}`, ai * 3 + si))).join('')}</svg></div>
+ <div class="card"><div class="hk">H₂ 알고리즘 독립성 ${vd(H2)}</div><p class="small">"개선"은 H₁의 조건을 Case B(컷오프) 대비로 적용하고, 두 알고리즘의 모든 시드가 두 기상(W1 학습, W2 비학습)에서 충족해야 채택(4.7.2항). 이 판정 규칙은 두 알고리즘의 시드 0 결과를 본 뒤 문서화되었다(부록 C). 두 알고리즘은 EUI 감소·UDI 감소에서 방향이 같았으나 그것이 가설이 뜻하는 개선은 아니었다.</p>
+  <div class="tblwrap" style="max-height:420px"><table class="tbl nw"><thead><tr><th>알고리즘</th><th>시드</th><th>기상</th><th>EUI</th><th>열쾌적</th><th>UDI</th><th>개선 조건</th></tr></thead><tbody>${rows2}</tbody></table></div></div>
 </div>
+<div class="card"><div class="hk">H₃ 네트워크 효과 <span class="vb na">미검토</span></div><p class="small">이웃 건물 정보를 공유하는 협조 제어와 건물별 독립 제어를 같은 블록에서 비교해야 시험할 수 있다. 건물군 협조 강화학습(S5)을 계산하지 않았으므로 채택도 기각도 하지 않는다. 7장은 시험할 때 확인할 항목(조정 가능한 부하, 새로 생기는 최대 전력 시각, 열쾌적 제약)을 제시한다(7.6.1항).</p></div>
+<div class="card"><div class="hk">원리별 전이 가설 P₁~P₄ <span class="vb na">탐색적</span></div><p class="small">생물 원리에서 유도한 제어 규칙을 같은 프레임워크 안에서 시험한 결과(3.4절, 표 8-2). H₁~H₃과 달리 사전 등록 가설이 아니며, P₁~P₃의 판정 기준은 결과 일부를 본 뒤 정식화되었다(부록 C (5)). 원리 적용 안의 판정은 검증 원장 C8-01에서 브라우저가 다시 내린다.</p>
+<div class="tblwrap"><table class="tbl"><thead><tr>${P.header.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${P.rows.map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
 <div class="card"><div class="hk">결정 시점 기록</div><ol class="tl">${c.ppo.timeline.map(([t, s]) => `<li><span class="mono">${esc(t)}</span> ${esc(s)}</li>`).join('')}</ol>
-<p class="small">기록 원문: "${esc(c.ppo.scope_note)}" (기록 파일은 평가 출력 생성 뒤인 16:28에 저장되었고, 결정 시각은 기록에 적힌 시각을 따랐다.)</p></div>`;
+<p class="small">강화학습 시각은 모델 파일 저장 시각이다. 계산 기준 변경과 재학습 결정은 이전 기준의 PPO 결과를 본 뒤에 내려졌다(부록 C).</p></div>`;
   }
 
   /* ---------- 무결성 ---------- */
@@ -284,7 +348,7 @@ ${r.items.map(x => `<tr class="${x.st}"><td>${esc(x.label)}</td><td class="mono"
     const P = $('#page-verify'); if (P.dataset.ok) return; P.dataset.ok = 1;
     P.innerHTML = `
 <div class="vhead"><div><div class="kicker">Verification ledger</div><h1>검증 원장</h1>
-<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장에는 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에 맞춘 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p><p class="small vscope"><b>이 원장이 확인하는 것과 확인하지 않는 것</b>: 논문 수치가 공개한 계산 출력과 산술적으로 일치하는지(재현성)를 확인합니다. 모델이 실제 건물을 잘 나타내는지(타당성)는 확인하지 않습니다. 모델의 타당성은 월별 실측 비교(5.4절, 기준 충족 보정용 1/31동·시험용 0/16동)와 민감도 계산으로 따로 판단해야 합니다.</p></div>
+<p class="lead">논문의 표와 본문 수치를 공개한 원자료에서 <b>이 브라우저가 직접 다시 계산</b>해 대조합니다. 각 주장에는 검증 수준(V0~V3)과 근거 파일을 함께 표시하고, 대조 결과는 논문 표기의 자릿수에 맞춘 허용오차로 판정합니다. 모든 성능 수치는 EnergyPlus 시뮬레이션 값이며 실측이 아닙니다.</p><p class="small vscope"><b>이 원장이 확인하는 것과 확인하지 않는 것</b>: 논문 수치가 공개한 계산 출력과 산술적으로 일치하는지(재현성)를 확인합니다. 모델이 실제 건물을 잘 나타내는지(타당성)는 확인하지 않습니다. 모델의 타당성은 월별 실측 비교(5.4절, 257동, 기준 충족 보정용 2/31동·시험용 1/215동)와 민감도 계산으로 따로 판단해야 합니다.</p></div>
 <div class="vbtns"><button class="btn primary" id="v-run">전체 재계산 실행</button><button class="btn" id="v-csv">결과 CSV 내려받기</button></div></div>
 <div id="v-sum" class="vsum"></div>
 <div class="lvlegend">${Object.entries(LV).map(([k, v]) => `<div><span class="lv lv${k[1]}">${k} ${v[0]}</span><span class="small">${v[1]}</span></div>`).join('')}</div>

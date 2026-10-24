@@ -1,23 +1,23 @@
 {
- "built": "2026-10-20T01:36:31+09:00",
+ "built": "2026-10-24T13:31:14+09:00",
  "files": [
   {
-   "path": "data/block50.json",
-   "bytes": 485055,
-   "sha256": "5a01873ee1b65b8fe8e85a109c5f19b0a3e30de33ba1642d881ee7be5aa80390",
-   "source": "50동 블록 시간별 전력(기존 표본)"
+   "path": "data/block257.json",
+   "bytes": 702302,
+   "sha256": "3748c84b4166c214f3125120e0787d6c88b4f2b9aafb7282f1ff35768f78d7f6",
+   "source": "257동 블록 시간별 전력·동시계수·부하율"
   },
   {
    "path": "data/buildings.json",
-   "bytes": 31888,
-   "sha256": "a792cc2254e5b81c75a7e184ec31ca781c671544f4b95cc8791d5a037fe608aa",
-   "source": "OSM 81동(분석 입력)"
+   "bytes": 36479,
+   "sha256": "663320b99275778a8ff1f6c9671e72f285ea371fcf7553db6f49acc2dc96112a",
+   "source": "분석 대상 건물 외곽선"
   },
   {
    "path": "data/buildings_all.json",
-   "bytes": 127316,
-   "sha256": "5350f9a06ba74d607117bf1a5b93c0e8ea81e2c409c6e51ad5e02c99310ca86b",
-   "source": "OSM 814동(표시용)"
+   "bytes": 129869,
+   "sha256": "92421e8e4c8a5db1c7718238590414379e0a79b4086d54d59325c0a8ecb72ff7",
+   "source": "OSM 814동(표시용, 역할 구분)"
   },
   {
    "path": "data/literature.json",
@@ -27,68 +27,80 @@
   },
   {
    "path": "data/references.json",
-   "bytes": 84350,
-   "sha256": "7e9660c2a19aa559dc1bd37c7359aa4995f55199c53d838ee98e471c8c11f68b",
-   "source": "논문 참고문헌 목록"
+   "bytes": 84656,
+   "sha256": "93e28b6f1c88b05b7ee3cc112712dbbe221ef089e5ba88f3f1db090b8c71440a",
+   "source": "논문 참고문헌 256편"
   },
   {
    "path": "data/sb_geo.json",
    "bytes": 646794,
    "sha256": "7e334f012c93dbcbc99591a288b9ebadf514041fbbf8e51cc96de864fb7b7d8d",
-   "source": ""
+   "source": "4개 대블록 경계"
   },
   {
    "path": "data/tables.json",
-   "bytes": 38738,
-   "sha256": "b4221bfd9181a94f0fc635a6e783cbd9c1dc4d8c4f0a394d396e74efe3b0c482",
-   "source": "논문 표 29개(원고에서 추출)"
+   "bytes": 67708,
+   "sha256": "0b9d8eb6f51163275da2a22f8d19cdf020200c2c4a5bf711e56d651ccdeba095",
+   "source": "논문 표 40개(검토용 v11 원고에서 추출)"
   },
   {
-   "path": "data/targets50.json",
-   "bytes": 47604,
-   "sha256": "7ea6ca4a0cf6a374d15829e0162883976fdb61100c8ae98337a660c577c66220",
-   "source": "50동 대상·실측 비교·시스템 결과(기존 표본)"
+   "path": "data/targets257.json",
+   "bytes": 266327,
+   "sha256": "632a404bd9683b354afe8205142fb113f36c9510c761ce6a65b28c5c2a1c37b1",
+   "source": "257동 대상·실측 비교(월 전기)·시스템별 효과"
   },
   {
    "path": "data/v/det3.json",
-   "bytes": 111986,
-   "sha256": "33edf7bcddecbf009035d76e3975a8c1347bb40f364ad0925cb5e6212d469b45",
-   "source": "상세 3개 동 EnergyPlus 연간 출력(46개 안)"
+   "bytes": 116911,
+   "sha256": "ceee3b2da1916a7d40ed208e09ac5211ed8a557e2250eace9b212ae9b641e822",
+   "source": "상세 3개 동 EnergyPlus 연간 출력(50개 안)"
   },
   {
    "path": "data/v/det3_block.bin",
-   "bytes": 1611840,
-   "sha256": "dba8a1946c99a53673e136c4f08dc7dde770fed373cad0652c614735cb29dd43",
+   "bytes": 1752000,
+   "sha256": "bc592aec2e66aa28b18a2ed99e90ccc9a930117670a969764c9c0c5f9ae89cd1",
    "source": "3개 동 블록 시간별 전력(Float32)"
   },
   {
    "path": "data/v/det3_ind_S1D.bin",
    "bytes": 315360,
-   "sha256": "da5f50993a68a4bbf08d39adee357db978d41e0e0686357901e1ef1bdc9dde98",
+   "sha256": "84564873e052ca7529799a19bd39d58faf9e9c737e7c13157942e4ff71979e20",
    "source": "S1·D1·D2 건물별 시간별 전력(Float32)"
   },
   {
    "path": "data/v/kinetic.json",
-   "bytes": 7749,
-   "sha256": "81f967fbea4ba09979cde8cb8f499f814f52e1f7cf465bbc56a9cb0b9752b810",
+   "bytes": 7499,
+   "sha256": "88b2b702f76e5be06e7a3a907907140dc24ea0e12aa92662cae6d339310ea4a8",
    "source": "키네틱 분류·3개 동 결과"
   },
   {
-   "path": "data/v/ppo.json",
-   "bytes": 4965,
-   "sha256": "e9aa5790b7e884117ba8468ece5aa120c469a5c421bd87aebf869a353972ca5a",
-   "source": "PPO 결정론적 평가·학습 보상·결정 시점"
+   "path": "data/v/kinetic_sb.json",
+   "bytes": 444,
+   "sha256": "67206b2503c548c3cf1fbc48fd22d5e388646414fdabb36cad63c9264e4d6505",
+   "source": "키네틱 분류·257동 결과"
+  },
+  {
+   "path": "data/v/principles.json",
+   "bytes": 999,
+   "sha256": "81be6b6e126ec0d30bcf993a4b7cb996fcd6cd443f6e3d1f586ec1b434c2d2a6",
+   "source": "생물 원리 → 설계 규칙 → 전이 가설 P₁~P₄"
+  },
+  {
+   "path": "data/v/rl.json",
+   "bytes": 12128,
+   "sha256": "ff64fabd2aacf1cab8d50c2a5604fbc2e37ed165b740b08d156e3a96311a7738",
+   "source": "PPO·SAC 각 3개 시드 결정론적 평가·학습 보상·비교 기준·결정 시점"
   },
   {
    "path": "data/v/sens3.json",
-   "bytes": 19560,
-   "sha256": "b6b32392206b75ed8d711243ff84359523f6c1793ab1de0f1b0a675f70348d01",
-   "source": "3개 동 민감도(가정 6종 × 8개 안) 건물별 연간값"
+   "bytes": 18217,
+   "sha256": "178e08b30029222f92a3787360bc509d280849c34bccc2cf7f67644e85961bbe",
+   "source": "3개 동 민감도(가정 6종 × 7개 안) 건물별 연간값"
   },
   {
    "path": "data/v/sens3_block.bin",
    "bytes": 1962240,
-   "sha256": "b4e38ca8572172890e4b4434f4bcc87be3f060118f6b5a8698cb2e19ee7500ae",
+   "sha256": "b7816cf0090b489c712ac008de26eab015c6d6b437487b37c3dcfd832bcaf3b4",
    "source": "3개 동 민감도 블록 시간별 전력(Float32)"
   },
   {
@@ -99,8 +111,8 @@
   },
   {
    "path": "data/v/zones3.json",
-   "bytes": 6595,
-   "sha256": "b6408e68e07a13c327f1e1571451cec5cb091f53734c6db41f7ea5c26b44c91a",
+   "bytes": 5944,
+   "sha256": "25abc039344d1bbc4afae29ddf8824c352b968b045e28256f855c73efa6515fc",
    "source": "구역 선별 계산(60개 구역)"
   },
   {
