@@ -1,13 +1,13 @@
 /* 사이트용 요약 원고 — 논문 본문을 옮긴 것이 아니라 사이트 독자를 위해 다시 쓴 글이다. 수치는 2026-10-24 검토용 원고 v11(계산 기준 v10)과 같다. */
 window.CONTENT = {
   meta: {
-    titleKo: '생체모방 원리 기반 건물군 키네틱 파사드 데이터 기반 성능 평가 프레임워크 연구',
-    titleParts: ['생체모방 원리 기반', '건물군 키네틱 파사드', '데이터 기반 성능 평가', '프레임워크 연구'],
-    subKo: '역삼역 일대 업무시설의 시뮬레이션·실측 비교와 효과 성립 조건',
-    titleEn: 'A Data-Driven Performance Evaluation Framework for Kinetic Facades in Building Clusters Based on Biomimetic Principles',
+    titleKo: '건물군 키네틱 파사드의 데이터 기반 성능 평가 프레임워크 연구',
+    titleParts: ['건물군 키네틱 파사드의', '데이터 기반 성능 평가', '프레임워크 연구'],
+    subKo: '역삼역 일대 업무시설의 시뮬레이션·실측 비교와 생체모방 제어 원리의 검증',
+    titleEn: 'A Data-Driven Performance Evaluation Framework for Kinetic Facades in Building Clusters: Simulation–Measurement Comparison of Office Buildings around Yeoksam Station, Seoul, and Tests of Biomimetic Control Principles',
     author: '조승완', advisor: '박미애', school: '국민대학교 일반대학원 건축학과 박사학위논문(예비심사 단계)',
     version: '2026-10-24 검토용 원고 v11 기준(계산: EnergyPlus 23.2, 계산 간격 10분, 건축물대장 면적 보정 형상)',
-    status: '논문 전문(PDF)은 저자 승인 후 공개합니다. 이 사이트는 요약·결과·자료·도구만 제공합니다. 제목은 지도교수 확인 전입니다.'
+    status: '논문 전문(PDF)은 저자 승인 후 공개합니다. 이 사이트는 요약·결과·자료·도구만 제공합니다. 제목은 2026-10-24에 바꾼 안이며 지도교수 확인 전입니다.'
   },
   stats: [
     { v: '≤ 1.4%', l: '시스템 3종의 연간 EUI 감소 폭', e: '상세 3개 동 블록 · 창면적비 40% (건물별 최대 1.72%)', c: '' },
