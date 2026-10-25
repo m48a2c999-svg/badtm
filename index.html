@@ -3,66 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kinetic Skin Lab — 역삼 블록 키네틱 파사드 연구</title>
-<meta name="description" content="건물군 키네틱 파사드의 데이터 기반 성능 평가 프레임워크 연구(생체모방 제어 원리의 검증 포함) — 결과·문헌·지도·시뮬레이션">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23E8541E' stroke-width='3'/%3E%3Cpath d='M16 1v30M1 16h30' stroke='%23E8541E' stroke-width='3'/%3E%3C/svg%3E">
+<title>외피 개량 검증 — 서울 업무시설 밀집지역</title>
+<meta name="description" content="서울 업무시설 밀집지역의 외피 개량에 따른 에너지 성능 검증 — 키네틱 파사드 적용 시뮬레이션을 중심으로. 연구 데이터베이스(SQLite) 기반 결과·건물·대안 탐색.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='4' width='20' height='24' fill='none' stroke='%23E8541E' stroke-width='3'/%3E%3Cpath d='M6 12h20M6 20h20' stroke='%23E8541E' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="assets/style.css">
-<script type="importmap">
-{"imports":{"three":"./assets/vendor/three.module.min.js"}}
-</script>
+<link rel="stylesheet" href="app/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="app/style.css">
 </head>
 <body>
 <header class="top">
   <a class="brand" href="#/">
-    <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 2v36M2 20h36" stroke="currentColor" stroke-width="2.4"/></svg>
-    <span><b>KINETIC SKIN LAB</b><small>역삼 블록 · 건물군 키네틱 파사드</small></span>
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="5" width="24" height="30" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M8 15h24M8 25h24M20 5v30" stroke="currentColor" stroke-width="2.4"/></svg>
+    <span><b>FACADE RETROFIT LAB</b><small>서울 업무시설 밀집지역 · 외피 개량 검증</small></span>
   </a>
   <button class="navtoggle" aria-label="메뉴" onclick="document.body.classList.toggle('navopen')">≡</button>
   <nav>
     <a href="#/" data-r="home">개요</a>
-    <a href="#/thesis" data-r="thesis">논문</a>
-    <a href="#/framework" data-r="framework">프레임워크</a>
-    <a href="#/kinetic" data-r="kinetic">키네틱 분류</a>
-    <a href="#/sim" data-r="sim">시뮬레이션</a>
-    <a href="#/map" data-r="map">지도</a>
-    <a href="#/results" data-r="results">결과 데이터</a>
-    <a href="#/verify" data-r="verify" class="navv">검증</a>
-    <a href="#/lit" data-r="lit">문헌</a>
-    <a href="#/terms" data-r="terms">용어</a>
-    <a href="#/about" data-r="about">자료·출처</a>
+    <a href="#/site" data-r="site">대상지·건물</a>
+    <a href="#/alts" data-r="alts">개량 대안</a>
+    <a href="#/results" data-r="results">결과</a>
+    <a href="#/traits" data-r="traits">건물 특성별</a>
+    <a href="#/valid" data-r="valid">실측 비교</a>
+    <a href="#/bio" data-r="bio">생체모방 원리</a>
+    <a href="#/plan" data-r="plan">향후 계획</a>
+    <a href="#/db" data-r="db">데이터베이스</a>
   </nav>
 </header>
 
 <main id="app">
+  <div id="boot" class="loading">연구 데이터베이스를 불러오는 중…</div>
   <section id="page-home" class="page"></section>
-  <section id="page-thesis" class="page"></section>
-  <section id="page-framework" class="page"></section>
-  <section id="page-kinetic" class="page"></section>
-  <section id="page-verify" class="page"></section>
-  <section id="page-sim" class="page"></section>
-  <section id="page-map" class="page"></section>
+  <section id="page-site" class="page"></section>
+  <section id="page-alts" class="page"></section>
   <section id="page-results" class="page"></section>
-  <section id="page-lit" class="page"></section>
-  <section id="page-terms" class="page"></section>
-  <section id="page-about" class="page"></section>
+  <section id="page-traits" class="page"></section>
+  <section id="page-valid" class="page"></section>
+  <section id="page-bio" class="page"></section>
+  <section id="page-plan" class="page"></section>
+  <section id="page-db" class="page"></section>
 </main>
 
 <footer class="foot">
-  <div>조승완 · 국민대학교 일반대학원 건축학과 박사과정 · 지도교수 박미애</div>
-  <div class="mono">모든 성능 수치는 EnergyPlus 23.2 시뮬레이션 값입니다. "실측"은 건축HUB 월별 사용량과의 비교만 가리킵니다. · 지도 © OpenStreetMap contributors</div>
+  <div>조승완 · 국민대학교 일반대학원 건축학과 박사과정 · 지도교수 박미애 · 예비심사 원고(2026-10-26) 기준 · 검토용</div>
+  <div class="mono">모든 성능 수치는 EnergyPlus 23.2 시뮬레이션 값입니다. "실측"은 건축HUB 월별 전기 사용량과의 비교만 가리킵니다. · 지도 © OpenStreetMap contributors</div>
+  <div><a class="archive" href="archive/v11/">이전 판 사이트(v11, 보관)</a></div>
 </footer>
 
-<script src="assets/vendor/leaflet/leaflet.js"></script>
-<script src="assets/content.js"></script>
-<script src="assets/solar.js"></script>
-<script src="assets/glossary.js"></script>
-<script src="assets/kinetic.js"></script>
-<script src="assets/verify.js"></script>
-<script src="assets/app.js"></script>
-<script type="module" src="assets/sim.js"></script>
+<script src="app/vendor/leaflet/leaflet.js"></script>
+<script src="app/vendor/sql-wasm.js"></script>
+<script src="app/app.js"></script>
 </body>
 </html>
