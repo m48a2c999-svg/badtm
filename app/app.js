@@ -421,7 +421,7 @@ function runQ() {
 }
 
 /* ---------------- 라우팅 ---------------- */
-const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, bio: pageBio, plan: pagePlan, db: pageDb };
+const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, bio: pageBio, plan: pagePlan, db: pageDb, gen: () => pageGen() };
 const BUILT = {};
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';
@@ -429,6 +429,7 @@ function route() {
   $$('.page').forEach(p => p.classList.toggle('on', p.id === 'page-' + key));
   $$('nav a').forEach(a => a.classList.toggle('on', a.dataset.r === key));
   document.body.classList.remove('navopen');
+  if (key === 'gen' && GEN.map) setTimeout(() => GEN.map.invalidateSize(), 0);
   if (key === 'site') { setTimeout(() => { drawMap(); MAP.invalidateSize(); if (!$('#btable').innerHTML) drawBTable(); }, 0); }
   window.scrollTo(0, 0);
 }

@@ -19,12 +19,18 @@
 | `#/bio` | 생체모방 제어 원리 4개(부록) — 원리, 규칙, 판정, 본 연구에서의 위치 |
 | `#/plan` | 향후 계획 — 재계산, 서울 3대 업무권역(CBD·YBD·GBD) 블록별 전체 건물 |
 | `#/db` | 데이터베이스 — 구성, SQL 질의, SQLite·CSV 내려받기 |
+| `#/gen` | 자료 생성기 — 권역·구역·구를 넣으면 공식 가구(지구단위계획구역 − 도시계획도로)와 OpenStreetMap 건물을 모아 가구별 표·GeoJSON·CSV를 만든다 |
 
 ## 데이터베이스
 
 - `data/db/research.sqlite` — 사이트의 모든 표와 그림의 출처. 브라우저에서 sql.js(1.10.3)로 엽니다.
 - `data/db/csv/*.csv` — 표별 CSV(UTF-8 BOM).
 - `tools/build_db.py` — 계산 결과 내보내기(`archive/v11/data`)와 원자료에서 데이터베이스를 다시 만드는 스크립트.
+
+## 공식 가구 자료
+
+- `data/upis/plans.json`, `plans.geojson`, `blocks_<시군구코드>.geojson` — 서울 지구단위계획구역 1,062개를 도시계획도로로 나눈 가구 6,000개(서울 열린데이터광장 UPIS 2026-09판, 법적 효력 없음·참고용).
+- `tools/build_upis_blocks.py` — UPIS shp(UQ161·UQ151·UQ111·UQ129)에서 위 파일을 만드는 스크립트.
 
 ## 이전 판
 
