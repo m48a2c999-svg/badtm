@@ -26,7 +26,7 @@ let ALT = {};
 const altName = t => (ALT[t] ? ALT[t].name : t);
 const COL = { ink: '#1E2A38', sun: '#E8541E', kin: '#F2B33D', ok: '#2F7D6B', red: '#B0391A', mut: '#8C949E', line: '#CDD1D6' };
 const CLASS_DEF = {
-  obstruction_class: { label: '주변 건물에 가린 정도', levels: ['적게 가림', '중간', '많이 가림'] },
+  obstruction_class: { label: '주변 건물에 가려진 정도', levels: ['적게 가려짐', '중간', '많이 가려짐'] },
   footprint_class: { label: '평면 면적(모델)', levels: ['소', '중', '대'] },
   floors_class: { label: '지상 층수', levels: ['6~10층', '11~20층', '21층 이상'] },
   block: { label: '대블록', levels: ['NE', 'NW', 'SE', 'SW'] },
@@ -122,7 +122,7 @@ function pageHome() {
   const r = {}; for (const t of ORDER257) { const v = q('SELECT dEUI_pct e, dpeak_pct p FROM results_257 WHERE tag=?', [t]); r[t] = { e: median(v.map(x => x.e)), p: median(v.map(x => x.p)), both: v.filter(x => x.e < 0 && x.p < 0).length, n: v.length }; }
   const eMeds = Object.values(r).map(x => x.e);
   const obs = cls => q("SELECT dEUI_pct e, dpeak_pct p FROM v_results WHERE tag=? AND obstruction_class=?", [cls[0], cls[1]]);
-  const f0hi = obs(['F0', '많이 가림']), lhlo = obs(['LH_F0', '적게 가림']);
+  const f0hi = obs(['F0', '많이 가려짐']), lhlo = obs(['LH_F0', '적게 가려짐']);
   const cb = JSON.parse(META.class_bounds);
   $('#page-home').innerHTML = `
   <div class="titleblock">
@@ -142,16 +142,16 @@ function pageHome() {
     <div class="card"><h3>연구 질문</h3><ol class="qlist">
       <li>외피를 개량하면 기존 업무시설의 연간 에너지 사용량, 최대 전력, 주광, 열쾌적은 개량 전보다 얼마나 달라지는가?</li>
       <li>고정형 차양과 키네틱 파사드는 어떤 지표에서 서로 다르며, 그 차이의 원인은 무엇인가?</li>
-      <li>밀집지역의 건물 조건(주변 건물에 가린 정도, 평면 규모, 층수)에 따라 효과는 어떻게 달라지며, 각 대안을 적용할 만한 조건은 무엇인가?</li></ol></div>
+      <li>밀집지역의 건물 조건(주변 건물에 가려진 정도, 평면 규모, 층수)에 따라 효과는 어떻게 달라지며, 각 대안을 적용할 만한 조건은 무엇인가?</li></ol></div>
     <div class="card"><h3>독창성</h3><p>${esc(META.originality)}</p><h3>범위</h3><p>${esc(META.scope)}</p></div>
   </div>
   <h2>연구 흐름</h2>
-  <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 원형, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 개량 대안</b>고정형 차양 · 키네틱 파사드 적용, 개량 전후 비교</div><div><b>05 건물 조건별 지표</b>가린 정도·평면 규모·층수별 효과, 블록 최대 전력(보조)</div></div>
+  <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 원형, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 개량 대안</b>고정형 차양 · 키네틱 파사드 적용, 개량 전후 비교</div><div><b>05 건물 조건별 지표</b>가려진 정도·평면 규모·층수별 효과, 블록 최대 전력(보조)</div></div>
   <h2>예비 결과 요약</h2>
   <div class="grid g3">
     <div class="card"><h3>① 효과는 작다</h3><p>257동 건물별 EUI 변화 중앙값은 ${pct(Math.min(...eMeds))}~${pct(Math.max(...eMeds))}였다. 주광을 막는 대안은 조명 전력이 늘어 최대 전력을 높였다.</p><a href="#/results">결과 →</a></div>
-    <div class="card"><h3>② 주광 유지가 갈림길</h3><p>작동하지 않을 때 걷어 올리는 블라인드의 일사 기준 제어만 EUI(${pct(r.BT_T300.e)})와 최대 전력(${pct(r.BT_T300.p)})을 함께 줄였다. 태양 추종은 같은 장치의 고정보다 불리하였다.</p><a href="#/alts">개량 대안 →</a></div>
-    <div class="card"><h3>③ 밀집 조건이 방향을 바꾼다</h3><p>많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)에서 블라인드 고정의 EUI 변화는 ${pct(median(f0hi.map(x => x.e)))}로 가장 컸고, 적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)에서는 대형 루버 고정이 EUI ${pct(median(lhlo.map(x => x.e)))}, 최대 전력 ${pct(median(lhlo.map(x => x.p)))}로 둘 다 나빠졌다.</p><a href="#/traits">건물 특성별 →</a></div>
+    <div class="card"><h3>② 주광 유지가 갈림길</h3><p>작동하지 않을 때 걷어 올리는 블라인드의 일사 기준 제어만 EUI(${pct(r.BT_T300.e)})와 최대 전력(${pct(r.BT_T300.p)})을 함께 줄였다. 태양 추종은 세 장치 모두 같은 장치의 고정보다 EUI가 컸다.</p><a href="#/alts">개량 대안 →</a></div>
+    <div class="card"><h3>③ 밀집 조건이 방향을 바꾼다</h3><p>많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)에서 블라인드 고정의 EUI 감소가 ${pct(median(f0hi.map(x => x.e)))}로 가장 컸고, 적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)에서는 대형 루버 고정이 EUI ${pct(median(lhlo.map(x => x.e)))}, 최대 전력 ${pct(median(lhlo.map(x => x.p)))}로 둘 다 나빠졌다.</p><a href="#/traits">건물 특성별 →</a></div>
   </div>
   ${note('결론의 성격: "키네틱 파사드가 좋다"를 보이는 것이 아니라, 서울 업무시설 밀집지역의 기존 건물에서 어떤 개량이 어떤 건물 조건에서 얼마만큼 효과가 있고 없는지를 수치로 밝히는 검증 연구이다. ' + SIMNOTE)}`;
 }
@@ -166,9 +166,9 @@ function pageSite() {
   $('#page-site').innerHTML = `
   <div class="kicker">대상지 · 건물 데이터베이스</div>
   <h1>역삼역 일대 4개 대블록, 업무시설 257동</h1>
-  <p>강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 업무시설 전부이다. 지도의 건물이나 표의 행을 누르면 건물별 개량 전후 결과와 실측 비교를 볼 수 있다.</p>
+  <p>강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이다. 지도의 건물이나 표의 행을 누르면 건물별 개량 전후 결과와 실측 비교를 볼 수 있다.</p>
   <div class="ctrl">
-    <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가린 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 최대 전력 변화</option></select></label>
+    <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 최대 전력 변화</option></select></label>
     <label>대안<select id="malt">${alts}</select></label>
     <label>검색<input type="search" id="msearch" placeholder="건물 이름"></label>
     <label>대블록<select id="mblock"><option value="">전체</option><option>NE</option><option>NW</option><option>SE</option><option>SW</option></select></label>
@@ -178,7 +178,7 @@ function pageSite() {
     <div class="card detail" id="bdetail"><h3>건물을 선택하세요</h3><p class="small">지도에서 건물을 누르거나 아래 표에서 행을 누르면 여기에 나타난다.</p></div>
   </div>
   <h2>건물 목록</h2><div id="btable"></div>
-  ${note('평면 면적은 등가 직사각형 모델의 평면 면적, 가린 정도는 창에서 본 주변 건물의 평균 차폐각이다. ' + SIMNOTE)}`;
+  ${note('평면 면적은 등가 직사각형 모델의 평면 면적, 가려진 정도는 창에서 본 주변 건물의 평균 차폐각이다. ' + SIMNOTE)}`;
   ['mcolor', 'malt', 'mblock'].forEach(id => $('#' + id).addEventListener('change', () => { drawMap(); drawBTable(); }));
   $('#msearch').addEventListener('input', drawBTable);
 }
@@ -220,7 +220,7 @@ function drawBTable() {
   const t = altName($('#malt').value);
   $('#btable').innerHTML = `<p class="small">${rows.length}동 · 열 제목을 누르면 정렬된다.</p>` + table([
     { h: '건물', k: 'name', sort: 1 }, { h: '블록', k: 'block', sort: 1 }, { h: '층수', k: 'floors', num: 1, sort: 1 }, { h: '평면(m²)', k: 'footprint_model_m2', num: 1, sort: 1, f: v => num(v) },
-    { h: '가린 정도(°)', k: 'obstruction_deg', num: 1, sort: 1, f: v => num(v, 1) }, { h: '사용승인', k: 'approval_year', num: 1, sort: 1, f: v => v ?? '—' },
+    { h: '가려진 정도(°)', k: 'obstruction_deg', num: 1, sort: 1, f: v => num(v, 1) }, { h: '사용승인', k: 'approval_year', num: 1, sort: 1, f: v => v ?? '—' },
     { h: '개량 전 EUI', k: 'base_EUI', num: 1, sort: 1, f: v => num(v, 1) }, { h: `${t} EUI`, k: 'dEUI_pct', num: 1, sort: 1, f: v => pct(v), cls: bad },
     { h: `${t} 최대 전력`, k: 'dpeak_pct', num: 1, sort: 1, f: v => pct(v), cls: bad }], rows, { maxh: 460, nw: 1, rowAttr: r => ` data-s="${esc(r.sim_name)}" style="cursor:pointer"${SEL === r.sim_name ? ' class="sel"' : ''}` });
   $$('#btable tbody tr').forEach(tr => tr.addEventListener('click', () => selectBuilding(tr.dataset.s, true)));
@@ -231,7 +231,7 @@ function selectBuilding(s, pan) {
   const rs = q('SELECT r.*, a.name FROM results_257 r JOIN alternatives a ON a.tag=r.tag WHERE r.sim_name=?', [s]).filter(r => ORDER257.includes(r.tag)).sort((x, y) => ORDER257.indexOf(x.tag) - ORDER257.indexOf(y.tag));
   const m = q('SELECT * FROM monthly WHERE sim_name=? ORDER BY idx', [s]);
   $('#bdetail').innerHTML = `<h3>${esc(b.name)}</h3>
-  <dl class="kv"><dt>대블록</dt><dd>${b.block}</dd><dt>층수 · 높이</dt><dd>${b.floors}층 · ${num(b.height_m, 0)} m</dd><dt>연면적(대장)</dt><dd>${b.gross_area_m2 ? num(b.gross_area_m2) + ' m²' : '—'}</dd><dt>평면 면적(모델)</dt><dd>${num(b.footprint_model_m2)} m² (${b.footprint_class})</dd><dt>가린 정도</dt><dd>${num(b.obstruction_deg, 1)}° (${b.obstruction_class})</dd><dt>사용승인</dt><dd>${b.approval_year ?? '—'}</dd><dt>모델</dt><dd>${b.role}</dd><dt>개량 전</dt><dd>EUI ${num(b.base_EUI, 1)} kWh/m²·yr · 최대 ${num(b.base_peak_kW, 0)} kW</dd></dl>
+  <dl class="kv"><dt>대블록</dt><dd>${b.block}</dd><dt>층수 · 높이</dt><dd>${b.floors}층 · ${num(b.height_m, 0)} m</dd><dt>연면적(대장)</dt><dd>${b.gross_area_m2 ? num(b.gross_area_m2) + ' m²' : '—'}</dd><dt>평면 면적(모델)</dt><dd>${num(b.footprint_model_m2)} m² (${b.footprint_class})</dd><dt>가려진 정도</dt><dd>${num(b.obstruction_deg, 1)}° (${b.obstruction_class})</dd><dt>사용승인</dt><dd>${b.approval_year ?? '—'}</dd><dt>모델</dt><dd>${b.role}</dd><dt>개량 전</dt><dd>EUI ${num(b.base_EUI, 1)} kWh/m²·yr · 최대 ${num(b.base_peak_kW, 0)} kW</dd></dl>
   ${table([{ h: '대안', k: 'name' }, { h: 'EUI', k: 'dEUI_pct', num: 1, f: v => pct(v), cls: bad }, { h: '최대 전력', k: 'dpeak_pct', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI', k: 'dUDI_pp', num: 1, f: v => pp(v, 1), cls: good }, { h: '열쾌적', k: 'dPMV_pp', num: 1, f: v => pp(v, 1), cls: good }], rs, { nw: 1 })}
   ${m.length ? `<h3 style="margin-top:12px">월별 전력: 실측과 모델(보정 후)</h3>${lineChart([{ label: '실측(건축HUB)', v: m.map(x => x.measured), c: COL.ink }, { label: '모델(보정 후)', v: m.map(x => x.simulated), c: COL.sun, dash: '5 3' }], 12, { h: 230, yd: 1, yl: 'kWh/m²', xt: [[0, '1월'], [3, '4월'], [6, '7월'], [9, '10월'], [11, '12월']] })}<p class="small">CV(RMSE) ${num(b.cv_rmse_cal, 1)}%(보정 전 ${num(b.cv_rmse_uncal, 1)}%) · NMBE ${sgn(b.nmbe_cal, 1)}% · ${b.split || ''}</p>` : '<p class="small">실측 비교 자료 없음</p>'}`;
   drawMap(); drawBTable();
@@ -271,7 +271,7 @@ function pageResults() {
   <p>아크플레이스·강남파이낸스센터·GS타워의 상세 모델. 개량 전 블록 EUI ${num(base.EUI, 2)} kWh/m²·yr, 블록 최대 전력 ${num(base.peak_kW)} kW 대비 변화이다.</p>
   ${table([{ h: '구분', k: 'category' }, { h: '대안', k: 'name' }, { h: '블록 EUI', k: 'dEUI_pct', num: 1, f: v => pct(v), cls: bad }, { h: '블록 최대 전력', k: 'dpeak_pct', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI(3개 동, %p)', k: 'dUDI_ARK', num: 1, f: (v, r) => rng(r, 'dUDI') }, { h: '열쾌적(3개 동, %p)', k: 'dPMV_ARK', num: 1, f: (v, r) => rng(r, 'dPMV') }], r3, { nw: 1 })}
   ${barsChart(r3.map(r => ({ label: r.name, e: r.dEUI_pct, p: r.dpeak_pct })), [{ key: 'e', label: '블록 EUI 변화', color: COL.ink }, { key: 'p', label: '블록 최대 전력 변화', color: COL.sun }])}
-  <p>창 앞에 남아 주광을 막는 대안은 UDI를 크게 낮추고 최대 전력을 높였다. 블라인드 일사 기준(걷어 올림)만 UDI를 유지하면서 EUI와 최대 전력을 함께 줄였다. 태양 추종은 같은 장치의 고정보다 EUI와 최대 전력이 모두 컸고, 피크 시간 폐쇄는 최대 전력을 가장 크게 높였다.</p>
+  <p>창 앞에 남아 주광을 막는 대안은 UDI를 낮추고(수평 장치는 크게) 최대 전력을 높였다. 블라인드 일사 기준(걷어 올림)만 UDI를 유지하면서 EUI와 최대 전력을 함께 줄였다. 태양 추종은 세 장치 모두 같은 장치의 고정보다 EUI가 컸고, 최대 전력은 블라인드·대형 루버에서 컸다(수직 핀은 +0.02% 대 +0.57%). 피크 시간 폐쇄는 최대 전력을 가장 크게 높였다.</p>
   <h2>2. 257동(건물별)</h2>
   ${table([{ h: '대안', k: 'label' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(median(v)), cls: v => bad(median(v)) }, { h: 'EUI 감소 동수', k: 'e', num: 1, f: (v, r) => `${v.filter(x => x < 0).length} (${Math.round(100 * v.filter(x => x < 0).length / r.n)}%)` }, { h: '최대 전력 중앙값', k: 'p', num: 1, f: v => pct(median(v)), cls: v => bad(median(v)) }, { h: '최대 전력 감소 동수', k: 'p', num: 1, f: (v, r) => `${v.filter(x => x < 0).length} (${Math.round(100 * v.filter(x => x < 0).length / r.n)}%)` }, { h: '둘 다 감소', k: 'both', num: 1, f: (v, r) => `${v} (${Math.round(100 * v / r.n)}%)` }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(median(v)), cls: v => good(median(v)) }, { h: '열쾌적 중앙값', k: 'c', num: 1, f: v => pp(median(v)), cls: v => good(median(v)) }], g, { nw: 1 })}
   <div><div><h3>EUI 변화 분포</h3>${stripChart(g.map(x => ({ label: x.label, v: x.e })), { color: COL.ink })}</div><div><h3>건물 최대 전력 변화 분포</h3>${stripChart(g.map(x => ({ label: x.label, v: x.p })), { color: COL.sun })}</div></div>
@@ -298,7 +298,7 @@ function pageTraits() {
   <label>y축<select id="sy">${Object.entries(METRIC).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}</select></label></div>
   <div id="scat"></div>
   <h2>예비 적용 조건</h2><div id="tcond"></div>
-  ${note('구간 경계: 가린 정도와 평면 면적은 257동의 3분위, 층수는 6~10·11~20·21층 이상(21층 이상은 10동뿐이므로 경향으로만 본다). 재계산에서는 구간 경계를 결과를 보기 전에 정한다. ' + SIMNOTE)}`;
+  ${note('구간 경계: 가려진 정도와 평면 면적은 257동의 3분위, 층수는 6~10·11~20·21층 이상(21층 이상은 10동뿐이므로 경향으로만 본다). 재계산에서는 구간 경계를 결과를 보기 전에 정한다. ' + SIMNOTE)}`;
   ['tcls', 'tmet'].forEach(id => $('#' + id).addEventListener('change', drawTraitTable));
   ['salt', 'sx', 'sy'].forEach(id => $('#' + id).addEventListener('change', drawScatter));
   drawTraitTable(); drawScatter(); drawConditions();
@@ -318,21 +318,21 @@ function drawScatter() {
   const t = $('#salt').value, x = $('#sx').value, y = $('#sy').value;
   const rows = q(`SELECT b.name, b.${x} AS x, r.${y} AS y, b.obstruction_class AS oc FROM results_257 r JOIN buildings b ON b.sim_name=r.sim_name WHERE r.tag=? AND b.${x} IS NOT NULL`, [t]);
   const sp = spearman(rows.map(r => r.x), rows.map(r => r.y));
-  const oc = { '적게 가림': seq3[0], '중간': seq3[1], '많이 가림': seq3[2] };
+  const oc = { '적게 가려짐': seq3[0], '중간': seq3[1], '많이 가려짐': seq3[2] };
   $('#scat').innerHTML = scatterChart(rows.map(r => ({ x: r.x, y: r.y, c: oc[r.oc], t: `${r.name}: ${num(r.x, 1)}, ${sgn(r.y)}` })), CONT[x], `${METRIC[y].label} (${y.endsWith('pp') ? '%p' : '%'})`, { noComma: x === 'approval_year' }) +
-    `<p class="small">${esc(altName(t))} · 순위 상관 Spearman ρ = <b>${sgn(sp.rho, 2)}</b> (n = ${sp.n}) · 점 색: 가린 정도(연한 = 적게, 진한 = 많이)</p>`;
+    `<p class="small">${esc(altName(t))} · 순위 상관 Spearman ρ = <b>${sgn(sp.rho, 2)}</b> (n = ${sp.n}) · 점 색: 가려진 정도(연한 = 적게, 진한 = 많이)</p>`;
 }
 function drawConditions() {
   const cb = JSON.parse(META.class_bounds);
   const med = (t, c, l, k) => median(q(`SELECT ${k} v FROM v_results WHERE tag=? AND ${c}=?`, [t, l]).map(r => r.v));
   const share = (t, c, l) => { const v = q(`SELECT dEUI_pct e, dpeak_pct p FROM v_results WHERE tag=? AND ${c}=?`, [t, l]); return Math.round(100 * v.filter(r => r.e < 0 && r.p < 0).length / v.length); };
   const rows = [
-    { c: `주변 건물에 많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)`, a: '블라인드 고정 · 수직 핀 고정', e: `EUI ${pct(med('F0', 'obstruction_class', '많이 가림', 'dEUI_pct'))} · ${pct(med('VF_F0', 'obstruction_class', '많이 가림', 'dEUI_pct'))}, 최대 전력 ${pct(med('F0', 'obstruction_class', '많이 가림', 'dpeak_pct'))} · ${pct(med('VF_F0', 'obstruction_class', '많이 가림', 'dpeak_pct'))}(증가 폭이 가장 작음)`, w: 'UDI 감소, 최대 전력은 여전히 증가' },
-    { c: `적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)`, a: '블라인드 일사 기준(걷어 올림)', e: `EUI ${pct(med('BT_T300', 'obstruction_class', '적게 가림', 'dEUI_pct'))}, 최대 전력 ${pct(med('BT_T300', 'obstruction_class', '적게 가림', 'dpeak_pct'))}, 둘 다 감소 ${share('BT_T300', 'obstruction_class', '적게 가림')}%`, w: '감소 폭이 작음(1% 미만), 열쾌적 비율 조금 낮아짐' },
-    { c: '적게 가려진 건물', a: '대형 루버 고정·일사 기준은 피함', e: `EUI ${pct(med('LH_F0', 'obstruction_class', '적게 가림', 'dEUI_pct'))}, 최대 전력 ${pct(med('LH_F0', 'obstruction_class', '적게 가림', 'dpeak_pct'))}, 둘 다 감소 ${share('LH_F0', 'obstruction_class', '적게 가림')}%`, w: '—' },
+    { c: `주변 건물에 많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)`, a: '블라인드 고정 · 수직 핀 고정', e: `EUI ${pct(med('F0', 'obstruction_class', '많이 가려짐', 'dEUI_pct'))} · ${pct(med('VF_F0', 'obstruction_class', '많이 가려짐', 'dEUI_pct'))}, 최대 전력 ${pct(med('F0', 'obstruction_class', '많이 가려짐', 'dpeak_pct'))} · ${pct(med('VF_F0', 'obstruction_class', '많이 가려짐', 'dpeak_pct'))}(증가 폭이 가장 작음)`, w: 'UDI 감소, 최대 전력은 여전히 증가' },
+    { c: `적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)`, a: '블라인드 일사 기준(걷어 올림)', e: `EUI ${pct(med('BT_T300', 'obstruction_class', '적게 가려짐', 'dEUI_pct'))}, 최대 전력 ${pct(med('BT_T300', 'obstruction_class', '적게 가려짐', 'dpeak_pct'))}, 둘 다 감소 ${share('BT_T300', 'obstruction_class', '적게 가려짐')}%`, w: '감소 폭이 작음(1% 미만), 열쾌적 비율 조금 낮아짐' },
+    { c: '적게 가려진 건물', a: '비권장: 대형 루버 고정·일사 기준', e: `EUI ${pct(med('LH_F0', 'obstruction_class', '적게 가려짐', 'dEUI_pct'))}·${pct(med('LT_T300', 'obstruction_class', '적게 가려짐', 'dEUI_pct'))}, 최대 전력 ${pct(med('LH_F0', 'obstruction_class', '적게 가려짐', 'dpeak_pct'))}·${pct(med('LT_T300', 'obstruction_class', '적게 가려짐', 'dpeak_pct'))}, 둘 다 감소 ${share('LH_F0', 'obstruction_class', '적게 가려짐')}%`, w: '—' },
     { c: '평면이 큰 건물', a: '블라인드 일사 기준', e: `EUI ${pct(med('BT_T300', 'footprint_class', '대', 'dEUI_pct'))}(소 ${pct(med('BT_T300', 'footprint_class', '소', 'dEUI_pct'))})`, w: '—' },
     { c: '최대 전력이 중요한 건물·블록', a: '블라인드 일사 기준', e: '주광을 잃는 대안은 모두 최대 전력을 높임', w: '피크 시간에 닫는 규칙은 오히려 불리(3개 동 +3.49%)' }];
-  $('#tcond').innerHTML = table([{ h: '건물 조건', k: 'c' }, { h: '유리한 대안', k: 'a', f: v => `<b>${esc(v)}</b>` }, { h: '근거(257동 중앙값)', k: 'e' }, { h: '주의할 점', k: 'w' }], rows);
+  $('#tcond').innerHTML = table([{ h: '건물 조건', k: 'c' }, { h: '권장·비권장 대안', k: 'a', f: v => `<b>${esc(v)}</b>` }, { h: '근거(257동 중앙값)', k: 'e' }, { h: '주의할 점', k: 'w' }], rows);
 }
 
 /* ---------------- 페이지: 실측 비교 ---------------- */
@@ -361,13 +361,13 @@ function pageBio() {
   const vcls = v => v.startsWith('채택') ? 'ok' : v.startsWith('기각') ? 'no' : 'mix';
   $('#page-bio').innerHTML = `
   <div class="kicker">부록 · 생체모방 제어 원리 4개</div><h1>생물 원리에서 유도한 제어 규칙은 통했는가</h1>
-  <p>이전 원고(v11)에서는 외피 장치의 제어 규칙 일부를 생물의 환경 반응 원리에서 유도하였다. 원리는 ISO 18458:2015의 하향식 절차(기능 분석 → 추상화 → 전이)로, ① 외피의 빛·열 조절과 같은 기능을 가진 생물 기작일 것, ② 기존 외피 장치의 제어 규칙으로 옮길 수 있을 것, ③ 생물학 문헌으로 기작이 확인될 것을 기준으로 후보 아홉 가지 가운데 네 가지를 골랐다.</p>
+  <p>본 연구의 이전 단계에서는 외피 장치의 제어 규칙 일부를 생물의 환경 반응 원리에서 유도하였다. 원리는 ISO 18458:2015의 하향식 절차(기능 분석 → 추상화 → 전이)로, ① 외피의 빛·열 조절과 같은 기능을 가진 생물 기작일 것, ② 기존 외피 장치의 제어 규칙으로 옮길 수 있을 것, ③ 생물학 문헌으로 기작이 확인될 것을 기준으로 후보 아홉 가지 가운데 네 가지를 골랐다.</p>
   <div class="grid g2">${P.map(p => `<div class="card pcard"><h3><span class="mono">${p.code.replace('P', 'P')}</span>${esc(p.name)} <span class="small">— ${esc(p.organism)}</span></h3>
     <p><b>생물 원리.</b> ${esc(p.biology)}</p><p><b>외피 제어 규칙.</b> ${esc(p.rule)}</p><p><b>비교.</b> ${esc(p.comparison)}</p>
     <p><span class="verdict ${vcls(p.verdict)}">${esc(p.verdict)}</span></p><p class="small">${esc(p.evidence)}</p></div>`).join('')}</div>
   <h2>판정 기준</h2><p>원리 적용 안이 비교 안보다 블록 EUI와 블록 최대 전력을 높이지 않고, 3개 동 모두에서 UDI와 열쾌적 비율을 낮추지 않으면서, 넷 가운데 하나 이상을 개선하면 채택이다. P₄는 분산 배정이 블록 최대 전력을 낮추는지로 판정하였다. P₁~P₃의 판정 기준은 결과 일부를 본 뒤 정한 것이다.</p>
   <h2>본 연구에서의 위치</h2>
-  <div class="card"><p>네 원리 가운데 P₂·P₃·P₄는 기각되었고, 채택된 P₁(ZB)도 비교 대상인 전 구역 태양 추종보다 나았을 뿐 개량 전(장치 없음)보다 나은 것은 아니었다. 또한 태양 추종(P₂)과 두 조건 작동(P₃)은 공학에서 이미 쓰이는 제어 규칙과 겹친다. 따라서 본 연구는 생체모방 원리를 연구의 틀로 두지 않고, 키네틱 파사드 제어 대안의 일부를 생물 원리에서 유도한 규칙으로 함께 시험한 결과로만 보고한다(예비심사 원고 부록).</p></div>
+  <div class="card"><p>네 원리 가운데 P₂·P₃·P₄는 기각되었고, 채택된 P₁(ZB)도 비교 대상인 전 구역 태양 추종보다 나았을 뿐 개량 전(장치 없음)보다 나은 것은 아니었다. 또한 태양 추종(P₂)과 두 신호 작동(P₃)은 공학에서 이미 쓰이는 제어 규칙과 겹친다. 따라서 본 연구는 생체모방 원리를 연구의 틀로 두지 않고, 키네틱 파사드 제어 대안의 일부를 생물 원리에서 유도한 규칙으로 함께 시험한 결과로만 보고한다(예비심사 원고 부록).</p></div>
   ${note('상세 3개 동 블록의 EnergyPlus 시뮬레이션 값. P₃의 전기변색 유리 두 신호 안(이전 계산에서 채택)은 전기변색 유리를 연구 범위에서 제외함에 따라 판정에서 뺐다.')}`;
 }
 
@@ -375,15 +375,15 @@ function pageBio() {
 function pagePlan() {
   const D = q('SELECT * FROM districts');
   $('#page-plan').innerHTML = `
-  <div class="kicker">한계와 향후 계획</div><h1>재계산, 그리고 국가가 정한 3대 오피스 권역으로</h1>
+  <div class="kicker">한계와 향후 계획</div><h1>재계산, 그리고 국가승인통계의 서울 오피스 3권역으로</h1>
   <h2>재계산</h2><ol>
   <li><b>대안·지표 확정</b> — 재계산 전에 개량 대안, 지표, 적용 조건의 판단 기준을 확정한다.</li>
   <li><b>257동</b> — 태양 추종 3종과 피크 시간 폐쇄를 257동에서도 계산하여 3개 동과 같은 대안 구성으로 맞춘다.</li>
   <li><b>차폐 포함·제외 비교</b> — 같은 건물에서 주변 건물 차폐를 넣은 경우와 뺀 경우를 대안별로 계산하여 밀집환경의 영향을 분리한다.</li>
   <li><b>밀집 조건 지표</b> — 평균 차폐각 외에 입면별 하늘 가림 비율 등 밀집 조건을 나타내는 지표를 정리하고, 구간 경계를 결과를 보기 전에 정한다.</li>
   <li><b>지표 추가</b> — 공간 주광 자율성(sDA)과 과다 일사 노출(ASE)을 추가하고, 눈부심은 대표 실에서 계산하거나 한계로 밝힌다.</li></ol>
-  <h2>확장 — 국가가 정한 3대 오피스 권역의 블록별 전체 건물</h2>
-  <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>블록.</b> 국내에는 "업무지구"라는 법정 용도지역이 없으므로, 도시관리계획으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 가구(街區)를 블록으로 쓴다. 블록 안의 모든 건물을 높이 제한 없이 정리한다. <a href="#/gen">자료 생성기</a>에서 권역을 고르면 가구와 건물 자료를 바로 만들 수 있다.</p></div>
+  <h2>확장 — 업무 기능 지구단위계획구역의 가구별 전체 건물</h2>
+  <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>블록.</b> 국내에는 "업무지구"라는 법정 용도지역이 없으므로, 도시관리계획으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 가구(街區, 2,000 m² 이상)를 블록으로 쓴다(결정도의 가구 번호와는 재계산 전에 대조). 가구 안의 모든 건물을 모아 주변 차폐와 가구 합산에 쓰고, 개량 효과의 분석 대상은 업무시설 6층 이상 건물로 한다. <a href="#/gen">자료 생성기</a>에서 권역을 고르면 가구와 건물 자료를 바로 만들 수 있다.</p></div>
   ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개량 효과</div></div>
   <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 원형 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>개량 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다. 전기변색 유리 같은 가변 유리는 범위에서 제외하였다.</li></ol>
@@ -394,7 +394,7 @@ function pagePlan() {
 const PRESETS = {
   '대안별 257동 요약': "SELECT a.name AS 대안, COUNT(*) AS 동수,\n       ROUND(AVG(r.dEUI_pct), 3) AS EUI_변화_평균,\n       SUM(r.dEUI_pct < 0) AS EUI_감소_동수,\n       SUM(r.dEUI_pct < 0 AND r.dpeak_pct < 0) AS 둘다_감소_동수\nFROM results_257 r JOIN alternatives a ON a.tag = r.tag\nWHERE a.category NOT LIKE '범위 제외%' AND a.tag <> 'S1'\nGROUP BY r.tag ORDER BY a.sort",
   '많이 가려진 건물 상위 10동': "SELECT name, block, floors, obstruction_deg, obstruction_class\nFROM buildings ORDER BY obstruction_deg DESC LIMIT 10",
-  '가린 정도 × 블라인드 고정': "SELECT obstruction_class, COUNT(*) n, ROUND(AVG(dEUI_pct), 3) EUI_평균, ROUND(AVG(dpeak_pct), 3) 최대전력_평균\nFROM v_results WHERE tag = 'F0' GROUP BY obstruction_class",
+  '가려진 정도 × 블라인드 고정': "SELECT obstruction_class, COUNT(*) n, ROUND(AVG(dEUI_pct), 3) EUI_평균, ROUND(AVG(dpeak_pct), 3) 최대전력_평균\nFROM v_results WHERE tag = 'F0' GROUP BY obstruction_class",
   '대블록별 블록 최대 전력': "SELECT block, scenario, peak_kW, dpeak_pct, CF, peak_time\nFROM block_257_by_block WHERE scenario IN ('S1c', 'F0c', 'BT_T300c') ORDER BY block, scenario",
   '실측 기준 충족 건물': "SELECT name, split, cv_rmse_cal, nmbe_cal FROM buildings\nWHERE cv_rmse_cal <= 15 AND ABS(nmbe_cal) <= 5",
 };

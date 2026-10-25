@@ -19,7 +19,7 @@ async function genLoadPlans() {
 function pageGen() {
   $('#page-gen').innerHTML = `
   <div class="kicker">연구 시스템 · 자료 생성기</div><h1>지역을 넣으면 가구와 건물 자료가 만들어진다</h1>
-  <p>권역을 고르거나 구역·구 이름을 검색해 선택하면, 법으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 <b>가구(블록)</b>와 그 안의 <b>모든 건물</b>을 자동으로 모아 가구별 표를 만든다. 결과는 계산 엔진(EnergyPlus)의 입력으로 쓰도록 내려받을 수 있다.</p>
+  <p>권역을 고르거나 구역·구 이름을 검색해 선택하면, 법으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 <b>가구(블록)</b>와 그 안에서 OpenStreetMap에 등록된 <b>건물</b>을 자동으로 모아 가구별 표를 만든다. 결과는 계산 엔진(EnergyPlus)의 입력으로 쓰도록 내려받을 수 있다.</p>
   <div class="grid g2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)">
     <div class="card">
       <h3>① 지역 입력</h3>
@@ -35,7 +35,7 @@ function pageGen() {
   </div>
   <h2>가구별 결과</h2><div id="gout"><p class="small">아직 만든 자료가 없다.</p></div>
   <h2>시스템 구성</h2>
-  <div class="flow"><div><b>입력</b>권역 · 구역 · 구 이름</div><div><b>① 경계</b>지구단위계획구역(UQ161) − 도시계획도로(UQ151) = 가구, 상업지역(UQ111) 비율</div><div><b>② 건물</b>OpenStreetMap 건물 윤곽·층수 태그(Overpass API)</div><div><b>③ 배정·지표</b>건물 중심점 → 가구, 건물 수·건폐율·층수</div><div><b>④ 계산 엔진</b>건축물대장 결합 → EnergyPlus 자동 모델 → 개량 대안 → DB</div></div>
+  <div class="flow"><div><b>입력</b>권역 · 구역 · 구 이름</div><div><b>① 경계</b>지구단위계획구역(UQ161) − 도시계획도로(UQ151) = 가구(2,000 m² 이상), 상업지역(UQ111) 비율</div><div><b>② 건물</b>OpenStreetMap 건물 윤곽·층수 태그(Overpass API)</div><div><b>③ 배정·지표</b>건물 중심점 → 가구, 건물 수·건폐율·층수</div><div><b>④ 계산 엔진</b>건축물대장 결합 → EnergyPlus 자동 모델 → 개량 대안 → DB</div></div>
   <div id="gnote"></div>${note('② 건물 윤곽은 OpenStreetMap 기여자 자료(ODbL)로, 빠진 건물이나 층수 태그가 없는 건물이 있다. ④ 계산 엔진 단계(건축물대장 결합·EnergyPlus)는 이 페이지에서 실행하지 않으며, 내려받은 자료를 입력으로 쓴다. 지금 계산 엔진이 자동으로 돌아가는 범위는 역삼 257동 절차(자동 모델·실측 비교·개량 대안)이고, 다른 지역은 재계산 단계에서 이 자료로 확장한다.')}`;
   $('#gpre').addEventListener('change', () => { const k = $('#gpre').value; if (!k) return; GEN.sel = new Set(PRESET[k]); $('#gq').value = ''; genList(); });
   $('#gq').addEventListener('input', genList); $('#gcom').addEventListener('change', genList);
