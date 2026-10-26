@@ -7,14 +7,14 @@
    · 에너지: 역삼 257동만 EnergyPlus 23.2 시간별 결과(block_257_hourly)를 함께 보여 준다.
    이 페이지의 일사·작동 값은 맑은 날 가정의 간이 계산이며 EnergyPlus 계산 값이 아니다.
    ===================================================================== */
-const LIVE = { map: null, canvas: null, R: null, t: 12 * 60, play: false, speed: 30, rule: 'BT_T300', mode: 'state', hDef: 12, date: null, slots: null, busy: false, sel: null, last: 0, job: 0 };
+const LIVE = { loadReq: 0, map: null, canvas: null, R: null, t: 12 * 60, play: false, speed: 30, rule: 'BT_T300', mode: 'state', hDef: 12, date: null, slots: null, busy: false, sel: null, last: 0, job: 0 };
 const LRULE = {
   F0: { name: '블라인드 고정', kind: 'fixed', ep: 'F0c', txt: '슬랫 수평으로 항상 창 앞(움직이지 않음)' },
   LH_F0: { name: '대형 루버 고정', kind: 'fixed', ep: 'LH_F0c', txt: '대형 수평 루버가 항상 창 앞(움직이지 않음)' },
   VF_F0: { name: '수직 핀 고정', kind: 'fixed', ep: 'VF_F0c', txt: '동·서 입면 수직 핀(움직이지 않음)' },
   S3: { name: '블라인드 태양 추종', kind: 'track', ep: null, txt: '입면에 직사광이 들면 직사광을 막는 각도로 슬랫을 조절, 아니면 수평' },
-  BT_T300: { name: '블라인드 일사 기준', kind: 'thresh', ep: 'BT_T300c', txt: '창면 일사 300 W/m² 초과 시 내림, 아니면 걷어 올림' },
-  LT_T300: { name: '대형 루버 일사 기준', kind: 'thresh', ep: 'LT_T300c', txt: '창면 일사 300 W/m² 초과 시 직사광 컷오프 각도, 아니면 수평' },
+  BT_T300: { name: '블라인드 일사 기준', kind: 'thresh', ep: 'BT_T300c', txt: '5~9월에 창면 일사 300 W/m² 초과 시 내림, 그 밖에는 걷어 올림' },
+  LT_T300: { name: '대형 루버 일사 기준', kind: 'thresh', ep: 'LT_T300c', txt: '5~9월에 창면 일사 300 W/m² 초과 시 직사광 컷오프 각도, 그 밖에는 수평' },
 };
 // ASHRAE 맑은 날 모델 월별 계수(A: W/m², B: 무차원, C: 확산 계수)
 const ASH = { A: [1230, 1215, 1186, 1136, 1104, 1088, 1085, 1107, 1151, 1192, 1221, 1233], B: [.142, .144, .156, .180, .196, .205, .207, .201, .177, .160, .149, .142], C: [.058, .060, .071, .097, .121, .134, .136, .122, .092, .073, .063, .057] };
@@ -64,8 +64,11 @@ function liveBuildRegion(src) {
     Hmax = Math.max(Hmax, b.h);
     if (b.tgt) {
       b.F = [];
-      for (let i = 0; i < P.length; i++) {
-        const p = P[i], q2 = P[(i + 1) % P.length]; const dx = q2[0] - p[0], dy = q2[1] - p[1]; const len = Math.hypot(dx, dy); if (len < 3) continue;
+      // 짧은 변(곡선 윤곽)은 이어 붙여 현 길이 3 m 이상의 입면으로 만든다
+      const seg = []; let st = 0;
+      for (let i = 1; i <= P.length; i++) { const e = P[i % P.length]; if (Math.hypot(e[0] - P[st][0], e[1] - P[st][1]) >= 3 || i === P.length) { seg.push([P[st], e]); st = i % P.length; } }
+      for (const [p, q2] of seg) {
+        const dx = q2[0] - p[0], dy = q2[1] - p[1]; const len = Math.hypot(dx, dy); if (len < 1) continue;
         let nx = dy / len, ny = -dx / len; if (!ccw) { nx = -nx; ny = -ny; }
         b.F.push({ len, nx, ny, naz: (Math.atan2(nx, ny) / D2R + 360) % 360, mx: (p[0] + q2[0]) / 2 + nx * 0.3, my: (p[1] + q2[1]) / 2 + ny * 0.3 });
       }
@@ -75,7 +78,7 @@ function liveBuildRegion(src) {
   // 격자(50 m)
   const G = new Map(), CS = 50; const key = (i, j) => i * 100003 + j;
   all.forEach((b, k) => { for (let i = Math.floor(b.bb[0] / CS); i <= Math.floor(b.bb[2] / CS); i++) for (let j = Math.floor(b.bb[1] / CS); j <= Math.floor(b.bb[3] / CS); j++) { const kk = key(i, j); if (!G.has(kk)) G.set(kk, []); G.get(kk).push(k); } });
-  return { ...src, all, tg: all.filter(b => b.tgt), la, lo, kx, ky, Hmax, G, CS, key };
+  return { ...src, all, tg: all.filter(b => b.tgt), la, lo, kx, ky, Hmax, G, CS, key, ray: 0, mark: new Int32Array(all.length) };
 }
 function segHitsPoly(x0, y0, x1, y1, P) {
   // 선분이 다각형 안에서 시작하거나 변과 교차하면 참
@@ -91,15 +94,20 @@ function segHitsPoly(x0, y0, x1, y1, P) {
 }
 function shadedAt(R, self, x, y, z, ux, uy, tanA) {
   const reach = Math.min(1500, Math.max(0, (R.Hmax - z) / tanA)); if (reach <= 0) return false;
-  const seen = new Set(); const step = R.CS / 2;
-  for (let s = 0; s <= reach + step; s += step) {
-    const px = x + ux * s, py = y + uy * s; const cell = R.G.get(R.key(Math.floor(px / R.CS), Math.floor(py / R.CS))); if (!cell) continue;
-    for (const k of cell) {
-      if (seen.has(k)) continue; seen.add(k); const n = R.all[k]; if (n === self || n.h <= z) continue;
+  const stamp = ++R.ray; const CS = R.CS;
+  // 격자 칸을 빠짐없이 따라가는 DDA(Amanatides–Woo)
+  let i = Math.floor(x / CS), j = Math.floor(y / CS); const si = ux > 0 ? 1 : -1, sj = uy > 0 ? 1 : -1;
+  const tdx = Math.abs(ux) > 1e-12 ? CS / Math.abs(ux) : Infinity, tdy = Math.abs(uy) > 1e-12 ? CS / Math.abs(uy) : Infinity;
+  let tmx = Math.abs(ux) > 1e-12 ? ((ux > 0 ? (i + 1) * CS - x : x - i * CS) / Math.abs(ux)) : Infinity, tmy = Math.abs(uy) > 1e-12 ? ((uy > 0 ? (j + 1) * CS - y : y - j * CS) / Math.abs(uy)) : Infinity;
+  for (let t = 0; t <= reach; ) {
+    const cell = R.G.get(R.key(i, j));
+    if (cell) for (const k of cell) {
+      if (R.mark[k] === stamp) continue; R.mark[k] = stamp; const n = R.all[k]; if (n === self || n.h <= z) continue;
       const L = Math.min(1500, (n.h - z) / tanA);
       if (n.bb[0] > Math.max(x, x + ux * L) || n.bb[2] < Math.min(x, x + ux * L) || n.bb[1] > Math.max(y, y + uy * L) || n.bb[3] < Math.min(y, y + uy * L)) continue;
       if (segHitsPoly(x, y, x + ux * L, y + uy * L, n.P)) return true;
     }
+    if (tmx < tmy) { t = tmx; tmx += tdx; i += si; } else { t = tmy; tmy += tdy; j += sj; }
   }
   return false;
 }
@@ -120,7 +128,9 @@ function liveSlot(R, ymd, minute) {
   });
   return { sp, cs, v: out };
 }
-function moveFrac(rule, v, o) { const k = LRULE[rule].kind; return k === 'thresh' ? v[o + 2] : k === 'track' ? v[o + 1] : 0; }
+// 일사 기준 2종은 표 2와 같이 5~9월에만 작동(그 밖의 달은 블라인드 걷어 올림, 루버 수평)
+const inSeason = () => { const m = (LIVE.ymd || ymdOf(LIVE.date))[1]; return m >= 5 && m <= 9; };
+function moveFrac(rule, v, o) { const k = LRULE[rule].kind; return k === 'thresh' ? (inSeason() ? v[o + 2] : 0) : k === 'track' ? v[o + 1] : 0; }
 
 /* ---------- 지역 불러오기 ---------- */
 function ringOfDb(poly) { const p = JSON.parse(poly); return p.map(([la, lo]) => [lo, la]); }
@@ -137,8 +147,8 @@ async function liveLoadYeoksam(msg) {
     if (!data) throw new Error('접속 실패');
     for (const el of data.elements) {
       if (!el.geometry || el.geometry.length < 4) continue; const ring = el.geometry.map(p => [p.lon, p.lat]); const c = centroid(ring);
-      if (targets.some(t => inRing(c, t.ring))) continue;
-      const hh = liveHeight(el.tags || {}); obstacles.push({ id: 'w' + el.id, name: (el.tags || {}).name || '', ring, h: hh.h, hsrc: hh.src, c });
+      if (targets.some(t => inRing(c, t.ring) || inRing(t.c, ring) || t.ring.some(p => inRing(p, ring)))) continue;
+      const hh = liveHeight(el.tags || {}); obstacles.push({ id: 'w' + el.id, name: (el.tags || {}).name || '', ring, h: hh.h, hsrc: hh.src, noH: !!hh.noH, c });
     }
     note2 = `주변 건물 ${obstacles.length}동(OpenStreetMap)을 차폐에 포함.`;
   } catch (x) { note2 = '주변 건물(OpenStreetMap)을 불러오지 못해 257동끼리의 차폐만 반영.'; }
@@ -148,15 +158,15 @@ function liveHeight(t) {
   const h = parseFloat(t.height), lv = parseFloat(t['building:levels']);
   if (Number.isFinite(h) && h > 0) return { h, src: 'OSM 높이' };
   if (Number.isFinite(lv) && lv > 0) return { h: lv * 3.5, src: 'OSM 층수 × 3.5 m' };
-  return { h: LIVE.hDef, src: `층수 정보 없음 → ${LIVE.hDef} m 가정` };
+  return { h: LIVE.hDef, src: `층수 정보 없음 → ${LIVE.hDef} m 가정`, noH: true };
 }
 async function liveLoadPlans(ids, label, msg) {
   const R = await genFetch(ids, t => { msg(t); return null; });
-  const conv = b => { const hh = b.height ? { h: b.height, src: 'OSM 높이' } : b.levels ? { h: b.levels * 3.5, src: 'OSM 층수 × 3.5 m' } : { h: LIVE.hDef, src: `층수 정보 없음 → ${LIVE.hDef} m 가정` }; return { id: b.id, name: b.name, ring: b.ring, h: hh.h, hsrc: hh.src, block: b.block ? b.block.split('-').pop() : '', plan: b.plan || '', c: b.c, levels: b.levels }; };
+  const conv = b => { const hh = b.height ? { h: b.height, src: 'OSM 높이' } : b.levels ? { h: b.levels * 3.5, src: 'OSM 층수 × 3.5 m' } : { h: LIVE.hDef, src: `층수 정보 없음 → ${LIVE.hDef} m 가정`, noH: true }; return { id: b.id, name: b.name, ring: b.ring, h: hh.h, hsrc: hh.src, noH: !!hh.noH, block: b.block ? b.block.split('-').pop() : '', plan: b.plan || '', c: b.c, levels: b.levels }; };
   const targets = R.bld.map(conv), obstacles = R.all.filter(b => !b.block).map(conv);
   if (!targets.length) throw new Error('가구 안 건물이 없다.');
-  const nh = targets.filter(t => t.hsrc.startsWith('층수 정보 없음')).length;
-  return { name: label, targets, obstacles, blocks: R.blocks, ep: false, note: `가구 ${R.blocks.length}개 · 가구 안 건물 ${targets.length}동 · 주변 차폐용 건물 ${obstacles.length}동. 높이 정보가 없는 건물 ${nh}동(${Math.round(100 * nh / targets.length)}%)은 ${LIVE.hDef} m로 가정.` };
+  const nh = targets.filter(t => t.noH).length;
+  return { name: label, targets, obstacles, blocks: R.blocks, ep: false, note: `가구 ${R.blocks.length}개 · 가구 안 건물 ${targets.length}동 · 주변 차폐용 건물 ${obstacles.length}동. 높이·층수 정보가 없는 건물 ${nh}동(${Math.round(100 * nh / targets.length)}%)은 ${LIVE.hDef} m로 가정.` };
 }
 
 /* ---------- 페이지 ---------- */
@@ -208,7 +218,7 @@ function pageLive() {
   $('#lreg').addEventListener('change', () => liveLoad($('#lreg').value));
   $('#lqgo').addEventListener('click', () => liveLoad('q:' + $('#lq').value.trim()));
   $('#lq').addEventListener('keydown', e => { if (e.key === 'Enter') liveLoad('q:' + $('#lq').value.trim()); });
-  $('#lhdef').addEventListener('change', () => { LIVE.hDef = +$('#lhdef').value; if (LIVE.src && !LIVE.src.ep) liveLoad(LIVE.srcKey); });
+  $('#lhdef').addEventListener('change', () => { LIVE.hDef = +$('#lhdef').value; if (!LIVE.src) return; const fix = b => { if (b.noH) { b.h = LIVE.hDef; b.hsrc = `층수 정보 없음 → ${LIVE.hDef} m 가정`; } }; LIVE.src.targets.forEach(fix); LIVE.src.obstacles.forEach(fix); LIVE.src.note = (LIVE.src.note || '').replace(/\d+ m로 가정/, LIVE.hDef + ' m로 가정'); LIVE.R = liveBuildRegion(LIVE.src); LIVE.sel = null; liveDay(); });
   $('#ldate').addEventListener('change', () => { LIVE.date = $('#ldate').value || LIVE.peakDate; liveDay(); });
   $$('#ldays button').forEach(b => b.addEventListener('click', () => { $('#ldate').value = b.dataset.d; LIVE.date = b.dataset.d; liveDay(); }));
   $('#lrule').addEventListener('change', () => { LIVE.rule = $('#lrule').value; liveRuleTxt(); liveCharts(); liveDraw(); liveStats(); });
@@ -225,7 +235,7 @@ function pageLive() {
 function liveRuleTxt() { const r = LRULE[LIVE.rule]; $('#lruletxt').innerHTML = `${esc(r.txt)}.${r.ep ? '' : ' <span class="tag mut">257동 EnergyPlus 결과 없음(상세 3개 동만 계산)</span>'}`; }
 function liveMsg(t) { const el = $('#lmsg'); if (el) el.innerHTML = t; }
 async function liveLoad(key) {
-  if (LIVE.busy) return; LIVE.busy = true; const job = ++LIVE.job; LIVE.slots = null;
+  const req = ++LIVE.loadReq; LIVE.job++; LIVE.slots = null;
   try {
     let src;
     if (key === 'yeoksam') src = await liveLoadYeoksam(liveMsg);
@@ -244,29 +254,29 @@ async function liveLoad(key) {
       src = await liveLoadPlans(pick.map(p => p.id), `"${s}" 검색 구역 ${pick.length}개`, liveMsg);
       src.note += ` 검색에 맞는 구역 ${ps.length}개 중 상업지역 비율이 높은 ${pick.length}개(${num(ha, 1)} ha)를 사용.`;
     }
-    if (job !== LIVE.job) return;
+    if (req !== LIVE.loadReq) return; // 그 사이 다른 지역을 고름
     LIVE.src = src; LIVE.srcKey = key; LIVE.R = liveBuildRegion(src); LIVE.sel = null; $('#lbinfo').innerHTML = '';
     liveMsg(`<b>${esc(src.name)}</b> — 계산 대상 ${num(LIVE.R.tg.length)}동. ${esc(src.note || '')}`);
     if (LIVE.blkLayer) LIVE.blkLayer.remove();
     if (src.blocks) LIVE.blkLayer = L.geoJSON({ type: 'FeatureCollection', features: src.blocks }, { style: { color: '#1E2A38', weight: 1, dashArray: '4 3', fill: false }, interactive: false }).addTo(LIVE.map);
     const lls = LIVE.R.tg.flatMap(b => b.ring.map(([x, y]) => [y, x])); LIVE.map.fitBounds(L.latLngBounds(lls), { padding: [12, 12] });
-    $('#ldays button').hidden = false;
     await liveDay();
-  } catch (x) { liveMsg('<span class="pos">' + (x.message || x) + '</span>'); }
-  LIVE.busy = false;
+  } catch (x) { if (req === LIVE.loadReq) liveMsg('<span class="pos">' + (x.message || x) + '</span>'); }
 }
 function ymdOf(s) { const [Y, M, D] = s.split('-').map(Number); return [Y, M, D]; }
 async function liveDay() {
   if (!LIVE.R) return; const R = LIVE.R, ymd = ymdOf(LIVE.date), job = ++LIVE.job;
   LIVE.slots = new Array(144).fill(null); LIVE.ymd = ymd;
   // 현재 시각부터 먼저 계산해 바로 보이게 한 뒤 하루 전체를 나누어 계산
-  const cur = Math.round(LIVE.t / 10); LIVE.slots[cur] = liveSlot(R, ymd, cur * 10); liveTick();
+  const cur = Math.min(143, Math.round(LIVE.t / 10)); LIVE.slots[cur] = liveSlot(R, ymd, cur * 10); liveTick();
   const t0 = performance.now(); let done = 1;
+  let tb = performance.now();
   for (let k = 0; k < 144; k++) {
     if (job !== LIVE.job) return;
     if (!LIVE.slots[k]) { LIVE.slots[k] = liveSlot(R, ymd, k * 10); done++; }
-    if (k % 6 === 5) { liveMsg(`<b>${esc(LIVE.src.name)}</b> — 하루 계산 중 ${Math.round(100 * done / 144)}%`); await new Promise(r => setTimeout(r, 0)); }
+    if (performance.now() - tb > 40) { liveMsg(`<b>${esc(LIVE.src.name)}</b> — 하루 계산 중 ${Math.round(100 * done / 144)}%`); await new Promise(r => setTimeout(r, 0)); tb = performance.now(); }
   }
+  if (job !== LIVE.job) return;
   const dt = (performance.now() - t0) / 1000;
   liveMsg(`<b>${esc(LIVE.src.name)}</b> — 계산 대상 ${num(R.tg.length)}동 · 하루 144개 시각(10분 간격) 계산 ${dt.toFixed(1)}초. ${esc(LIVE.src.note || '')}`);
   liveCharts(); liveTick();
@@ -288,16 +298,21 @@ function irrColor(v) { const t = Math.max(0, Math.min(1, v / 600)); const a = [2
 function hull(pts) { pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); const lo = [], up = []; for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); } for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); } up.pop(); lo.pop(); return lo.concat(up); }
 function liveDraw() {
   const R = LIVE.R, cv = LIVE.canvas; if (!R || !cv) return;
-  const sz = LIVE.map.getSize(), dpr = window.devicePixelRatio || 1; cv.width = sz.x * dpr; cv.height = sz.y * dpr; cv.style.width = sz.x + 'px'; cv.style.height = sz.y + 'px';
+  const sz = LIVE.map.getSize(), dpr = window.devicePixelRatio || 1; if (cv.width !== sz.x * dpr || cv.height !== sz.y * dpr) { cv.width = sz.x * dpr; cv.height = sz.y * dpr; cv.style.width = sz.x + 'px'; cv.style.height = sz.y + 'px'; }
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, sz.x, sz.y);
   const o = LIVE.map.latLngToContainerPoint([R.la, R.lo]), ex = LIVE.map.latLngToContainerPoint([R.la, R.lo + 100 / R.kx]), ny = LIVE.map.latLngToContainerPoint([R.la + 100 / R.ky, R.lo]);
   const sx = (ex.x - o.x) / 100, sy = (ny.y - o.y) / 100; const X = p => o.x + p[0] * sx, Y = p => o.y + p[1] * sy;
   const sp = sunPos(LIVE.ymd || ymdOf(LIVE.date), LIVE.t, R.la, R.lo);
   // 그림자(연속 시간)
   if (sp.alt > 0.5) {
-    const L1 = 1 / Math.tan(sp.alt * D2R), dx = -Math.sin(sp.az * D2R) * L1, dy = -Math.cos(sp.az * D2R) * L1;
+    // 그림자 다각형(m 좌표)은 1분 단위로 캐시하고, 지도 이동 때는 좌표 변환만 다시 한다
+    const mk = `${LIVE.date}|${Math.round(LIVE.t)}`;
+    if (!R.hc || R.hc.k !== mk) {
+      const L1 = 1 / Math.tan(sp.alt * D2R), dx = -Math.sin(sp.az * D2R) * L1, dy = -Math.cos(sp.az * D2R) * L1;
+      R.hc = { k: mk, H: R.all.map(b => { const l = Math.min(b.h * L1, 1500) / L1; return hull([...b.P, ...b.P.map(p => [p[0] + dx * l, p[1] + dy * l])]); }) };
+    }
     const path = new Path2D();
-    for (const b of R.all) { const l = Math.min(b.h * L1, 1500) / L1; const H = hull([...b.P, ...b.P.map(p => [p[0] + dx * l, p[1] + dy * l])]); path.moveTo(X(H[0]), Y(H[0])); for (let i = 1; i < H.length; i++) path.lineTo(X(H[i]), Y(H[i])); path.closePath(); }
+    for (const H of R.hc.H) { path.moveTo(X(H[0]), Y(H[0])); for (let i = 1; i < H.length; i++) path.lineTo(X(H[i]), Y(H[i])); path.closePath(); }
     ctx.fillStyle = 'rgba(30,42,56,0.22)'; ctx.fill(path, 'nonzero');
   } else { ctx.fillStyle = 'rgba(30,42,56,0.18)'; ctx.fillRect(0, 0, sz.x, sz.y); }
   // 주변 건물
@@ -377,7 +392,7 @@ function liveBInfo() {
   const b = LIVE.sel; if (!b) { $('#lbinfo').innerHTML = ''; return; } const R = LIVE.R, i = R.tg.indexOf(b), S = liveCur(); if (!S) return;
   const sp = S.sp, cs = S.cs, ux = Math.sin(sp.az * D2R), uy = Math.cos(sp.az * D2R), tanA = Math.tan(Math.max(sp.alt, 0.5) * D2R), ca = Math.cos(sp.alt * D2R);
   const dirName = a => ['북', '북동', '동', '남동', '남', '남서', '서', '북서'][Math.round(a / 45) % 8];
-  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (I > 300 ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평')) : (Ib > 0 ? '추종(컷오프)' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직사광', I, st }; });
+  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (I > 300 && inSeason() ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평')) : (Ib > 0 ? '추종(컷오프)' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직사광', I, st }; });
   let ep = '';
   if (b.sim) { const r = q('SELECT tag, dEUI_pct, dpeak_pct FROM results_257 WHERE sim_name=?', [b.sim]); const m = Object.fromEntries(r.map(x => [x.tag, x])); const t = LIVE.rule; ep = m[t] ? `<p class="small">EnergyPlus 결과(이 건물, ${esc(LRULE[t].name)}, 보정 기준 대비): EUI ${pct(m[t].dEUI_pct)}, 건물 최대 전력 ${pct(m[t].dpeak_pct)}. <a href="#/site">대상지·건물</a>에서 자세히.</p>` : ''; }
   $('#lbinfo').innerHTML = `<div class="card"><h3>${esc(b.name || b.id)} <span class="small">${b.block ? '가구 ' + esc(b.block) : ''} · 높이 ${num(b.h, 1)} m(${esc(b.hsrc)})</span></h3>${table([{ h: '입면 방향', k: 'o' }, { h: '길이(m)', k: 'len', num: 1, f: v => num(v, 0) }, { h: '직사광', k: 's' }, { h: '일사(W/m²)', k: 'I', num: 1, f: v => num(v) }, { h: '작동', k: 'st' }], rows, { nw: 1, maxh: 260 })}<p class="small">길이 5 m 이상 입면만 표시. 입면 중앙(높이 ${num(b.h / 2, 1)} m) 한 점에서 판정한 맑은 날 간이 계산.</p>${ep}</div>`;
@@ -386,14 +401,15 @@ function liveBInfo() {
 function liveSave(name, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
 function liveCsvBld() {
   if (!LIVE.slots || LIVE.slots.some(s => !s)) { liveMsg('하루 계산이 끝난 뒤 내려받을 수 있다.'); return; }
-  const R = LIVE.R, rule = LIVE.rule; const lines = ['id,name,block,lon,lat,height_m,height_source,date,time,sun_alt_deg,sun_az_deg,facade_irr_Wm2,sunlit_frac,shaded_by_neighbors_frac,over300_frac,moving_frac_' + rule];
+  const R = LIVE.R, rule = LIVE.rule; const q2 = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = ['id,name,plan,block,lon,lat,height_m,height_source,date,time,sun_alt_deg,sun_az_deg,facade_irr_Wm2,sunlit_frac,shaded_by_neighbors_frac,over300_frac,moving_frac_' + rule];
   for (let k = 0; k < 144; k += 6) { const s = LIVE.slots[k]; if (s.sp.alt <= 0) continue; const tm = `${String(k / 6).padStart(2, '0')}:00`;
-    R.tg.forEach((b, i) => { const o = i * 5; lines.push([b.id, `"${String(b.name || '').replace(/"/g, '""')}"`, b.block || '', b.c[0].toFixed(6), b.c[1].toFixed(6), b.h.toFixed(1), b.hsrc, LIVE.date, tm, s.sp.alt.toFixed(2), s.sp.az.toFixed(1), s.v[o].toFixed(1), s.v[o + 1].toFixed(3), s.v[o + 4].toFixed(3), s.v[o + 2].toFixed(3), moveFrac(rule, s.v, o).toFixed(3)].join(',')); }); }
+    R.tg.forEach((b, i) => { const o = i * 5; lines.push([b.id, q2(b.name), q2(b.plan), b.block || '', b.c[0].toFixed(6), b.c[1].toFixed(6), b.h.toFixed(1), q2(b.hsrc), LIVE.date, tm, s.sp.alt.toFixed(2), s.sp.az.toFixed(1), s.v[o].toFixed(1), s.v[o + 1].toFixed(3), s.v[o + 4].toFixed(3), s.v[o + 2].toFixed(3), moveFrac(rule, s.v, o).toFixed(3)].join(',')); }); }
   liveSave(`live_buildings_${LIVE.date}_${rule}.csv`, lines.join('\n'));
 }
 function liveCsvDay() {
   const se = LIVE.series || liveSeries(); if (!se) { liveMsg('하루 계산이 끝난 뒤 내려받을 수 있다.'); return; }
   const lines = ['region,date,rule,time,sun_alt_deg,sun_az_deg,facade_irr_mean_Wm2,sunlit_pct,shaded_by_neighbors_pct,moving_pct'];
-  se.forEach((x, k) => lines.push([`"${LIVE.src.name}"`, LIVE.date, LIVE.rule, `${String(Math.floor(k / 6)).padStart(2, '0')}:${String(k % 6 * 10).padStart(2, '0')}`, x.alt.toFixed(2), x.az.toFixed(1), x.I.toFixed(1), x.lit.toFixed(1), x.blk.toFixed(1), x.mv.toFixed(1)].join(',')));
+  se.forEach((x, k) => lines.push([`"${String(LIVE.src.name).replace(/"/g, '""')}"`, LIVE.date, LIVE.rule, `${String(Math.floor(k / 6)).padStart(2, '0')}:${String(k % 6 * 10).padStart(2, '0')}`, x.alt.toFixed(2), x.az.toFixed(1), x.I.toFixed(1), x.lit.toFixed(1), x.blk.toFixed(1), x.mv.toFixed(1)].join(',')));
   liveSave(`live_region_${LIVE.date}_${LIVE.rule}.csv`, lines.join('\n'));
 }

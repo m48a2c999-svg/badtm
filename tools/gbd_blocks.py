@@ -1,3 +1,4 @@
+"""테헤란로제2지구 가구별 예비 수치: 257동 중 가구 안 140동의 EnergyPlus 결과(res_sb10 시간별)를 가구별로 합산. 출력 gbd_blocks.json/csv (값은 소수 4자리, 표시는 2자리)."""
 import json,sqlite3,pickle,numpy as np,statistics as st,csv
 MB='/tmp/claude-0/-home-claude/d855b01c-4d65-5c73-a219-ae59fd128dc1/scratchpad/mb/res_sb10/'
 PLAN='11680UQ161PS202505140001'
@@ -37,7 +38,7 @@ for g,ns in sorted(groups.items(),key=lambda kv:(kv[0]=='ALL',kv[0])):
     row={'block':g,'n':len(ns),'peak0_kW':int(round(float(H0.max())))}
     for a in ALTS:
         E=sum(load(n,a)[0] for n in ns); H=sum(load(n,a)[1] for n in ns)
-        row[f'{a}_dE']=round(100*(E-E0)/E0,2); row[f'{a}_dP']=round(float(100*(H.max()-H0.max())/H0.max()),2)
+        row[f'{a}_dE']=round(float(100*(E-E0)/E0),4); row[f'{a}_dP']=round(float(100*(H.max()-H0.max())/H0.max()),4)
         row[f'{a}_both']=sum(1 for n in ns if R[(n,a)][0]<0 and R[(n,a)][1]<0)
     rows.append(row)
 pass

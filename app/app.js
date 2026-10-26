@@ -395,11 +395,11 @@ function pagePlan() {
 /* 강남 권역 가구별 예비 수치(테헤란로제2지구 가구 안 140동) */
 function gbdSection() {
   const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
-  const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL');
+  const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL'); if (!all) return '';
   const rows = ORDER257.map(t => ({ name: altName(t), dE: all[t + '_dE'], dP: all[t + '_dP'], both: all[t + '_both'], bothG: blk.filter(r => r[t + '_dE'] < 0 && r[t + '_dP'] < 0).length, rng: `${pct(Math.min(...blk.map(r => r[t + '_dE'])))} ~ ${pct(Math.max(...blk.map(r => r[t + '_dE'])))}` }));
   return `<h2>강남 권역 가구별 예비 수치 — 테헤란로제2지구 가구 ${blk.length}개, ${all.n}동</h2>
-  <p>역삼 257동 가운데 테헤란로제2지구 지구단위계획구역의 가구 안에 있는 ${all.n}동을 가구별로 묶어, 이미 계산한 EnergyPlus 시간별 결과를 더하였다(가구 EUI = 가구 안 건물의 연간 에너지 합 ÷ 연면적 합, 가구 최대 전력 = 시간별 전력 합의 최댓값, 개량 전 대비). 가구 안의 다른 건물(6층 미만 등)은 아직 계산하지 않았으므로 가구 전체 값이 아니다.</p>
-  ${table([{ h: '대안', k: 'name' }, { h: '구역 합산 EUI', k: 'dE', num: 1, f: v => pct(v), cls: bad }, { h: '구역 합산 최대 전력', k: 'dP', num: 1, f: v => pct(v), cls: bad }, { h: '가구별 EUI 범위', k: 'rng', num: 1 }, { h: '둘 다 감소한 가구', k: 'bothG', num: 1, f: v => `${v}/${blk.length}` }, { h: '둘 다 감소한 건물', k: 'both', num: 1, f: v => `${v}/${all.n}` }], rows, { nw: 1 })}
+  <p>역삼 257동 가운데 테헤란로제2지구 지구단위계획구역의 가구 안에 있는 ${all.n}동을 가구별로 묶어, 이미 계산한 EnergyPlus 시간별 결과를 더하였다(가구 EUI = 가구 안 건물의 연간 에너지 합 ÷ 연면적 합, 가구 최대 전력 = 시간별 전력 합의 연간 최댓값, 개량 전(보정 기준) 대비). 가구 안의 다른 건물(6층 미만 등)은 아직 계산하지 않았으므로 가구 전체 값이 아니다.</p>
+  ${table([{ h: '대안', k: 'name' }, { h: '140동 합산 EUI', k: 'dE', num: 1, f: v => pct(v), cls: bad }, { h: '140동 합산 최대 전력', k: 'dP', num: 1, f: v => pct(v), cls: bad }, { h: '가구별 EUI 범위', k: 'rng', num: 1 }, { h: '둘 다 감소한 가구', k: 'bothG', num: 1, f: v => `${v}/${blk.length}` }, { h: '둘 다 감소한 건물', k: 'both', num: 1, f: v => `${v}/${all.n}` }], rows, { nw: 1 })}
   <details><summary class="small">가구별 표 보기(${blk.length}개 가구)</summary>${table([{ h: '가구', k: 'gagu' }, { h: '건물', k: 'n', num: 1 }, { h: '개량 전 최대 전력(kW)', k: 'peak0_kW', num: 1, f: v => num(v) }, ...['F0', 'BT_T300', 'LH_F0'].flatMap(t => [{ h: altName(t) + ' EUI', k: t + '_dE', num: 1, f: v => pct(v), cls: bad }, { h: '최대 전력', k: t + '_dP', num: 1, f: v => pct(v), cls: bad }])], blk, { nw: 1, maxh: 420 })}</details>
   ${note('가구 번호는 서울 UPIS 지구단위계획구역(UQ161)을 도시계획도로(UQ151)로 나눈 순번이며 결정도의 가구 번호와는 재계산 전에 대조한다. ' + SIMNOTE)}`;
 }
