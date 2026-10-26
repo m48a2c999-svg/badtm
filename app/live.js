@@ -143,8 +143,7 @@ async function liveLoadYeoksam(msg) {
     let s = 90, w = 180, n = -90, e = -180; for (const t of targets) for (const [x, y] of t.ring) { s = Math.min(s, y); n = Math.max(n, y); w = Math.min(w, x); e = Math.max(e, x); }
     const pad = 0.003, bb = `${(s - pad).toFixed(6)},${(w - pad).toFixed(6)},${(n + pad).toFixed(6)},${(e + pad).toFixed(6)}`;
     const ql = `[out:json][timeout:60];(way["building"](${bb}););out tags geom;`;
-    let data = null; for (const u of OVERPASS) { try { const r = await fetch(u, { method: 'POST', body: 'data=' + encodeURIComponent(ql), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); if (r.ok) { data = await r.json(); break; } } catch (x) { } }
-    if (!data) throw new Error('접속 실패');
+    const { data } = await overpassQuery(ql, t => msg('주변 건물: ' + t), 70000);
     for (const el of data.elements) {
       if (!el.geometry || el.geometry.length < 4) continue; const ring = el.geometry.map(p => [p.lon, p.lat]); const c = centroid(ring);
       if (targets.some(t => inRing(c, t.ring) || inRing(t.c, ring) || t.ring.some(p => inRing(p, ring)))) continue;

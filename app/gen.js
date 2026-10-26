@@ -18,6 +18,27 @@ const PRESET = {
 const GEN_MAX_PLANS = 30, GEN_MAX_HA = 600;
 const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 
+
+/* Overpass 질의: 서버마다 시간 제한(기본 90초)을 두고, 실패하면 다음 서버 → 한 바퀴 더 시도 */
+async function overpassQuery(ql, onWait = () => {}, ms = 90000) {
+  let err = '';
+  for (let round = 0; round < 2; round++) {
+    for (const u of OVERPASS) {
+      const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), ms);
+      try {
+        const r = await fetch(u, { method: 'POST', body: 'data=' + encodeURIComponent(ql), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ac.signal });
+        if (r.ok) { const d = await r.json(); clearTimeout(tm); return { data: d, used: u }; }
+        err = 'HTTP ' + r.status;
+      } catch (x) { err = x.name === 'AbortError' ? '시간 초과' : x.message; }
+      clearTimeout(tm);
+      const last = round === 1 && u === OVERPASS[OVERPASS.length - 1];
+      if (!last) onWait(`${u.split('/')[2]} 응답 없음(${err}) — 다른 서버로 다시 시도`);
+    }
+    if (round === 0) await new Promise(r => setTimeout(r, 3000));
+  }
+  throw new Error('OpenStreetMap 서버에 접속하지 못했다(' + err + '). 잠시 뒤 다시 시도해 주세요.');
+}
+
 async function genLoadPlans() {
   if (GEN.plans) return;
   const j = await (await fetch('data/upis/plans.json')).json();
@@ -96,9 +117,7 @@ async function genFetch(planIds, onStep = () => {}) {
   const s2 = onStep('② OpenStreetMap 건물 윤곽 받는 중… (수십 초 걸릴 수 있음)');
   const pad = 0.0015; const bb = `${(s - pad).toFixed(6)},${(w - pad).toFixed(6)},${(n + pad).toFixed(6)},${(e + pad).toFixed(6)}`;
   const ql = `[out:json][timeout:120];(way["building"](${bb});relation["building"]["type"="multipolygon"](${bb}););out tags geom;`;
-  let data = null, used = null, err = '';
-  for (const u of OVERPASS) { try { const r = await fetch(u, { method: 'POST', body: 'data=' + encodeURIComponent(ql), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); if (r.ok) { data = await r.json(); used = u; break; } err = r.status; } catch (x) { err = x.message; } }
-  if (!data) throw new Error('OpenStreetMap 서버에 접속하지 못했다(' + err + ')');
+  const { data, used } = await overpassQuery(ql, t => { if (s2) s2.textContent = '② ' + t; else onStep('② ' + t); }, 130000);
   const B = [];
   for (const el of data.elements) {
     let ring = null;
