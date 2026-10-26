@@ -5,10 +5,17 @@
 'use strict';
 const GEN = { plans: null, gu: null, sel: new Set(), blocks: null, bld: null, map: null, layer: null, log: [] };
 const PRESET = {
-  '도심(CBD)': ['11110UQ161PS201908270002', '11110UQ161PS202405270003', '11110UQ161PS202308280002', '11140UQ161PS202403210003'],
+  // 도심: 세종로·종로2·3가·종로4·5가·명동관광특구 + 도심 핵심부(광화문·시청·무교다동·을지로·남대문) 도시정비형 재개발구역 등(서울 UPIS UQ161 2026-09)
+  '도심(CBD)': ['11110UQ161PS201908270002', '11110UQ161PS202405270003', '11110UQ161PS202308280002', '11140UQ161PS202403210003',
+    '11000UQ161PS201912150057', '11000UQ161PS202012175029', '11000UQ161PS201912150198', '11140UQ161PS202409030001', '11140UQ161PS202405290001',
+    '11110UQ161PS202412160001', '99999UQ161PS202404020001', '11110UQ161PS202412100001', '11110UQ161PS202505140001', '11110UQ161PS202411250001',
+    '11110UQ161PS202408060003', '11140UQ161PS202403210001', '11140UQ161PS202409020002', '11140UQ161PS202504100001', '11140UQ161PS202502250001',
+    '11140UQ161PS202405140003', '11140UQ161PS202403260001', '11140UQ161PS202409020001', '11140UQ161PS202504070001', '11140UQ161PS202408280001',
+    '11140UQ161PS202407110001', '11110UQ161PS202405270002', '11140UQ161PS202604290001'],
   '강남(GBD)': ['11680UQ161PS202505140001'],
   '여의도·마포(YBD)': ['11000UQ161PS202411250001'],
 };
+const GEN_MAX_PLANS = 30, GEN_MAX_HA = 600;
 const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 
 async function genLoadPlans() {
@@ -56,7 +63,7 @@ function genList() {
   genSelInfo();
 }
 function genSelInfo() { const ps = GEN.plans.filter(p => GEN.sel.has(p.id)); $('#gselinfo').textContent = ps.length ? `선택 ${ps.length}개 구역 · 가구 ${ps.reduce((a, p) => a + p.n_blocks, 0)}개 · ${num(ps.reduce((a, p) => a + p.area_ha, 0), 1)} ha` : '선택한 구역 없음'; }
-function step(t, cls = '') { GEN.log.push(`${new Date().toISOString()} ${t}`); const li = document.createElement('li'); li.textContent = t; if (cls) li.className = cls; $('#gsteps').appendChild(li); return li; }
+function step(t, cls = '', html = false) { GEN.log.push(`${new Date().toISOString()} ${t}`); const li = document.createElement('li'); if (html) li.innerHTML = t; else li.textContent = t; if (cls) li.className = cls; $('#gsteps').appendChild(li); return li; }
 
 /* ---- 기하 도우미(경위도 → 국지 평면 m) ---- */
 let LAT0 = 37.5;
@@ -68,58 +75,62 @@ function inPoly(pt, rings) { return rings.length && inRing(pt, rings[0]) && !rin
 function polysOf(geom) { return geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : []; }
 function centroid(r) { let x = 0, y = 0; const n = r.length - 1 || 1; for (let i = 0; i < n; i++) { x += r[i][0]; y += r[i][1]; } return [x / n, y / n]; }
 
+/* ---- 지역 자료 만들기(자료 생성기·실시간 시뮬레이션 공용) ----
+   planIds: 지구단위계획구역 ID 목록. 반환: { plans, blocks(가구 GeoJSON 피처), all(범위 안 모든 건물), bld(가구 안 건물), used, bbox } */
+async function genFetch(planIds, onStep = () => {}) {
+  await genLoadPlans();
+  const sel = new Set(planIds);
+  const ps = GEN.plans.filter(p => sel.has(p.id));
+  if (!ps.length) throw new Error('구역을 먼저 선택하세요.');
+  if (ps.length > GEN_MAX_PLANS || ps.reduce((a, p) => a + p.area_ha, 0) > GEN_MAX_HA) throw new Error(`한 번에 ${GEN_MAX_PLANS}개 구역·${GEN_MAX_HA} ha까지만 만든다(OpenStreetMap 서버 부담). 선택을 줄여 주세요.`);
+  const s1 = onStep('① 공식 가구 경계 불러오는 중…');
+  const files = [...new Set(ps.map(p => p.gu))];
+  const feats = [];
+  for (const g of files) { const j = await (await fetch(`data/upis/blocks_${g}.geojson`)).json(); feats.push(...j.features.filter(f => sel.has(f.properties.plan_id))); }
+  if (!feats.length) throw new Error('선택한 구역에 2,000 m² 이상인 가구가 없다.');
+  let s = 90, w = 180, n = -90, e = -180;
+  for (const f of feats) for (const poly of polysOf(f.geometry)) for (const [x, y] of poly[0]) { s = Math.min(s, y); n = Math.max(n, y); w = Math.min(w, x); e = Math.max(e, x); }
+  LAT0 = (s + n) / 2;
+  feats.forEach(f => { f.properties.area_m2_web = Math.round(polysOf(f.geometry).reduce((a, r) => a + polyArea(r), 0)); f.properties.bld = []; });
+  if (s1) s1.textContent = `① 가구 ${feats.length}개 (${ps.length}개 구역)`;
+  const s2 = onStep('② OpenStreetMap 건물 윤곽 받는 중… (수십 초 걸릴 수 있음)');
+  const pad = 0.0015; const bb = `${(s - pad).toFixed(6)},${(w - pad).toFixed(6)},${(n + pad).toFixed(6)},${(e + pad).toFixed(6)}`;
+  const ql = `[out:json][timeout:120];(way["building"](${bb});relation["building"]["type"="multipolygon"](${bb}););out tags geom;`;
+  let data = null, used = null, err = '';
+  for (const u of OVERPASS) { try { const r = await fetch(u, { method: 'POST', body: 'data=' + encodeURIComponent(ql), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); if (r.ok) { data = await r.json(); used = u; break; } err = r.status; } catch (x) { err = x.message; } }
+  if (!data) throw new Error('OpenStreetMap 서버에 접속하지 못했다(' + err + ')');
+  const B = [];
+  for (const el of data.elements) {
+    let ring = null;
+    if (el.type === 'way' && el.geometry && el.geometry.length > 3) ring = el.geometry.map(p => [p.lon, p.lat]);
+    else if (el.type === 'relation' && el.members) { const o = el.members.find(m => m.role === 'outer' && m.geometry); if (o) ring = o.geometry.map(p => [p.lon, p.lat]); }
+    if (!ring) continue;
+    const t = el.tags || {}; const lv = parseFloat(t['building:levels']); const h = parseFloat(t.height);
+    B.push({ id: `${el.type[0]}${el.id}`, ring, name: t.name || '', type: t.building, levels: Number.isFinite(lv) ? lv : null, height: Number.isFinite(h) ? h : null, area: ringArea(ring), c: centroid(ring) });
+  }
+  if (s2) s2.textContent = `② 건물 윤곽 ${B.length}동 (${used.split('/')[2]}, 가구 경계 바깥 150 m 포함)`;
+  const s3 = onStep('③ 건물을 가구에 배정하는 중…');
+  let assigned = 0;
+  for (const b of B) { for (const f of feats) { if (polysOf(f.geometry).some(r => inPoly(b.c, r))) { f.properties.bld.push(b); b.block = `${f.properties.plan_id}-${f.properties.block}`; b.plan = f.properties.plan; assigned++; break; } } }
+  if (s3) s3.textContent = `③ 가구 안 건물 ${assigned}동 (가구 밖 ${B.length - assigned}동은 주변 차폐용으로만 사용)`;
+  for (const f of feats) {
+    const bs = f.properties.bld, P = f.properties; const lv = bs.map(b => b.levels).filter(v => v != null);
+    P.n_bld = bs.length; P.footprint_m2 = Math.round(bs.reduce((a, b) => a + b.area, 0)); P.coverage_pct = P.area_m2_web ? +(100 * P.footprint_m2 / P.area_m2_web).toFixed(1) : null;
+    P.n_levels_tagged = lv.length; P.levels_mean = lv.length ? +(lv.reduce((a, b) => a + b, 0) / lv.length).toFixed(1) : null; P.levels_max = lv.length ? Math.max(...lv) : null;
+    P.n_6f_plus = lv.filter(v => v >= 6).length; P.n_office_tag = bs.filter(b => ['office', 'commercial'].includes(b.type)).length;
+    P.floor_area_est_m2 = lv.length ? Math.round(bs.filter(b => b.levels != null).reduce((a, b) => a + b.area * b.levels, 0)) : null;
+  }
+  return { plans: ps, blocks: feats, all: B, bld: B.filter(b => b.block), used, bbox: [s, w, n, e] };
+}
 async function genRun() {
-  const ps = GEN.plans.filter(p => GEN.sel.has(p.id));
   $('#gsteps').innerHTML = ''; GEN.log = []; $('#gout').innerHTML = '';
-  if (!ps.length) { step('구역을 먼저 선택하세요.', 'pos'); return; }
-  if (ps.length > 12 || ps.reduce((a, p) => a + p.area_ha, 0) > 600) { step('한 번에 12개 구역·600 ha까지만 만든다(OpenStreetMap 서버 부담). 선택을 줄여 주세요.', 'pos'); return; }
   $('#grun').disabled = true;
   try {
-    // ① 가구
-    const s1 = step('① 공식 가구 경계 불러오는 중…');
-    const files = [...new Set(ps.map(p => p.gu))];
-    const feats = [];
-    for (const g of files) { const j = await (await fetch(`data/upis/blocks_${g}.geojson`)).json(); feats.push(...j.features.filter(f => GEN.sel.has(f.properties.plan_id))); }
-    let s = 90, w = 180, n = -90, e = -180;
-    for (const f of feats) for (const poly of polysOf(f.geometry)) for (const [x, y] of poly[0]) { s = Math.min(s, y); n = Math.max(n, y); w = Math.min(w, x); e = Math.max(e, x); }
-    LAT0 = (s + n) / 2;
-    feats.forEach(f => { f.properties.area_m2_web = Math.round(polysOf(f.geometry).reduce((a, r) => a + polyArea(r), 0)); f.properties.bld = []; });
-    s1.textContent = `① 가구 ${feats.length}개 (${ps.length}개 구역)`;
-    GEN.blocks = feats;
-    // ② 건물
-    const s2 = step('② OpenStreetMap 건물 윤곽 받는 중… (수십 초 걸릴 수 있음)');
-    const pad = 0.0005; const bb = `${(s - pad).toFixed(6)},${(w - pad).toFixed(6)},${(n + pad).toFixed(6)},${(e + pad).toFixed(6)}`;
-    const ql = `[out:json][timeout:90];(way["building"](${bb});relation["building"]["type"="multipolygon"](${bb}););out tags geom;`;
-    let data = null, used = null, err = '';
-    for (const u of OVERPASS) { try { const r = await fetch(u, { method: 'POST', body: 'data=' + encodeURIComponent(ql), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); if (r.ok) { data = await r.json(); used = u; break; } err = r.status; } catch (x) { err = x.message; } }
-    if (!data) throw new Error('OpenStreetMap 서버에 접속하지 못했다(' + err + ')');
-    const B = [];
-    for (const el of data.elements) {
-      let ring = null;
-      if (el.type === 'way' && el.geometry && el.geometry.length > 3) ring = el.geometry.map(p => [p.lon, p.lat]);
-      else if (el.type === 'relation' && el.members) { const o = el.members.find(m => m.role === 'outer' && m.geometry); if (o) ring = o.geometry.map(p => [p.lon, p.lat]); }
-      if (!ring) continue;
-      const t = el.tags || {}; const lv = parseFloat(t['building:levels']); const h = parseFloat(t.height);
-      B.push({ id: `${el.type[0]}${el.id}`, ring, name: t.name || '', type: t.building, levels: Number.isFinite(lv) ? lv : null, height: Number.isFinite(h) ? h : null, area: ringArea(ring), c: centroid(ring) });
-    }
-    s2.textContent = `② 건물 윤곽 ${B.length}동 (${used.split('/')[2]})`;
-    // ③ 배정
-    const s3 = step('③ 건물을 가구에 배정하는 중…');
-    let assigned = 0;
-    for (const b of B) { for (const f of feats) { if (polysOf(f.geometry).some(r => inPoly(b.c, r))) { f.properties.bld.push(b); b.block = `${f.properties.plan_id}-${f.properties.block}`; b.plan = f.properties.plan; assigned++; break; } } }
-    GEN.bld = B.filter(b => b.block);
-    s3.textContent = `③ 가구 안 건물 ${assigned}동 (구역 밖 ${B.length - assigned}동 제외)`;
-    // ④ 지표
-    for (const f of feats) {
-      const bs = f.properties.bld, P = f.properties; const lv = bs.map(b => b.levels).filter(v => v != null);
-      P.n_bld = bs.length; P.footprint_m2 = Math.round(bs.reduce((a, b) => a + b.area, 0)); P.coverage_pct = P.area_m2_web ? +(100 * P.footprint_m2 / P.area_m2_web).toFixed(1) : null;
-      P.n_levels_tagged = lv.length; P.levels_mean = lv.length ? +(lv.reduce((a, b) => a + b, 0) / lv.length).toFixed(1) : null; P.levels_max = lv.length ? Math.max(...lv) : null;
-      P.n_6f_plus = lv.filter(v => v >= 6).length; P.n_office_tag = bs.filter(b => ['office', 'commercial'].includes(b.type)).length;
-      P.floor_area_est_m2 = lv.length ? Math.round(bs.filter(b => b.levels != null).reduce((a, b) => a + b.area * b.levels, 0)) : null;
-    }
+    const R = await genFetch([...GEN.sel], step);
+    GEN.blocks = R.blocks; GEN.bld = R.bld; GEN.all = R.all; GEN.last = R;
     step(`④ 가구별 지표 계산 완료 · 층수 태그가 있는 건물 ${GEN.bld.filter(b => b.levels != null).length}/${GEN.bld.length}동`);
-    genDraw(); genTable(ps, used);
-    step('⑤ 아래에서 결과를 내려받을 수 있다.', 'neg');
+    genDraw(); genTable(R.plans, R.used);
+    step('⑤ 아래에서 결과를 내려받거나, <a href="#/live">실시간 시뮬레이션</a>에서 이 지역을 바로 돌려 볼 수 있다.', 'neg', true);
   } catch (x) { step('오류: ' + x.message, 'pos'); }
   $('#grun').disabled = false;
 }

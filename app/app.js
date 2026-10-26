@@ -126,7 +126,7 @@ function pageHome() {
   const cb = JSON.parse(META.class_bounds);
   $('#page-home').innerHTML = `
   <div class="titleblock">
-    <div class="kicker">예비심사 원고 기준 · 2026-10-26 · 검토용</div>
+    <div class="kicker">예비심사 원고 기준 · 2026-10-26</div>
     <h1>${esc(META.title_ko)}</h1>
     <p class="en">${esc(META.title_en)}</p>
     <div class="small">${esc(META.author)}</div>
@@ -385,9 +385,23 @@ function pagePlan() {
   <h2>확장 — 업무 기능 지구단위계획구역의 가구별 전체 건물</h2>
   <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>블록.</b> 국내에는 "업무지구"라는 법정 용도지역이 없으므로, 도시관리계획으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 가구(街區, 2,000 m² 이상)를 블록으로 쓴다(결정도의 가구 번호와는 재계산 전에 대조). 가구 안의 모든 건물을 모아 주변 차폐와 가구 합산에 쓰고, 개량 효과의 분석 대상은 업무시설 6층 이상 건물로 한다. <a href="#/gen">자료 생성기</a>에서 권역을 고르면 가구와 건물 자료를 바로 만들 수 있다.</p></div>
   ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
+  ${gbdSection()}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개량 효과</div></div>
   <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 원형 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>개량 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다. 전기변색 유리 같은 가변 유리는 범위에서 제외하였다.</li></ol>
   <h2>일정(안)</h2>${table([{ h: '시기', k: 'a' }, { h: '내용', k: 'b' }], [{ a: '2026년 11월 9일', b: '예비심사: 목적·방법·예비 결과·재계산과 확장 계획 발표' }, { a: '2026년 11~12월', b: '대안·지표 확정, 상세 3개 동·257동 재계산, sDA·ASE 추가' }, { a: '2027년 1~3월', b: '3권역 가구별 자료 확보(건축물대장 결합), 간이 모델 검증, 가구별 계산' }, { a: '2027년 4~6월', b: '분석·집필, 본심사 원고' }, { a: '2027년 9월', b: '학위 수여' }])}`;
+}
+
+
+/* 강남 권역 가구별 예비 수치(테헤란로제2지구 가구 안 140동) */
+function gbdSection() {
+  const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
+  const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL');
+  const rows = ORDER257.map(t => ({ name: altName(t), dE: all[t + '_dE'], dP: all[t + '_dP'], both: all[t + '_both'], bothG: blk.filter(r => r[t + '_dE'] < 0 && r[t + '_dP'] < 0).length, rng: `${pct(Math.min(...blk.map(r => r[t + '_dE'])))} ~ ${pct(Math.max(...blk.map(r => r[t + '_dE'])))}` }));
+  return `<h2>강남 권역 가구별 예비 수치 — 테헤란로제2지구 가구 ${blk.length}개, ${all.n}동</h2>
+  <p>역삼 257동 가운데 테헤란로제2지구 지구단위계획구역의 가구 안에 있는 ${all.n}동을 가구별로 묶어, 이미 계산한 EnergyPlus 시간별 결과를 더하였다(가구 EUI = 가구 안 건물의 연간 에너지 합 ÷ 연면적 합, 가구 최대 전력 = 시간별 전력 합의 최댓값, 개량 전 대비). 가구 안의 다른 건물(6층 미만 등)은 아직 계산하지 않았으므로 가구 전체 값이 아니다.</p>
+  ${table([{ h: '대안', k: 'name' }, { h: '구역 합산 EUI', k: 'dE', num: 1, f: v => pct(v), cls: bad }, { h: '구역 합산 최대 전력', k: 'dP', num: 1, f: v => pct(v), cls: bad }, { h: '가구별 EUI 범위', k: 'rng', num: 1 }, { h: '둘 다 감소한 가구', k: 'bothG', num: 1, f: v => `${v}/${blk.length}` }, { h: '둘 다 감소한 건물', k: 'both', num: 1, f: v => `${v}/${all.n}` }], rows, { nw: 1 })}
+  <details><summary class="small">가구별 표 보기(${blk.length}개 가구)</summary>${table([{ h: '가구', k: 'gagu' }, { h: '건물', k: 'n', num: 1 }, { h: '개량 전 최대 전력(kW)', k: 'peak0_kW', num: 1, f: v => num(v) }, ...['F0', 'BT_T300', 'LH_F0'].flatMap(t => [{ h: altName(t) + ' EUI', k: t + '_dE', num: 1, f: v => pct(v), cls: bad }, { h: '최대 전력', k: t + '_dP', num: 1, f: v => pct(v), cls: bad }])], blk, { nw: 1, maxh: 420 })}</details>
+  ${note('가구 번호는 서울 UPIS 지구단위계획구역(UQ161)을 도시계획도로(UQ151)로 나눈 순번이며 결정도의 가구 번호와는 재계산 전에 대조한다. ' + SIMNOTE)}`;
 }
 
 /* ---------------- 페이지: 데이터베이스 ---------------- */
@@ -400,7 +414,7 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개량 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '개량 대안(구분·장치·작동·주광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개량 전 대비)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 9개 안)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', principles: '생체모방 제어 원리 4개와 판정', districts: '3대 업무권역 확장 계획', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개량 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '개량 대안(구분·장치·작동·주광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개량 전 대비)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 9개 안)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', principles: '생체모방 제어 원리 4개와 판정', districts: '3대 업무권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·최대 전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `
@@ -422,7 +436,7 @@ function runQ() {
 }
 
 /* ---------------- 라우팅 ---------------- */
-const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, bio: pageBio, plan: pagePlan, db: pageDb, gen: () => pageGen() };
+const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, bio: pageBio, plan: pagePlan, db: pageDb, gen: () => pageGen(), live: () => pageLive() };
 const BUILT = {};
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';
@@ -431,6 +445,7 @@ function route() {
   $$('nav a').forEach(a => a.classList.toggle('on', a.dataset.r === key));
   document.body.classList.remove('navopen');
   if (key === 'gen' && GEN.map) setTimeout(() => GEN.map.invalidateSize(), 0);
+  if (key === 'live' && LIVE.map) setTimeout(() => { LIVE.map.invalidateSize(); liveDraw(); }, 0);
   if (key === 'site') { setTimeout(() => { drawMap(); MAP.invalidateSize(); if (!$('#btable').innerHTML) drawBTable(); }, 0); }
   window.scrollTo(0, 0);
 }

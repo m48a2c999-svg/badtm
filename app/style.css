@@ -277,3 +277,15 @@ textarea.sqlin{width:100%;min-height:120px;font:13px/1.5 var(--mono);padding:10p
 section h2{margin-top:30px}
 .sel{background:#FFF1E8 !important}
 .svgc{max-width:920px}
+
+/* 실시간 시뮬레이션 */
+.live-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;align-items:start}
+.live-ctrl h3{margin-top:14px}.live-ctrl h3:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.chips button{font:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.chips button:hover{border-color:var(--ink,#1E2A38)}
+.timebar{display:flex;align-items:center;gap:10px;margin:6px 0}
+.timebar b{font-size:22px;min-width:64px}
+.lcomp{position:absolute;right:10px;top:10px;z-index:460;background:rgba(255,255,255,.9);border:1px solid var(--line);padding:4px 6px;text-align:center;pointer-events:none}
+.lcur{pointer-events:none}
+@media (max-width:900px){.live-grid{grid-template-columns:minmax(0,1fr)}}
