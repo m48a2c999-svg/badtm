@@ -12,9 +12,9 @@ import numpy as np
 S = sys.argv[1] if len(sys.argv) > 1 else '/tmp/claude-0/-home-claude/d855b01c-4d65-5c73-a219-ae59fd128dc1/scratchpad'
 W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = S + '/mb/res_sb10'; R3 = S + '/sim/res10'
-WITH = {'S1': 'S1c', 'F0': 'F0c', 'LH_F0': 'LH_F0c', 'VF_F0': 'VF_F0c', 'S3': 'S3@c', 'LH_C': 'LH_C@c', 'VF_C': 'VF_C@c', 'BT_T300': 'BT_T300@y', 'LT_T300': 'LT_T300@y', 'PK': 'PKY@c'}
-NOSH = {'S1': 'S1@ns', 'F0': 'F0@ns', 'LH_F0': 'LH_F0@ns', 'VF_F0': 'VF_F0@ns', 'S3': 'S3@ns', 'LH_C': 'LH_C@ns', 'VF_C': 'VF_C@ns', 'BT_T300': 'BT_T300@yns', 'LT_T300': 'LT_T300@yns', 'PK': 'PKY@ns'}
-SEAS = {'BT_T300': 'BT_T300c', 'LT_T300': 'LT_T300c'}
+WITH = {'S1': 'S1c', 'F0': 'F0c', 'LH_F0': 'LH_F0c', 'VF_F0': 'VF_F0c', 'S3': 'S3@c', 'LH_C': 'LH_C@c', 'VF_C': 'VF_C@c', 'BT_T300': 'BT_T300c', 'LT_T300': 'LT_T300c', 'PK': 'PKY@c'}
+NOSH = {'S1': 'S1@ns', 'F0': 'F0@ns', 'LH_F0': 'LH_F0@ns', 'VF_F0': 'VF_F0@ns', 'S3': 'S3@ns', 'LH_C': 'LH_C@ns', 'VF_C': 'VF_C@ns', 'BT_T300': 'BT_T300@ns', 'LT_T300': 'LT_T300@ns', 'PK': 'PKY@ns'}
+SEAS = {'BT_T300': 'BT_T300@y', 'LT_T300': 'LT_T300@y'}   # 2026-10-27 저자 결정: 일사량 기준 제어 본 대안 = 냉방기(5~9월). 연중 작동판은 비교용
 ALTS = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']
 c = sqlite3.connect(os.path.join(W, 'data/db/research.sqlite'))
 BL = dict(c.execute('SELECT sim_name, block FROM buildings').fetchall())
@@ -45,7 +45,7 @@ for n in names:
         for a in M:
             d = cache.get((n, grp, a))
             if d is None: continue
-            out['results'].append({'sim_name': n, 'cond': {'with': '차폐 포함', 'nosh': '차폐 제외', 'season': '차폐 포함(냉방기 한정)'}[grp], 'tag': a,
+            out['results'].append({'sim_name': n, 'cond': {'with': '차폐 포함', 'nosh': '차폐 제외', 'season': '차폐 포함(연중 작동)'}[grp], 'tag': a,
                                    'EUI': round(d['EUI'], 4), 'peak_kW': round(d['peak_kW'], 2), 'UDI': round(d.get('UDI'), 3) if d.get('UDI') is not None else None,
                                    'PMV_ok': round(d.get('PMV_ok'), 3) if d.get('PMV_ok') is not None else None,
                                    'heat': round(d['Heating:NaturalGas'], 3), 'cool': round(d['Cooling:Electricity'], 3), 'light': round(d['InteriorLights:Electricity'], 3),

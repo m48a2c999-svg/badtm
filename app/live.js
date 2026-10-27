@@ -3,20 +3,20 @@
    · 태양 위치: NOAA 태양 위치 계산식(서울 표준시 UTC+9)
    · 외피 일사: ASHRAE 맑은 날 모델(월별 A·B·C 계수) — 직달 + 천공 확산(수직면 1/2) + 지면 반사(반사율 0.2)
    · 주변 차폐: 건물 윤곽 × 높이로, 입면 중앙(높이 1/2) 점에서 태양 방향으로 가린 건물이 있는지 판정
-   · 작동 규칙: 원고 표 2의 작동 기준(연중, 창면 일사량 300 W/m², 컷오프 각도 제어, 평일 13~18시 폐쇄)을 간이하게 적용
+   · 작동 규칙: 원고 표 2의 작동 기준(일사량 기준 제어는 5~9월 창면 일사량 300 W/m², 컷오프 각도 제어, 평일 13~18시 폐쇄)을 간이하게 적용
    · 에너지: 역삼 257동만 EnergyPlus 23.2 시간별 결과(block_257_hourly)를 함께 보여 준다.
    이 페이지의 일사·작동 값은 맑은 날 가정의 간이 계산이며 EnergyPlus 계산 값이 아니다.
    ===================================================================== */
 const LIVE = { loadReq: 0, map: null, canvas: null, R: null, t: 12 * 60, play: false, speed: 30, rule: 'BT_T300', mode: 'state', hDef: 12, date: null, slots: null, busy: false, sel: null, last: 0, job: 0 };
-const LRULE = {   // 9개 대안 — 원고 표 2와 같이 모두 연중(1~12월) 같은 조건, ep = 257동 EnergyPlus 시간별 결과의 시나리오 이름
+const LRULE = {   // 9개 대안 — 원고 표 2와 같은 작동 규칙(일사량 기준 제어만 5~9월), ep = 257동 EnergyPlus 시간별 결과의 시나리오 이름
   F0: { name: '블라인드 고정', kind: 'fixed', ep: 'F0', txt: '슬랫 수평으로 항상 창 앞(움직이지 않음)' },
   LH_F0: { name: '수평 루버 고정', kind: 'fixed', ep: 'LH_F0', txt: '수평 루버(300 mm)가 항상 창 앞(움직이지 않음)' },
   VF_F0: { name: '수직 루버 고정', kind: 'fixed', ep: 'VF_F0', txt: '동·서 입면 수직 루버(움직이지 않음)' },
   S3: { name: '블라인드 컷오프 각도 제어', kind: 'track', ep: 'S3', txt: '입면에 직달일사가 들면 직달일사를 막는 각도(컷오프 각도)로 슬랫을 조절, 아니면 수평' },
   LH_C: { name: '수평 루버 컷오프 각도 제어', kind: 'track', ep: 'LH_C', txt: '같은 방식의 컷오프 각도 제어(수평 루버)' },
   VF_C: { name: '수직 루버 컷오프 각도 제어', kind: 'track', ep: 'VF_C', txt: '같은 방식의 컷오프 각도 제어(동·서 수직 루버). 간이 계산의 작동 비율은 모든 입면의 직달일사 비율로 표시' },
-  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '연중, 창면 입사 일사량 300 W/m² 초과 시 내림, 그 밖에는 걷어 올림' },
-  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '연중, 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖에는 수평' },
+  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 내림, 그 밖과 난방기(10~4월)에는 걷어 올림' },
+  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖과 난방기(10~4월)에는 수평' },
   PK: { name: '피크 시간대 차양 폐쇄', kind: 'peak', ep: 'PK', txt: '연중 평일 13~18시 슬랫 폐쇄, 그 밖에는 수평(요일은 EnergyPlus 계산과 같은 2023년 달력 기준)' },
 };
 // ASHRAE 맑은 날 모델 월별 계수(A: W/m², B: 무차원, C: 확산 계수)
@@ -131,10 +131,11 @@ function liveSlot(R, ymd, minute) {
   });
   return { sp, cs, v: out };
 }
-// 원고 표 2와 같이 모든 대안 연중 작동(2026-10-27). 피크 시간대 차양 폐쇄는 평일 13~18시.
+// 원고 표 2: 일사량 기준 제어는 냉방기(5~9월), 나머지는 연중 작동(2026-10-27). 피크 시간대 차양 폐쇄는 평일 13~18시.
 // 요일은 EnergyPlus 계산 연도(2023년 달력, 1월 1일 일요일) 기준으로 판정하여 EnergyPlus 시간별 전력과 맞춘다.
+const isCooling = () => { const [, M] = LIVE.ymd || ymdOf(LIVE.date); return M >= 5 && M <= 9; };   // 일사량 기준 제어는 냉방기(5~9월)에만 작동(2026-10-27)
 const isPeakTime = (minute = LIVE.t) => { const [, M, D] = LIVE.ymd || ymdOf(LIVE.date); const wd = new Date(Date.UTC(2023, M - 1, D)).getUTCDay(); const h = minute / 60; return wd >= 1 && wd <= 5 && h >= 13 && h < 18; };
-function moveFrac(rule, v, o, minute = LIVE.t) { const k = LRULE[rule].kind; return k === 'thresh' ? v[o + 2] : k === 'track' ? v[o + 1] : k === 'peak' ? (isPeakTime(minute) ? 1 : 0) : 0; }
+function moveFrac(rule, v, o, minute = LIVE.t) { const k = LRULE[rule].kind; return k === 'thresh' ? (isCooling() ? v[o + 2] : 0) : k === 'track' ? v[o + 1] : k === 'peak' ? (isPeakTime(minute) ? 1 : 0) : 0; }
 
 /* ---------- 지역 불러오기 ---------- */
 function ringOfDb(poly) { const p = JSON.parse(poly); return p.map(([la, lo]) => [lo, la]); }
@@ -395,7 +396,7 @@ function liveBInfo() {
   const b = LIVE.sel; if (!b) { $('#lbinfo').innerHTML = ''; return; } const R = LIVE.R, i = R.tg.indexOf(b), S = liveCur(); if (!S) return;
   const sp = S.sp, cs = S.cs, ux = Math.sin(sp.az * D2R), uy = Math.cos(sp.az * D2R), tanA = Math.tan(Math.max(sp.alt, 0.5) * D2R), ca = Math.cos(sp.alt * D2R);
   const dirName = a => ['북', '북동', '동', '남동', '남', '남서', '서', '북서'][Math.round(a / 45) % 8];
-  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (I > 300 ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평')) : k === 'peak' ? (isPeakTime() ? '폐쇄' : '수평') : (Ib > 0 ? '컷오프 각도' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직달일사', I, st }; });
+  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (isCooling() && I > 300 ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평') + (isCooling() ? '' : '(난방기)')) : k === 'peak' ? (isPeakTime() ? '폐쇄' : '수평') : (Ib > 0 ? '컷오프 각도' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직달일사', I, st }; });
   let ep = '';
   if (b.sim) { const r = q('SELECT tag, dEUI_pct, dpeak_pct FROM results_257 WHERE sim_name=?', [b.sim]); const m = Object.fromEntries(r.map(x => [x.tag, x])); const t = LIVE.rule; ep = m[t] ? `<p class="small">EnergyPlus 결과(이 건물, ${esc(LRULE[t].name)}, 보정 기준 대비): EUI ${pct(m[t].dEUI_pct)}, 건물 피크전력 ${pct(m[t].dpeak_pct)}. <a href="#/site">대상지·건물</a>에서 자세히.</p>` : ''; }
   $('#lbinfo').innerHTML = `<div class="card"><h3>${esc(b.name || b.id)} <span class="small">${b.block ? '가구 ' + esc(b.block) : ''} · 높이 ${num(b.h, 1)} m(${esc(b.hsrc)})</span></h3>${table([{ h: '입면 방향', k: 'o' }, { h: '길이(m)', k: 'len', num: 1, f: v => num(v, 0) }, { h: '직달일사', k: 's' }, { h: '일사(W/m²)', k: 'I', num: 1, f: v => num(v) }, { h: '작동', k: 'st' }], rows, { nw: 1, maxh: 260 })}<p class="small">길이 5 m 이상 입면만 표시. 입면 중앙(높이 ${num(b.h / 2, 1)} m) 한 점에서 판정한 맑은 날 간이 계산.</p>${ep}</div>`;
