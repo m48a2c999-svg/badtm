@@ -20,17 +20,18 @@ J = lambda p: json.load(open(os.path.join(A, p), encoding='utf-8'))
 
 # ---------------- meta ----------------
 meta = [
-    ('title_ko', '서울 업무시설 밀집지역의 외피 개량에 따른 에너지 성능 검증 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —'),
-    ('title_en', 'Energy Performance Verification of Facade Retrofits in Office-Dense Areas of Seoul: A Simulation Study of Kinetic Facade Applications'),
-    ('purpose', '본 연구는 서울 업무시설 밀집지역의 기존 건물을 대상으로 키네틱 파사드 및 외피 개량 대안을 적용하고, 시뮬레이션을 통해 개량 전후의 에너지 성능 변화를 비교·검증하여 건물 특성에 따른 효과와 적용 조건을 도출하는 데 목적이 있다.'),
+    ('title_ko', '서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —'),
+    ('title_en', 'Energy Performance Evaluation of Envelope Improvements for Existing Buildings in Office-Dense Areas of Seoul: A Simulation Study of Kinetic Facade Applications'),
+    ('purpose', '본 연구는 서울 업무시설 밀집지역의 기존 건물을 대상으로 키네틱 파사드 및 외피 성능 개선안을 적용하고, 시뮬레이션을 통해 개선 전후의 에너지 성능 변화를 비교·평가하여 건물 특성에 따른 효과와 적용 조건을 도출하는 데 목적이 있다.'),
     ('author', '조승완 · 국민대학교 일반대학원 건축학과 박사과정 · 지도교수 박미애'),
     ('engine', 'EnergyPlus 23.2, 서울 TMYx 2011–2025, 계산 간격 10분, 연간 8,760시간'),
     ('prototype', 'DOE 대형 사무소 기준 모델(Deru et al., 2011): 창면적비 40%, 창 U 3.24 W/m²·K, SHGC 0.39, 가시광 투과율 0.305'),
     ('calibration', '전역 배율: 기기 밀도 1.0 × 냉동기 COP 배수 2.0(보정용 31동으로 결정)'),
-    ('status', '예비심사(2026-11-09) 원고 기준 예비 결과. 개량 대안과 지표를 확정한 뒤 재계산 예정.'),
+    ('conditions', '9개 대안 모두 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·연중(1~12월) 작동, 설계일에는 장치 미작동. 주변 차폐 포함·제외 두 경우를 계산.'),
+    ('status', '예비심사(2026-11-09) 원고 기준 예비 결과(2026-10-27 연중 같은 조건 재계산). 차폐 제외 계산 일부는 2026-10-28 완료 예정.'),
     ('basis', '국가승인통계 「상업용부동산 임대동향조사」(국토교통부 작성·한국부동산원 조사, 승인번호 제408001호)의 서울 오피스 권역(도심·강남·여의도·마포) — 2040 서울도시기본계획 3도심(서울도심, 여의도·영등포, 강남)에 대응(통계 권역은 마포 포함). 오피스 조사 대상(업무시설, 6층 이상)과 같은 건물 기준. 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 지구단위계획구역으로 정함.'),
-    ('scope', '키네틱 파사드 = 외피 요소가 물리적으로 움직여 형태가 바뀌는 외피(블라인드·루버·핀). 움직이지 않고 물성이 바뀌는 전기변색 유리는 범위에서 제외(데이터는 참고로 보존).'),
-    ('originality', '밀집지역이라는 조건(주변 건물에 가려진 정도·평면 규모·층수)이 개량 효과의 크기와 방향을 바꾼다는 것을 실제 업무시설 257동으로 정량화하고 건물 조건별 적용 조건을 제시. 블록 합산 최대 전력은 동시계수 0.994로 건물별 합과 거의 같아 보조 지표.'),
+    ('scope', '키네틱 파사드 = 외피 요소가 물리적으로 움직이는 가동형 외부 차양(블라인드·루버). 고정형·가동형 구분은 「건축물의 에너지절약설계기준」 제5조를 따름. 움직이지 않고 물성이 바뀌는 전기변색 유리는 범위에서 제외(데이터는 참고로 보존).'),
+    ('originality', '밀집지역이라는 조건(주변 건물에 가려진 정도)이 성능 개선 효과의 크기와 방향을 바꾼다는 것을 실제 업무시설 257동과 9개 대안(연중 같은 조건)으로 정량화하고, 같은 건물의 주변 차폐 포함·제외 비교로 그 영향을 분리하여 건물 조건별 적용 조건을 제시. 블록 합산 피크전력은 동시율 0.993~1.000으로 건물별 합과 거의 같아 보조 지표.'),
     ('built', pd.Timestamp.now(tz='Asia/Seoul').strftime('%Y-%m-%d %H:%M KST')),
 ]
 con.execute('CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT)')
@@ -84,23 +85,23 @@ con.execute("INSERT INTO meta VALUES('class_bounds', ?)", (json.dumps(q),))
 
 # ---------------- alternatives ----------------
 ALT = [
-    # tag, 구분, 이름, 장치, 작동, 기간, 미작동 시, 주광, 원리, 3동, 257동, 257동 태그
-    ('S1', '개량 전', '장치 없음', '—', '주변 건물 차폐만 반영', '—', '—', '—', None, 1, 1, 'S1c'),
-    ('F0', '고정형 차양', '블라인드 고정', '외부 블라인드 80 mm, 4개 입면', '슬랫 수평(0°) 고정', '연중', '창 앞', '주광 손실', None, 1, 1, 'F0c'),
-    ('LH_F0', '고정형 차양', '대형 루버 고정', '대형 수평 루버 300 mm, 4개 입면', '수평 고정', '연중', '창 앞', '주광 손실', None, 1, 1, 'LH_F0c'),
-    ('VF_F0', '고정형 차양', '수직 핀 고정', '수직 핀 300 mm, 동·서 입면', '고정', '연중', '창 앞', '주광 손실', None, 1, 1, 'VF_F0c'),
-    ('S3', '키네틱 파사드', '블라인드 태양 추종', '외부 블라인드 80 mm', '직사광을 막는 각도로 슬랫을 계산 간격(10분)마다 조절(컷오프)', '연중', '창 앞(추종)', '주광 손실', 'P2', 1, 0, None),
-    ('BT_T300', '키네틱 파사드', '블라인드 일사 기준', '외부 블라인드 80 mm', '창면 일사 300 W/m² 초과 시 내림(컷오프)', '5~9월', '걷어 올림', '주광 유지', None, 1, 1, 'BT_T300c'),
-    ('LT_T300', '키네틱 파사드', '대형 루버 일사 기준', '대형 수평 루버 300 mm', '창면 일사 300 W/m² 초과 시 컷오프', '5~9월', '창 앞(수평)', '주광 손실', None, 1, 1, 'LT_T300c'),
-    ('EC_DLS', '범위 제외(가변 유리)', '전기변색 주광 연동', '전기변색 유리(SHGC 0.39 ↔ 0.09)', '기준점 500 lx를 유지하도록 착색 정도를 연속 조절', '5~9월', '투명', '주광 유지', None, 1, 1, 'EC_DLSc'),
-    ('EC_SOLS', '범위 제외(가변 유리)', '전기변색 일사 기준', '전기변색 유리', '창면 일사 300 W/m² 초과 시 착색', '5~9월', '투명', '주광 유지', None, 1, 0, None),
-    ('PK', '키네틱 파사드', '피크 시간 폐쇄', '외부 블라인드 80 mm', '수평 고정 + 7~8월 평일 13~18시 폐쇄', '연중', '창 앞', '주광 손실', None, 1, 0, None),
-    ('BT_TS300', '키네틱 파사드(원리 시험)', '블라인드 두 신호', '외부 블라인드 80 mm', '창면 일사 300 W/m² 초과이고 실온 23.5 °C 초과일 때만 내림', '5~9월', '걷어 올림', '주광 유지', 'P3', 1, 0, None),
-    ('EC_TS300', '범위 제외(가변 유리)', '전기변색 두 신호', '전기변색 유리', '창면 일사 300 W/m² 초과이고 실온 23.5 °C 초과일 때만 착색', '5~9월', '투명', '주광 유지', 'P3', 1, 0, None),
-    ('LH_C', '키네틱 파사드', '대형 루버 태양 추종', '대형 수평 루버 300 mm', '같은 방식의 태양 추종', '연중', '창 앞(추종)', '주광 손실', 'P2', 1, 0, None),
-    ('VF_C', '키네틱 파사드', '수직 핀 태양 추종', '수직 핀 300 mm, 동·서', '같은 방식의 태양 추종', '연중', '창 앞(추종)', '주광 손실', 'P2', 1, 0, None),
-    ('ZA', '키네틱 파사드(원리 시험)', '구역 차등 A', '외부 블라인드 80 mm', '가려진 구역 장치 없음, 나머지 구역 태양 추종', '연중', '창 앞', '주광 손실', 'P1', 1, 0, None),
-    ('ZB', '키네틱 파사드(원리 시험)', '구역 차등 B', '외부 블라인드 80 mm', '가려진 구역 수평 고정, 나머지 구역 태양 추종', '연중', '창 앞', '주광 손실', 'P1', 1, 0, None),
+    # tag, 구분, 이름, 장치, 작동, 기간, 미작동 시, 자연채광, 원리, 3동, 257동, 257동 태그(차폐 포함)
+    ('S1', '개선 전', '장치 없음', '—', '주변 건물 차폐만 반영', '—', '—', '—', None, 1, 1, 'S1c'),
+    ('F0', '고정형 차양', '블라인드 고정', '외부 블라인드(슬랫 80 mm), 4개 입면', '슬랫 수평(0°) 고정', '연중', '창 앞', '자연채광 감소', None, 1, 1, 'F0c'),
+    ('LH_F0', '고정형 차양', '수평 루버 고정', '수평 루버(300 mm), 4개 입면', '수평 고정', '연중', '창 앞', '자연채광 감소', None, 1, 1, 'LH_F0c'),
+    ('VF_F0', '고정형 차양', '수직 루버 고정', '수직 루버(300 mm), 동·서 입면', '고정', '연중', '창 앞', '자연채광 감소', None, 1, 1, 'VF_F0c'),
+    ('S3', '키네틱 파사드', '블라인드 컷오프 각도 제어', '외부 블라인드(80 mm)', '직달일사를 막는 각도(컷오프 각도)로 슬랫을 계산 간격(10분)마다 조절', '연중', '창 앞(각도 조절)', '자연채광 감소', 'P2', 1, 1, 'S3@c'),
+    ('LH_C', '키네틱 파사드', '수평 루버 컷오프 각도 제어', '수평 루버(300 mm)', '같은 방식의 컷오프 각도 제어', '연중', '창 앞(각도 조절)', '자연채광 감소', 'P2', 1, 1, 'LH_C@c'),
+    ('VF_C', '키네틱 파사드', '수직 루버 컷오프 각도 제어', '수직 루버(300 mm), 동·서', '같은 방식의 컷오프 각도 제어', '연중', '창 앞(각도 조절)', '자연채광 감소', 'P2', 1, 1, 'VF_C@c'),
+    ('BT_T300', '키네틱 파사드', '블라인드 일사량 기준 제어', '외부 블라인드(80 mm)', '창면 입사 일사량 300 W/m² 초과 시 내림(컷오프 각도)', '연중', '걷어 올림', '자연채광 유지', None, 1, 1, 'BT_T300@y'),
+    ('LT_T300', '키네틱 파사드', '수평 루버 일사량 기준 제어', '수평 루버(300 mm)', '창면 입사 일사량 300 W/m² 초과 시 컷오프 각도', '연중', '창 앞(수평)', '자연채광 감소', None, 1, 1, 'LT_T300@y'),
+    ('PK', '키네틱 파사드', '피크 시간대 차양 폐쇄', '외부 블라인드(80 mm)', '평일 13~18시 슬랫 폐쇄, 그 밖에는 수평', '연중', '창 앞(수평)', '자연채광 감소', None, 1, 1, 'PKY@c'),
+    ('EC_DLS', '범위 제외(가변 유리)', '전기변색 자연채광 연동', '전기변색 유리(SHGC 0.39 ↔ 0.09)', '기준점 500 lx를 유지하도록 착색 정도를 연속 조절', '5~9월', '투명', '자연채광 유지', None, 1, 0, None),
+    ('EC_SOLS', '범위 제외(가변 유리)', '전기변색 일사량 기준', '전기변색 유리', '창면 일사량 300 W/m² 초과 시 착색', '5~9월', '투명', '자연채광 유지', None, 1, 0, None),
+    ('BT_TS300', '키네틱 파사드(원리 시험)', '블라인드 두 신호', '외부 블라인드(80 mm)', '창면 일사량 300 W/m² 초과이고 실온 23.5 °C 초과일 때만 내림', '5~9월', '걷어 올림', '자연채광 유지', 'P3', 1, 0, None),
+    ('EC_TS300', '범위 제외(가변 유리)', '전기변색 두 신호', '전기변색 유리', '창면 일사량 300 W/m² 초과이고 실온 23.5 °C 초과일 때만 착색', '5~9월', '투명', '자연채광 유지', 'P3', 1, 0, None),
+    ('ZA', '키네틱 파사드(원리 시험)', '구역 차등 A', '외부 블라인드(80 mm)', '가려진 구역 장치 없음, 나머지 구역 컷오프 각도 제어', '연중', '창 앞', '자연채광 감소', 'P1', 1, 0, None),
+    ('ZB', '키네틱 파사드(원리 시험)', '구역 차등 B', '외부 블라인드(80 mm)', '가려진 구역 수평 고정, 나머지 구역 컷오프 각도 제어', '연중', '창 앞', '자연채광 감소', 'P1', 1, 0, None),
 ]
 con.execute('''CREATE TABLE alternatives(tag TEXT PRIMARY KEY, category TEXT, name TEXT, device TEXT, operation TEXT, period TEXT, idle_state TEXT, daylight TEXT,
                principle TEXT, in_3bldg INTEGER, in_257 INTEGER, tag_257 TEXT, sort INTEGER)''')
@@ -109,38 +110,51 @@ con.executemany('INSERT INTO alternatives VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)', [a
 # ---------------- results: 3 detailed buildings (block of 3) ----------------
 K = J('v/kinetic.json')
 N3 = K['buildings']
-con.execute('CREATE TABLE results_3bldg(tag TEXT PRIMARY KEY, dEUI_pct REAL, dpeak_pct REAL, CF REAL, dUDI_ARK REAL, dUDI_GFC REAL, dUDI_GST REAL, dPMV_ARK REAL, dPMV_GFC REAL, dPMV_GST REAL)')
-for s in K['systems']:
-    if s['tag'] not in {a[0] for a in ALT} or s.get('dEUI') is None:
+RC = json.load(open(os.path.join(W, 'tools/derived/recalc.json'), encoding='utf-8'))
+con.execute('CREATE TABLE results_3bldg(tag TEXT PRIMARY KEY, dEUI_pct REAL, dpeak_pct REAL, CF REAL, dUDI_ARK REAL, dUDI_GFC REAL, dUDI_GST REAL, dPMV_ARK REAL, dPMV_GFC REAL, dPMV_GST REAL, dEUI_nosh_pct REAL, dpeak_nosh_pct REAL)')
+D3 = RC['detailed3']
+for t, w in D3['with'].items():   # 연중 같은 조건(2026-10-27): 차폐 포함 / 제외
+    o = D3['without'][t]
+    con.execute('INSERT INTO results_3bldg VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (t, round(w['dEUI'], 3), round(w['dpeak'], 3), round(w['CF'], 4), *[round(x, 2) for x in w['dUDI']], *[round(x, 2) for x in w['dPMV']], round(o['dEUI'], 3), round(o['dpeak'], 3)))
+for s_ in K['systems']:   # 원리 시험·범위 제외 안(이전 판 값 유지)
+    if s_['tag'] in D3['with'] or s_['tag'] not in {a[0] for a in ALT} or s_.get('dEUI') is None:
         continue
-    u, p = s['dUDI'], s['dPMV']
-    con.execute('INSERT INTO results_3bldg VALUES(?,?,?,?,?,?,?,?,?,?)', (s['tag'], s['dEUI'], s['dP'], s['CF'], *u, *p))
+    u, p_ = s_['dUDI'], s_['dPMV']
+    con.execute('INSERT INTO results_3bldg VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (s_['tag'], s_['dEUI'], s_['dP'], s_['CF'], *u, *p_, None, None))
 con.execute("INSERT INTO meta VALUES('base_3bldg', ?)", (json.dumps({'EUI': 145.58, 'peak_kW': 9875, 'buildings': N3}),))
 
 # ---------------- results: 257 buildings ----------------
-S = pd.read_csv(os.path.join(MB, 'sb10_sys.csv'))
-S = S.rename(columns={'tag': 'tag_257', 'PMV_ok': 'PMV_ok'})
-inv = {a[11]: a[0] for a in ALT if a[11]}
-S['tag'] = S.tag_257.map(inv)
-S = S[['sim_name', 'tag', 'EUI', 'peak_kW', 'UDI', 'PMV_ok', 'dEUI_pct', 'dpeak_pct', 'dUDI_pp', 'dPMV_pp']].round(4)
-S.to_sql('results_257', con, index=False)
+RR = pd.DataFrame(RC['results'])
+RR[RR.cond == '차폐 포함'][['sim_name', 'tag', 'EUI', 'peak_kW', 'UDI', 'PMV_ok', 'dEUI_pct', 'dpeak_pct', 'dUDI_pp', 'dPMV_pp']].round(4).to_sql('results_257', con, index=False)
 con.execute('CREATE INDEX ix_r257 ON results_257(tag, sim_name)')
+RR.round(4).to_sql('results_257_cond', con, index=False)   # 차폐 포함 / 차폐 제외 / 차폐 포함(냉방기 한정) 모두, 용도별(난방·냉방·조명) 원단위 포함
+con.execute('CREATE INDEX ix_r257c ON results_257_cond(cond, tag, sim_name)')
+EU = RC['enduse']; base_ = EU['base']
+con.execute('CREATE TABLE enduse_257(tag TEXT PRIMARY KEY, heat REAL, cool REAL, light REAL, fan_pump_tower REAL, EUI REAL, dEUI_pct REAL)')
+con.execute('INSERT INTO enduse_257 VALUES(?,?,?,?,?,?,?)', ('S1', base_['Heating:NaturalGas'], base_['Cooling:Electricity'], base_['InteriorLights:Electricity'], base_['Fans:Electricity'] + base_['Pumps:Electricity'] + base_['HeatRejection:Electricity'], base_['EUI'], 0.0))
+for t, v in EU.items():
+    if t == 'base': continue
+    con.execute('INSERT INTO enduse_257 VALUES(?,?,?,?,?,?,?)', (t, v['Heating:NaturalGas'], v['Cooling:Electricity'], v['InteriorLights:Electricity'], v['Fans:Electricity'] + v['Pumps:Electricity'] + v['HeatRejection:Electricity'], v['EUI'], 100 * v['EUI'] / base_['EUI']))
 
 # ---------------- block (257) ----------------
 con.execute('CREATE TABLE block_257(scenario TEXT PRIMARY KEY, label TEXT, tag TEXT, peak_kW REAL, dpeak_pct REAL, CF REAL, LF REAL, peak_hour INTEGER, dEUI_pct REAL)')
-BEUI = {'S1c': 0.0, 'F0c': -1.25, 'LH_F0c': -0.38, 'VF_F0c': -0.29, 'EC_DLSc': -0.12, 'BT_T300c': -0.12, 'LT_T300c': -0.37}  # 학위논문 v12 표 5-17
-lab = {'S1c': ('개량 전(장치 없음)', 'S1'), 'F0c': ('블라인드 고정', 'F0'), 'LH_F0c': ('대형 루버 고정', 'LH_F0'), 'VF_F0c': ('수직 핀 고정', 'VF_F0'),
-       'EC_DLSc': ('전기변색 주광 연동', 'EC_DLS'), 'BT_T300c': ('블라인드 일사 기준', 'BT_T300'), 'LT_T300c': ('대형 루버 일사 기준', 'LT_T300'),
-       'S1c_D1': ('참고: 운전 시간 시차 ±1시간, 장치 없음', None), 'S1c_D2': ('참고: 운전 시간 시차 ±2시간, 장치 없음', None)}
-for k, v in B['summary'].items():
-    con.execute('INSERT INTO block_257 VALUES(?,?,?,?,?,?,?,?,?)', (k, lab[k][0], lab[k][1], v['peak'], v['dP'], v['CF'], v['LF'], v['hour'], BEUI.get(k)))
+BW = RC['summary']['block_with']
+names_ = {a[0]: a[2] for a in ALT}
+hourly = RC['hourly']
+for t in ['S1', 'F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']:
+    v = BW[t]; h = hourly[t]
+    con.execute('INSERT INTO block_257 VALUES(?,?,?,?,?,?,?,?,?)', (t, '개선 전(장치 없음)' if t == 'S1' else names_[t], t, round(v['peak'], 1), 0.0 if t == 'S1' else round(v['dpeak'], 3), round(v['CF'], 4), round(sum(h) / len(h) / max(h), 4), v['peak_hour'], 0.0 if t == 'S1' else round(v['dEUI'], 3)))
+for k, lab_ in (('S1c_D1', '참고: 운전 시간 시차 ±1시간, 장치 없음'), ('S1c_D2', '참고: 운전 시간 시차 ±2시간, 장치 없음')):
+    v = B['summary'][k]
+    con.execute('INSERT INTO block_257 VALUES(?,?,?,?,?,?,?,?,?)', (k.replace('S1c', 'S1'), lab_, None, v['peak'], v['dP'], v['CF'], v['LF'], v['hour'], None))
 con.execute('CREATE TABLE block_257_by_block(block TEXT, scenario TEXT, peak_kW REAL, dpeak_pct REAL, CF REAL, EUI REAL, dEUI_pct REAL, peak_time TEXT, PRIMARY KEY(block, scenario))')
-for b, d in bb.items():
+import datetime as _dt
+hl = lambda i: (_dt.datetime(2021, 1, 1) + _dt.timedelta(hours=i)).strftime('%-m/%-d %-H시')
+for b, d in RC['by_block'].items():
     for sc, v in d.items():
-        R = lambda x, k: None if x is None else round(x, k)
-        con.execute('INSERT INTO block_257_by_block VALUES(?,?,?,?,?,?,?,?)', (b, sc, R(v['peak'], 1), R(v['dP_pct'], 3), R(v['CF'], 4), R(v.get('EUI'), 2), R(v.get('dEUI_pct'), 3), v['when']))
+        con.execute('INSERT INTO block_257_by_block VALUES(?,?,?,?,?,?,?,?)', (b, sc, round(v['peak'], 1), None if sc == 'S1' else round(v['dP'], 3), round(v['CF'], 4), round(v['EUI'], 2), None if sc == 'S1' else round(v['dEUI'], 3), hl(v['hour'])))
 con.execute('CREATE TABLE block_257_hourly(scenario TEXT, hour INTEGER, kW INTEGER, PRIMARY KEY(scenario, hour)) WITHOUT ROWID')
-for sc, arr in B['hourly'].items():
+for sc, arr in list(hourly.items()) + [('S1_D1', B['hourly']['S1c_D1']), ('S1_D2', B['hourly']['S1c_D2'])]:
     con.executemany('INSERT INTO block_257_hourly VALUES(?,?,?)', [(sc, i, int(x)) for i, x in enumerate(arr)])
 
 # ---------------- validation ----------------
@@ -159,13 +173,13 @@ for t in T['targets']:
 # ---------------- principles ----------------
 PR = [
     ('P1', '공간 분화', '피부', '피부는 부위마다 땀샘·혈류가 달라 필요한 곳에서만 체온을 조절한다.', '부하가 크고 효과가 나는 구역에만 가동 장치를 둔다(입면 4개 × 층대 5개 = 20개 구역 판정).',
-     'ZB / 전 구역 태양 추종(S3)', '채택(ZB) · 기각(ZA)', 'ZB는 S3보다 EUI(+0.80% / +0.82%)와 블록 최대 전력(+1.35% / +1.80%)이 낮고 UDI·열쾌적이 같거나 높음. ZA는 열쾌적 1.7~2.1%p 낮아 기각. 둘 다 개량 전보다는 EUI·최대 전력이 높음.'),
-    ('P2', '일사 조절', '솔방울·해바라기', '솔방울 비늘은 습도에 따라, 해바라기는 태양 위치에 따라 연속적·가역적으로 움직인다.', '태양 위치에 따라 직사광을 막는 각도로 연속 조절한다(태양 추종, 컷오프).',
-     '태양 추종 / 같은 장치의 고정', '기각', '블라인드·대형 루버·수직 핀 모두 태양 추종이 고정보다 EUI가 크고(+0.82 / −1.39%, +0.46 / −0.86%, +0.70 / −0.13%) 열쾌적 2.4~6.3%p 낮음.'),
-    ('P3', '신호 통합', '잎의 기공', '기공은 빛·이산화탄소·수분 등 여러 신호를 함께 판단해 열고 닫는다.', '창면 일사와 실내 온도가 함께 기준을 넘을 때만 작동한다(일사 300 W/m² 초과이고 실온 23.5 °C 초과, 5~9월).',
-     '두 신호 / 일사 한 신호(블라인드)', '기각', '블라인드는 EUI(−0.32% / −0.30%)·최대 전력(−0.52% / −0.48%)은 나았으나 UDI 0.1~0.2%p 낮아 기각. 참고: 전기변색 유리 두 신호 안은 이전 계산에서 채택이었으나 전기변색 유리를 연구 범위에서 제외함.'),
+     'ZB / 전 구역 컷오프 각도 제어(S3)', '채택(ZB) · 기각(ZA)', 'ZB는 S3보다 EUI(+0.80% / +0.82%)와 블록 피크전력(+1.35% / +1.80%)이 낮고 UDI·열쾌적이 같거나 높음. ZA는 열쾌적 1.7~2.1%p 낮아 기각. 둘 다 개선 전보다는 EUI·피크전력이 높음.'),
+    ('P2', '일사 조절', '솔방울·해바라기', '솔방울 비늘은 습도에 따라, 해바라기는 태양 위치에 따라 연속적·가역적으로 움직인다.', '태양 위치에 따라 직사광을 막는 각도로 연속 조절한다(컷오프 각도 제어).',
+     '컷오프 각도 제어 / 같은 장치의 고정', '기각', '블라인드·수평 루버·수직 루버 모두 컷오프 각도 제어가 고정보다 EUI가 크고(+0.82 / −1.39%, +0.46 / −0.86%, +0.70 / −0.13%) 열쾌적 2.4~6.3%p 낮음.'),
+    ('P3', '신호 통합', '잎의 기공', '기공은 빛·이산화탄소·수분 등 여러 신호를 함께 판단해 열고 닫는다.', '창면 일사와 실내 온도가 함께 기준을 넘을 때만 작동한다(일사량 300 W/m² 초과이고 실온 23.5 °C 초과, 5~9월).',
+     '두 신호 / 일사량 한 신호(블라인드, 냉방기)', '기각', '이전 계산(두 안 모두 냉방기 5~9월 작동)에서 블라인드는 EUI(−0.32% / −0.30%)·피크전력(−0.52% / −0.48%)은 나았으나 UDI 0.1~0.2%p 낮아 기각. 참고: 전기변색 유리 두 신호 안은 이전 계산에서 채택이었으나 전기변색 유리를 연구 범위에서 제외함.'),
     ('P4', '집단 분산', '꿀벌 무리', '꿀벌은 개체마다 반응 기준이 달라 무리 전체의 반응이 한꺼번에 몰리지 않는다.', '같은 자극에 대한 작동 기준을 건물마다 다르게 배정한다(200~400 W/m²).',
-     '블라인드 125가지 배정(균일 배정 포함) / 모든 건물 300 W/m²', '기각', '블라인드 배정의 블록 최대 전력은 균일 배정 대비 −0.03~+0.20%로 낮아지지 않음(전기변색 유리 배정은 범위 제외로 뺌).'),
+     '블라인드 125가지 배정(균일 배정 포함) / 모든 건물 300 W/m²', '기각', '블라인드 배정의 블록 피크전력은 균일 배정 대비 −0.03~+0.20%로 낮아지지 않음(전기변색 유리 배정은 범위 제외로 뺌).'),
 ]
 con.execute('CREATE TABLE principles(code TEXT PRIMARY KEY, name TEXT, organism TEXT, biology TEXT, rule TEXT, comparison TEXT, verdict TEXT, evidence TEXT)')
 con.executemany('INSERT INTO principles VALUES(?,?,?,?,?,?,?,?)', PR)
@@ -181,11 +195,21 @@ con.executemany('INSERT INTO districts VALUES(?,?,?,?,?)', DS)
 
 
 # ---------------- GBD 가구별 예비 수치 (테헤란로제2지구, 257동 중 140동) ----------------
-GB = json.load(open(os.path.join(W, 'tools/derived/gbd_blocks.json'), encoding='utf-8'))
+GB = json.load(open(os.path.join(W, 'tools/derived/gbd_blocks.json'), encoding='utf-8'))   # 가구 배정(140동)
 con.execute('CREATE TABLE gbd_assign(sim_name TEXT PRIMARY KEY, plan_id TEXT, gagu TEXT)')
 con.executemany('INSERT INTO gbd_assign VALUES(?,?,?)', [(k, '11680UQ161PS202505140001', v) for k, v in GB['assign'].items()])
-gcols = list(GB['rows'][0].keys())
-pd.DataFrame(GB['rows'])[gcols].rename(columns={'block': 'gagu'}).to_sql('gbd_blocks', con, index=False)
+GW = RC['gagu_with']   # 연중 같은 조건 9개 대안의 가구별 합산 변화(2026-10-27)
+A9 = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']
+r257 = {(r['sim_name'], r['tag']): r for r in RC['results'] if r['cond'] == '차폐 포함'}
+grows = []
+for g, v in GW.items():
+    ns = list(GB['assign']) if g == 'ALL' else [n for n, gg in GB['assign'].items() if gg == g]
+    row = {'gagu': g, 'n': v['n']}
+    for a in A9:
+        row[a + '_dE'] = round(v[a]['dE'], 4); row[a + '_dP'] = round(v[a]['dP'], 4)
+        row[a + '_both'] = sum(1 for n in ns if (n, a) in r257 and r257[(n, a)]['dEUI_pct'] < 0 and r257[(n, a)]['dpeak_pct'] < 0)
+    grows.append(row)
+pd.DataFrame(grows).sort_values('gagu').to_sql('gbd_blocks', con, index=False)
 
 # ---------------- views ----------------
 con.executescript('''
