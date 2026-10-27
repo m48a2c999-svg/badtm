@@ -113,7 +113,7 @@ N3 = K['buildings']
 RC = json.load(open(os.path.join(W, 'tools/derived/recalc.json'), encoding='utf-8'))
 con.execute('CREATE TABLE results_3bldg(tag TEXT PRIMARY KEY, dEUI_pct REAL, dpeak_pct REAL, CF REAL, dUDI_ARK REAL, dUDI_GFC REAL, dUDI_GST REAL, dPMV_ARK REAL, dPMV_GFC REAL, dPMV_GST REAL, dEUI_nosh_pct REAL, dpeak_nosh_pct REAL)')
 D3 = RC['detailed3']
-for t, w in D3['with'].items():   # 연중 같은 조건(2026-10-27): 차폐 포함 / 제외
+for t, w in D3['with'].items():   # 2026-10-27 재계산(일사량 기준 제어는 냉방기): 차폐 포함 / 제외
     o = D3['without'][t]
     con.execute('INSERT INTO results_3bldg VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (t, round(w['dEUI'], 3), round(w['dpeak'], 3), round(w['CF'], 4), *[round(x, 2) for x in w['dUDI']], *[round(x, 2) for x in w['dPMV']], round(o['dEUI'], 3), round(o['dpeak'], 3)))
 for s_ in K['systems']:   # 원리 시험·범위 제외 안(이전 판 값 유지)
@@ -127,7 +127,7 @@ con.execute("INSERT INTO meta VALUES('base_3bldg', ?)", (json.dumps({'EUI': 145.
 RR = pd.DataFrame(RC['results'])
 RR[RR.cond == '차폐 포함'][['sim_name', 'tag', 'EUI', 'peak_kW', 'UDI', 'PMV_ok', 'dEUI_pct', 'dpeak_pct', 'dUDI_pp', 'dPMV_pp']].round(4).to_sql('results_257', con, index=False)
 con.execute('CREATE INDEX ix_r257 ON results_257(tag, sim_name)')
-RR.round(4).to_sql('results_257_cond', con, index=False)   # 차폐 포함 / 차폐 제외 / 차폐 포함(냉방기 한정) 모두, 용도별(난방·냉방·조명) 원단위 포함
+RR.round(4).to_sql('results_257_cond', con, index=False)   # 차폐 포함 / 차폐 제외 / 차폐 포함(연중 작동, 일사량 기준 제어 비교) 모두, 용도별(난방·냉방·조명) 원단위 포함
 con.execute('CREATE INDEX ix_r257c ON results_257_cond(cond, tag, sim_name)')
 EU = RC['enduse']; base_ = EU['base']
 con.execute('CREATE TABLE enduse_257(tag TEXT PRIMARY KEY, heat REAL, cool REAL, light REAL, fan_pump_tower REAL, EUI REAL, dEUI_pct REAL)')
@@ -198,7 +198,7 @@ con.executemany('INSERT INTO districts VALUES(?,?,?,?,?)', DS)
 GB = json.load(open(os.path.join(W, 'tools/derived/gbd_blocks.json'), encoding='utf-8'))   # 가구 배정(140동)
 con.execute('CREATE TABLE gbd_assign(sim_name TEXT PRIMARY KEY, plan_id TEXT, gagu TEXT)')
 con.executemany('INSERT INTO gbd_assign VALUES(?,?,?)', [(k, '11680UQ161PS202505140001', v) for k, v in GB['assign'].items()])
-GW = RC['gagu_with']   # 연중 같은 조건 9개 대안의 가구별 합산 변화(2026-10-27)
+GW = RC['gagu_with']   # 2026-10-27 재계산 9개 대안의 가구별 합산 변화(2026-10-27)
 A9 = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']
 r257 = {(r['sim_name'], r['tag']): r for r in RC['results'] if r['cond'] == '차폐 포함'}
 grows = []

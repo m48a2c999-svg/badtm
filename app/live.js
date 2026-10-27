@@ -371,7 +371,7 @@ function liveCharts() {
   const ser = [{ label: '입면 평균 일사(W/m²)', c: COL.ink, v: se.map(x => x.I) }];
   const ser2 = [{ label: '직달일사가 드는 입면(%)', c: COL.mut, v: se.map(x => x.lit), dash: '4 3' }];
   if (kind !== 'fixed') ser2.push({ label: '작동 중인 입면(%)', c: COL.sun, v: se.map(x => x.mv) });
-  let h = chartSvg('lc1', `${LIVE.src.name} · ${LIVE.date} · 맑은 날 간이 계산`, ser, 'W/m²') + chartSvg('lc2', `${LRULE[LIVE.rule].name}의 작동 — 하루 변화`, ser2, '%', { hi: 100 });
+  let h = chartSvg('lc1', `${LIVE.src.name} · ${LIVE.date} · 맑은 날 간이 계산`, ser, 'W/m²') + chartSvg('lc2', `${LRULE[LIVE.rule].name}의 작동 — 하루 변화${LRULE[LIVE.rule].kind === 'thresh' && !isCooling() ? '(난방기: 작동 안 함)' : ''}`, ser2, '%', { hi: 100 });
   $('#lchart').innerHTML = h;
   // EnergyPlus 곡선(역삼 257동)
   if (LIVE.src.ep) {

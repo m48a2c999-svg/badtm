@@ -1,9 +1,9 @@
-"""2026-10-27 재계산(연중 같은 조건) 결과를 사이트 DB 입력으로 내보낸다.
+"""2026-10-27 재계산(계산 기간 연중, 일사량 기준 제어는 냉방기 5~9월 작동) 결과를 사이트 DB 입력으로 내보낸다.
 입력: scratchpad/mb/res_sb10/*.pkl (257동), scratchpad/sim/res10/*.pkl (상세 3개 동), scratchpad/recalc/out/*.json
 출력: tools/derived/recalc.json
-태그: 차폐 포함 S1c·F0c·LH_F0c·VF_F0c·S3@c·LH_C@c·VF_C@c·BT_T300@y·LT_T300@y·PKY@c,
-      차폐 제외 S1@ns·F0@ns·LH_F0@ns·VF_F0@ns·S3@ns·LH_C@ns·VF_C@ns·BT_T300@yns·LT_T300@yns·PKY@ns,
-      이전 판(냉방기 한정) BT_T300c·LT_T300c
+태그: 차폐 포함 S1c·F0c·LH_F0c·VF_F0c·S3@c·LH_C@c·VF_C@c·BT_T300c·LT_T300c·PKY@c,
+      차폐 제외 S1@ns·F0@ns·LH_F0@ns·VF_F0@ns·S3@ns·LH_C@ns·VF_C@ns·BT_T300@ns·LT_T300@ns·PKY@ns,
+      일사량 기준 제어 연중 작동판(비교) BT_T300@y·LT_T300@y
 모든 값은 EnergyPlus 23.2 시뮬레이션 값이다.
 """
 import os, json, pickle, sqlite3, sys
