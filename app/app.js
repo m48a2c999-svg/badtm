@@ -167,9 +167,11 @@ function pageSite() {
   <div class="kicker">대상지 · 건물 데이터베이스</div>
   <h1>역삼역 일대 4개 대블록, 업무시설 257동</h1>
   <p>강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
+  <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">향후 계획</a>). 지금까지 EnergyPlus 계산을 마친 것은 강남 권역의 이 257동이며(그중 140동이 테헤란로제2지구 가구 40개 안), 이 페이지와 결과 페이지의 수치는 모두 이 257동의 예비 결과이다. 도심·여의도와 강남의 나머지 가구는 2027년 1~3월에 계산한다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>에서 볼 수 있다).</p>
   <div class="ctrl">
     <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 피크전력 변화</option></select></label>
     <label>대안<select id="malt">${alts}</select></label>
+    <label>주변 차폐<select id="mcond"><option value="차폐 포함">포함(본 결과)</option><option value="차폐 제외">제외(비교)</option></select></label>
     <label>검색<input type="search" id="msearch" placeholder="건물 이름"></label>
     <label>대블록<select id="mblock"><option value="">전체</option><option>NE</option><option>NW</option><option>SE</option><option>SW</option></select></label>
   </div>
@@ -179,12 +181,14 @@ function pageSite() {
   </div>
   <h2>건물 목록</h2><div id="btable"></div>
   ${note('평면 면적은 등가 직사각형 모델의 평면 면적, 가려진 정도는 창에서 본 주변 건물의 평균 차폐각이다. ' + SIMNOTE)}`;
-  ['mcolor', 'malt', 'mblock'].forEach(id => $('#' + id).addEventListener('change', () => { drawMap(); drawBTable(); }));
+  ['mcolor', 'malt', 'mblock', 'mcond'].forEach(id => $('#' + id).addEventListener('change', () => { drawMap(); drawBTable(); }));
   $('#msearch').addEventListener('input', drawBTable);
 }
+const mcond = () => ($('#mcond') || {}).value || '차폐 포함';
 function siteRows() {
   const t = $('#malt').value, blk = $('#mblock').value, s = ($('#msearch').value || '').trim();
-  let sql = `SELECT b.*, r.dEUI_pct, r.dpeak_pct, r.dUDI_pp FROM buildings b LEFT JOIN results_257 r ON r.sim_name=b.sim_name AND r.tag=? WHERE 1=1`; const p = [t];
+  const cd = mcond();
+  let sql = `SELECT b.*, r.dEUI_pct, r.dpeak_pct, r.dUDI_pp FROM buildings b LEFT JOIN results_257_cond r ON r.sim_name=b.sim_name AND r.tag=? AND r.cond=? WHERE 1=1`; const p = [t, cd];
   if (blk) { sql += ' AND b.block=?'; p.push(blk); }
   if (s) { sql += ' AND b.name LIKE ?'; p.push('%' + s + '%'); }
   return q(sql, p);
@@ -212,16 +216,16 @@ function drawMap() {
   let leg = '';
   if (mode === 'block') leg = Object.entries(blockColor).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join(' ');
   else if (CLASS_DEF[mode]) leg = `${CLASS_DEF[mode].label}: ` + CLASS_DEF[mode].levels.slice(0, 3).map((l, i) => `<span><i style="background:${seq3[i]}"></i>${l}</span>`).join(' ');
-  else { const lim = mode === 'dEUI_pct' ? 2 : 3; leg = `${altName($('#malt').value)} · ${METRIC[mode].label}: ` + [-lim, -lim / 2, 0, lim / 2, lim].map(v => `<span><i style="background:${divColor(v, lim)}"></i>${pct(v, 1)}</span>`).join(' ') + ' (초록 = 감소, 빨강 = 증가)'; }
+  else { const lim = mode === 'dEUI_pct' ? 2 : 3; leg = `${altName($('#malt').value)}(주변 차폐 ${mcond() === '차폐 제외' ? '제외' : '포함'}) · ${METRIC[mode].label}: ` + [-lim, -lim / 2, 0, lim / 2, lim].map(v => `<span><i style="background:${divColor(v, lim)}"></i>${pct(v, 1)}</span>`).join(' ') + ' (초록 = 감소, 빨강 = 증가)'; }
   $('#mleg').innerHTML = leg;
 }
 function drawBTable() {
   const rows = siteRows().sort((a, b) => { const x = a[SORT.k], y = b[SORT.k]; if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : x < y ? -1 : 0) * SORT.d; });
-  const t = altName($('#malt').value);
+  const t = altName($('#malt').value) + (mcond() === '차폐 제외' ? '(차폐 제외)' : '');
   $('#btable').innerHTML = `<p class="small">${rows.length}동 · 열 제목을 누르면 정렬된다.</p>` + table([
     { h: '건물', k: 'name', sort: 1 }, { h: '블록', k: 'block', sort: 1 }, { h: '층수', k: 'floors', num: 1, sort: 1 }, { h: '평면(m²)', k: 'footprint_model_m2', num: 1, sort: 1, f: v => num(v) },
     { h: '가려진 정도(°)', k: 'obstruction_deg', num: 1, sort: 1, f: v => num(v, 1) }, { h: '사용승인', k: 'approval_year', num: 1, sort: 1, f: v => v ?? '—' },
-    { h: '개선 전 EUI', k: 'base_EUI', num: 1, sort: 1, f: v => num(v, 1) }, { h: `${t} EUI`, k: 'dEUI_pct', num: 1, sort: 1, f: v => pct(v), cls: bad },
+    { h: mcond() === '차폐 제외' ? '개선 전 EUI(차폐 포함)' : '개선 전 EUI', k: 'base_EUI', num: 1, sort: 1, f: v => num(v, 1) }, { h: `${t} EUI`, k: 'dEUI_pct', num: 1, sort: 1, f: v => pct(v), cls: bad },
     { h: `${t} 피크전력`, k: 'dpeak_pct', num: 1, sort: 1, f: v => pct(v), cls: bad }], rows, { maxh: 460, nw: 1, rowAttr: r => ` data-s="${esc(r.sim_name)}" style="cursor:pointer"${SEL === r.sim_name ? ' class="sel"' : ''}` });
   $$('#btable tbody tr').forEach(tr => tr.addEventListener('click', () => selectBuilding(tr.dataset.s, true)));
   $$('#btable th[data-k]').forEach(th => th.addEventListener('click', () => { const k = th.dataset.k; SORT = { k, d: SORT.k === k ? -SORT.d : -1 }; drawBTable(); }));
@@ -229,10 +233,12 @@ function drawBTable() {
 function selectBuilding(s, pan) {
   SEL = s; const b = q1('SELECT * FROM buildings WHERE sim_name=?', [s]);
   const rs = q('SELECT r.*, a.name FROM results_257 r JOIN alternatives a ON a.tag=r.tag WHERE r.sim_name=?', [s]).filter(r => ORDER257.includes(r.tag)).sort((x, y) => ORDER257.indexOf(x.tag) - ORDER257.indexOf(y.tag));
+  const ns = Object.fromEntries(q("SELECT tag, dEUI_pct, dpeak_pct FROM results_257_cond WHERE cond='차폐 제외' AND sim_name=?", [s]).map(r => [r.tag, r])); rs.forEach(r => { r.nsE = ns[r.tag] ? ns[r.tag].dEUI_pct : null; r.nsP = ns[r.tag] ? ns[r.tag].dpeak_pct : null; });
   const m = q('SELECT * FROM monthly WHERE sim_name=? ORDER BY idx', [s]);
   $('#bdetail').innerHTML = `<h3>${esc(b.name)}</h3>
   <dl class="kv"><dt>대블록</dt><dd>${b.block}</dd><dt>층수 · 높이</dt><dd>${b.floors}층 · ${num(b.height_m, 0)} m</dd><dt>연면적(대장)</dt><dd>${b.gross_area_m2 ? num(b.gross_area_m2) + ' m²' : '—'}</dd><dt>평면 면적(모델)</dt><dd>${num(b.footprint_model_m2)} m² (${b.footprint_class})</dd><dt>가려진 정도</dt><dd>${num(b.obstruction_deg, 1)}° (${b.obstruction_class})</dd><dt>사용승인</dt><dd>${b.approval_year ?? '—'}</dd><dt>모델</dt><dd>${b.role}</dd><dt>개선 전</dt><dd>EUI ${num(b.base_EUI, 1)} kWh/m²·yr · 최대 ${num(b.base_peak_kW, 0)} kW</dd></dl>
-  ${table([{ h: '대안', k: 'name' }, { h: 'EUI', k: 'dEUI_pct', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력', k: 'dpeak_pct', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI', k: 'dUDI_pp', num: 1, f: v => pp(v, 1), cls: good }, { h: '열쾌적', k: 'dPMV_pp', num: 1, f: v => pp(v, 1), cls: good }], rs, { nw: 1 })}
+  ${table([{ h: '대안', k: 'name' }, { h: 'EUI', k: 'dEUI_pct', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력', k: 'dpeak_pct', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI', k: 'dUDI_pp', num: 1, f: v => pp(v, 1), cls: good }, { h: '열쾌적', k: 'dPMV_pp', num: 1, f: v => pp(v, 1), cls: good }, { h: 'EUI(차폐 제외)', k: 'nsE', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력(차폐 제외)', k: 'nsP', num: 1, f: v => pct(v), cls: bad }], rs, { nw: 1 })}
+  <p class="small">앞의 네 열은 주변 차폐 포함(본 결과), 뒤의 두 열은 같은 건물에서 주변 건물 차폐를 뺀 계산(비교)으로, 각각 같은 조건의 개선 전 대비이다.</p>
   ${m.length ? `<h3 style="margin-top:12px">월별 전력: 실측과 모델(보정 후)</h3>${lineChart([{ label: '실측(건축HUB)', v: m.map(x => x.measured), c: COL.ink }, { label: '모델(보정 후)', v: m.map(x => x.simulated), c: COL.sun, dash: '5 3' }], 12, { h: 230, yd: 1, yl: 'kWh/m²', xt: [[0, '1월'], [3, '4월'], [6, '7월'], [9, '10월'], [11, '12월']] })}<p class="small">CV(RMSE) ${num(b.cv_rmse_cal, 1)}%(보정 전 ${num(b.cv_rmse_uncal, 1)}%) · NMBE ${sgn(b.nmbe_cal, 1)}% · ${b.split || ''}</p>` : '<p class="small">실측 비교 자료 없음</p>'}`;
   drawMap(); drawBTable();
   if (pan && b.lat) MAP.setView([b.lat, b.lon], 17);
@@ -268,7 +274,7 @@ function pageResults() {
     const pr = w.filter(r => o[r.sim_name]); return { tag: t, name: altName(t), n: pr.length, ew: median(pr.map(r => r.e)), eo: median(pr.map(r => o[r.sim_name].e)), pw: median(pr.map(r => r.p)), po: median(pr.map(r => o[r.sim_name].p)), uw: median(pr.map(r => r.u)), uo: median(pr.map(r => o[r.sim_name].u)), flip: pr.filter(r => Math.sign(r.e) !== Math.sign(o[r.sim_name].e)).length }; });
   const ctx = (() => { const w = Object.fromEntries(q("SELECT sim_name, EUI, peak_kW, UDI FROM results_257_cond WHERE cond='차폐 포함' AND tag='S1'").map(r => [r.sim_name, r])); const o = q("SELECT sim_name, EUI, peak_kW, UDI FROM results_257_cond WHERE cond='차폐 제외' AND tag='S1'"); return { n: o.length, e: median(o.map(r => 100 * (w[r.sim_name].EUI / r.EUI - 1))), p: median(o.map(r => 100 * (w[r.sim_name].peak_kW / r.peak_kW - 1))), u: median(o.map(r => w[r.sim_name].UDI - r.UDI)) }; })();
   // 작동 기간(냉방기 본 대안 대 연중 비교)
-  const per = ['BT_T300', 'LT_T300'].map(t => { const y = q("SELECT dEUI_pct e, dpeak_pct p, dUDI_pp u FROM results_257_cond WHERE cond='차폐 포함' AND tag=?", [t]), c = q("SELECT dEUI_pct e, dpeak_pct p, dUDI_pp u FROM results_257_cond WHERE cond='차폐 포함(연중 작동)' AND tag=?", [t]); return [{ name: altName(t), per: '냉방기(5~9월, 본 대안)', e: median(y.map(r => r.e)), p: median(y.map(r => r.p)), u: median(y.map(r => r.u)), d: y.filter(r => r.e < 0).length, n: y.length }, { name: altName(t), per: '연중(1~12월, 비교)', e: median(c.map(r => r.e)), p: median(c.map(r => r.p)), u: median(c.map(r => r.u)), d: c.filter(r => r.e < 0).length, n: c.length }]; }).flat();
+  const per = ['BT_T300', 'LT_T300'].map(t => [['차폐 포함', '냉방기(5~9월, 본 대안)', '차폐 포함'], ['차폐 포함(연중 작동)', '연중(1~12월, 비교)', '차폐 포함'], ['차폐 제외', '냉방기(5~9월)', '차폐 제외'], ['차폐 제외(연중 작동)', '연중(1~12월, 비교)', '차폐 제외']].map(([cd, per, sh]) => { const y = q("SELECT dEUI_pct e, dpeak_pct p, dUDI_pp u FROM results_257_cond WHERE cond=? AND tag=?", [cd, t]); return y.length ? { name: altName(t), per, sh, e: median(y.map(r => r.e)), p: median(y.map(r => r.p)), u: median(y.map(r => r.u)), d: y.filter(r => r.e < 0).length, n: y.length } : null; }).filter(Boolean)).flat();
   const blk = q("SELECT * FROM block_257 ORDER BY rowid");
   const pk = q1("SELECT peak_hour h FROM block_257 WHERE scenario='S1'").h; const d0 = Math.floor(pk / 24) * 24;
   const hr = sc => q('SELECT kW FROM block_257_hourly WHERE scenario=? AND hour>=? AND hour<? ORDER BY hour', [sc, d0, d0 + 24]).map(x => x.kW);
@@ -295,8 +301,8 @@ function pageResults() {
   ${table([{ h: '대안', k: 'name' }, { h: 'n', k: 'n', num: 1 }, { h: 'EUI(차폐 포함)', k: 'ew', num: 1, f: v => pct(v), cls: bad }, { h: 'EUI(차폐 제외)', k: 'eo', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력(포함)', k: 'pw', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력(제외)', k: 'po', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI(포함)', k: 'uw', num: 1, f: v => pp(v, 1) }, { h: 'UDI(제외)', k: 'uo', num: 1, f: v => pp(v, 1) }, { h: 'EUI 방향이 바뀐 건물', k: 'flip', num: 1, f: (v, r) => r.n ? `${v} (${Math.round(100 * v / r.n)}%)` : '—' }], sh.filter(r => r.n >= 257), { nw: 1 })}
   <p>차폐를 빼면 블라인드 일사량 기준 제어를 제외한 8개 대안의 EUI 변화가 모두 높아졌다. 고정형의 절감은 건물별 중앙값 기준으로 사라지거나 증가로 바뀌었고, 연중 작동하는 키네틱 4종은 EUI 증가가 4~6배로 커져 EUI를 줄인 건물이 한 동도 없었다. 주변 건물이 없으면 차양이 막는 겨울 일사와 잃게 하는 자연채광이 많아지기 때문으로 해석된다(블라인드 컷오프 각도 제어의 난방 증가 +1.04 → +6.69 kWh/m²·yr, 257동 합산). 난방기에 걷어 올리는 블라인드 일사량 기준 제어만 차폐를 빼도 EUI 감소를 유지하였다. 주변 건물을 넣지 않은 단일 건물 계산은 주변 건물보다 낮은 건물이 많은 밀집지역의 효과를 다르게 평가할 수 있다.</p>
   <h2>5. 작동 기간에 따른 차이(일사량 기준 제어)</h2>
-  ${table([{ h: '대안', k: 'name' }, { h: '작동 기간', k: 'per' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: 'EUI 감소 동수', k: 'd', num: 1, f: (v, r) => `${v}/${r.n}` }, { h: '피크전력 중앙값', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(v, 1) }], per, { nw: 1 })}
-  <p>피크전력은 두 기간에서 같았다(피크가 7월 31일에 생김). 연중 작동하면 겨울에도 창면 일사량이 300 W/m²를 넘는 시간마다 차양이 내려와 난방이 늘었다. 그래서 일사량 기준 제어는 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 하였다.</p>
+  ${table([{ h: '대안', k: 'name' }, { h: '주변 차폐', k: 'sh' }, { h: '작동 기간', k: 'per' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: 'EUI 감소 동수', k: 'd', num: 1, f: (v, r) => `${v}/${r.n}` }, { h: '피크전력 중앙값', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(v, 1) }], per, { nw: 1 })}
+  <p>피크전력 중앙값은 두 기간에서 같았다(피크가 7월 31일에 생김). 연중 작동하면 겨울에도 창면 일사량이 300 W/m²를 넘는 시간마다 차양이 내려와 난방이 늘었다. 그래서 일사량 기준 제어는 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 하였다(연중 결과를 본 뒤 정한 것이다). 주변 차폐를 뺀 조건에서도 같은 방향이었다. 연중 작동시키면 EUI가 블라인드 일사량 기준 제어는 −0.13%에서 +8.92%로, 수평 루버 일사량 기준 제어는 +2.09%에서 +5.17%로 늘고, EUI를 줄인 건물이 한 동도 없었다(차폐 제외·연중 작동 행은 원고에 싣지 않은 비교 계산, 2026-10-28 완료). 각 행은 같은 주변 차폐 조건의 개선 전 대비이다.</p>
   <h2>6. 블록 합산 피크전력(보조 지표)</h2>
   ${table([{ h: '대안', k: 'label' }, { h: '블록 피크전력(kW)', k: 'peak_kW', num: 1, f: v => num(v) }, { h: '변화', k: 'dpeak_pct', num: 1, f: (v, r) => r.scenario === 'S1' ? '—' : pct(v), cls: (v, r) => r.scenario === 'S1' ? '' : bad(v) }, { h: '동시율', k: 'CF', num: 1, f: v => num(v, 3) }, { h: '부하율', k: 'LF', num: 1, f: v => num(v, 3) }, { h: '블록 EUI 변화', k: 'dEUI_pct', num: 1, f: (v, r) => r.scenario === 'S1' || v == null ? '—' : pct(v) }], blk, { nw: 1 })}
   ${lineChart([{ label: '개선 전', v: hr('S1'), c: COL.ink }, { label: '블라인드 고정', v: hr('F0'), c: COL.sun }, { label: '블라인드 일사량 기준 제어', v: hr('BT_T300'), c: COL.ok, dash: '5 3' }, { label: '피크 시간대 차양 폐쇄', v: hr('PK'), c: COL.red, dash: '2 2' }], 24, { yl: '257동 합산 전력(kW)', xt: [[0, '0시'], [6, '6시'], [12, '12시'], [16, '16시'], [23, '23시']] })}
@@ -400,7 +406,7 @@ function pagePlan() {
   const D = q('SELECT * FROM districts');
   $('#page-plan').innerHTML = `
   <div class="kicker">한계와 향후 계획</div><h1>재계산, 그리고 국가승인통계의 서울 오피스 3권역으로</h1>
-  <h2>재계산(2026-10-27 진행 상황)</h2><ol>
+  <h2>재계산(2026-10-28 기준)</h2><ol>
   <li><b>같은 조건</b> — 완료. 9개 대안을 같은 257동·보정 모델·기상·계산 간격·계산 기간(연중 1~12월)으로 다시 계산하였다. 일사량 기준 제어 2종은 작동 기간 비교에 따라 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 정하였다(2026-10-27). 피크 시간대 차양 폐쇄는 연중 평일 13~18시.</li>
   <li><b>257동 대안 구성</b> — 완료. 컷오프 각도 제어 3종과 피크 시간대 차양 폐쇄를 257동에 추가하였다.</li>
   <li><b>차폐 포함·제외 비교</b> — 완료(2026-10-28). 9개 대안 × 257동 × 차폐 포함·제외. 차폐를 빼면 블라인드 일사량 기준 제어를 제외한 8개 대안의 EUI 변화가 모두 높아졌다(결과 4절).</li>
@@ -438,7 +444,7 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외·차폐 포함(연중 작동, 일사량 기준 제어 비교)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', principles: '생체모방 제어 원리 4개와 판정', districts: '3대 업무권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', principles: '생체모방 제어 원리 4개와 판정', districts: '3대 업무권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `

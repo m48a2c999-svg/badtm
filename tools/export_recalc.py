@@ -3,7 +3,7 @@
 출력: tools/derived/recalc.json
 태그: 차폐 포함 S1c·F0c·LH_F0c·VF_F0c·S3@c·LH_C@c·VF_C@c·BT_T300c·LT_T300c·PKY@c,
       차폐 제외 S1@ns·F0@ns·LH_F0@ns·VF_F0@ns·S3@ns·LH_C@ns·VF_C@ns·BT_T300@ns·LT_T300@ns·PKY@ns,
-      일사량 기준 제어 연중 작동판(비교) BT_T300@y·LT_T300@y
+      일사량 기준 제어 연중 작동판(비교) BT_T300@y·LT_T300@y, 차폐 제외 연중 작동판(비교) BT_T300@yns·LT_T300@yns
 모든 값은 EnergyPlus 23.2 시뮬레이션 값이다.
 """
 import os, json, pickle, sqlite3, sys
@@ -15,6 +15,7 @@ RES = S + '/mb/res_sb10'; R3 = S + '/sim/res10'
 WITH = {'S1': 'S1c', 'F0': 'F0c', 'LH_F0': 'LH_F0c', 'VF_F0': 'VF_F0c', 'S3': 'S3@c', 'LH_C': 'LH_C@c', 'VF_C': 'VF_C@c', 'BT_T300': 'BT_T300c', 'LT_T300': 'LT_T300c', 'PK': 'PKY@c'}
 NOSH = {'S1': 'S1@ns', 'F0': 'F0@ns', 'LH_F0': 'LH_F0@ns', 'VF_F0': 'VF_F0@ns', 'S3': 'S3@ns', 'LH_C': 'LH_C@ns', 'VF_C': 'VF_C@ns', 'BT_T300': 'BT_T300@ns', 'LT_T300': 'LT_T300@ns', 'PK': 'PKY@ns'}
 SEAS = {'BT_T300': 'BT_T300@y', 'LT_T300': 'LT_T300@y'}   # 2026-10-27 저자 결정: 일사량 기준 제어 본 대안 = 냉방기(5~9월). 연중 작동판은 비교용
+SEASNS = {'BT_T300': 'BT_T300@yns', 'LT_T300': 'LT_T300@yns'}   # 차폐 제외 + 연중 작동(비교, 2026-10-28 완료, 원고 미사용)
 ALTS = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']
 c = sqlite3.connect(os.path.join(W, 'data/db/research.sqlite'))
 BL = dict(c.execute('SELECT sim_name, block FROM buildings').fetchall())
@@ -30,22 +31,22 @@ def L(n, t):
 out = {'results': [], 'hourly': {}, 'by_block': {}, 'n_done': {}}
 cache = {}
 for n in names:
-    for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS)):
+    for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS), ('season_ns', SEASNS)):
         for a, t in M.items():
             d = L(n, t)
             if d is None: continue
             cache[(n, grp, a)] = d
-for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS)):
+for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS), ('season_ns', SEASNS)):
     out['n_done'][grp] = {a: sum(1 for n in names if (n, grp, a) in cache) for a in M}
 
 def rel(x, b, k): return None if x is None or b is None or x.get(k) is None or b.get(k) is None else (100 * (x[k] / b[k] - 1) if k in ('EUI', 'peak_kW') else x[k] - b[k])
 for n in names:
-    for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS)):
-        base = cache.get((n, 'with' if grp == 'season' else grp, 'S1'))
+    for grp, M in (('with', WITH), ('nosh', NOSH), ('season', SEAS), ('season_ns', SEASNS)):
+        base = cache.get((n, {'season': 'with', 'season_ns': 'nosh'}.get(grp, grp), 'S1'))
         for a in M:
             d = cache.get((n, grp, a))
             if d is None: continue
-            out['results'].append({'sim_name': n, 'cond': {'with': '차폐 포함', 'nosh': '차폐 제외', 'season': '차폐 포함(연중 작동)'}[grp], 'tag': a,
+            out['results'].append({'sim_name': n, 'cond': {'with': '차폐 포함', 'nosh': '차폐 제외', 'season': '차폐 포함(연중 작동)', 'season_ns': '차폐 제외(연중 작동)'}[grp], 'tag': a,
                                    'EUI': round(d['EUI'], 4), 'peak_kW': round(d['peak_kW'], 2), 'UDI': round(d.get('UDI'), 3) if d.get('UDI') is not None else None,
                                    'PMV_ok': round(d.get('PMV_ok'), 3) if d.get('PMV_ok') is not None else None,
                                    'heat': round(d['Heating:NaturalGas'], 3), 'cool': round(d['Cooling:Electricity'], 3), 'light': round(d['InteriorLights:Electricity'], 3),
