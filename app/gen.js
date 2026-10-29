@@ -64,13 +64,13 @@ function pageGen() {
   <h2>가구별 결과</h2><div id="gout"><p class="small">아직 만든 자료가 없다.</p></div>
   <h2>시스템 구성</h2>
   <div class="flow"><div><b>입력</b>권역 · 구역 · 구 이름</div><div><b>① 경계</b>지구단위계획구역(UQ161) − 도시계획도로(UQ151) = 가구(2,000 m² 이상), 상업지역(UQ111) 비율</div><div><b>② 건물</b>OpenStreetMap 건물 윤곽·층수 태그(Overpass API)</div><div><b>③ 배정·지표</b>건물 중심점 → 가구, 건물 수·건폐율·층수</div><div><b>④ 계산 엔진</b>건축물대장 결합 → EnergyPlus 자동 모델 → 성능 개선안 → DB</div></div>
-  <div id="gnote"></div>${note('② 건물 윤곽은 OpenStreetMap 기여자 자료(ODbL)로, 빠진 건물이나 층수 태그가 없는 건물이 있다. ④ 계산 엔진 단계(건축물대장 결합·EnergyPlus)는 이 페이지에서 실행하지 않으며, 내려받은 자료를 입력으로 쓴다. 지금 계산 엔진이 자동으로 돌아가는 범위는 역삼 257동 절차(자동 모델·실측 비교·성능 개선안)이고, 다른 지역은 2027년 1~3월에 이 자료로 계산한다.')}`;
+  <div id="gnote"></div>${note('② 건물 윤곽은 OpenStreetMap 기여자 자료(ODbL)로, 빠진 건물이나 층수 태그가 없는 건물이 있다. ④ 계산 엔진 단계(건축물대장 결합·EnergyPlus)는 이 페이지에서 실행하지 않으며, 내려받은 자료를 입력으로 쓴다. 지금 계산 엔진(스크립트)으로 실행한 범위는 역삼 257동 절차(자동 모델·실측 비교·성능 개선안)이고, 다른 지역은 2027년 1~3월에 이 자료로 계산한다.')}`;
   $('#gpre').addEventListener('change', () => { const k = $('#gpre').value; if (!k) return; GEN.sel = new Set(PRESET[k]); $('#gq').value = ''; genList(); });
   $('#gq').addEventListener('input', genList); $('#gcom').addEventListener('change', genList);
   $('#grun').addEventListener('click', genRun); $('#gclear').addEventListener('click', () => { GEN.sel.clear(); genList(); });
   GEN.map = L.map('gmap', { scrollWheelZoom: false }).setView([37.535, 126.99], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(GEN.map);
-  genLoadPlans().then(() => { $('#gnote').innerHTML = note(`① 경계 자료: ${esc(GEN.src)}. ${esc(GEN.rule)}. 서울 지구단위계획구역 ${GEN.plans.length}개, 가구 ${GEN.plans.reduce((a, p) => a + p.n_blocks, 0)}개가 탑재되어 있다.`); genList(); });
+  genLoadPlans().then(() => { $('#gnote').innerHTML = note(`① 경계 자료: ${esc(GEN.src)}. ${esc(GEN.rule)}. 서울 지구단위계획구역 ${GEN.plans.length.toLocaleString('ko-KR')}개, 가구 ${GEN.plans.reduce((a, p) => a + p.n_blocks, 0).toLocaleString('ko-KR')}개가 탑재되어 있다.`); genList(); });
 }
 function genList() {
   if (!GEN.plans) return;

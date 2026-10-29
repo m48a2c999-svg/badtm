@@ -33,7 +33,7 @@ const CLASS_DEF = {
   era_class: { label: '사용승인 연도', levels: ['1995년 이전', '1996~2005년', '2006년 이후', '미상'] },
 };
 const METRIC = { dEUI_pct: { label: 'EUI 변화', f: pct, cls: bad }, dpeak_pct: { label: '건물 피크전력 변화', f: pct, cls: bad }, dUDI_pp: { label: 'UDI 변화', f: pp, cls: good }, dPMV_pp: { label: '열쾌적 비율 변화', f: pp, cls: good } };
-const CONT = { obstruction_deg: '평균 차폐각(°)', footprint_model_m2: '모델 평면 면적(m²)', floors: '지상 층수', sky_view_proxy: '천공률 대용값', approval_year: '사용승인 연도' };
+const CONT = { obstruction_deg: '평균 차폐각(°)', footprint_model_m2: '모델 평면 면적(m²)', floors: '지상 층수', approval_year: '사용승인 연도' };
 
 /* ---------------- SVG charts ---------------- */
 function svgEl(w, h, inner) { return `<svg class="svgc" viewBox="0 0 ${w} ${h}" role="img">${inner}</svg>`; }
@@ -122,7 +122,7 @@ function pageHome() {
   const r = {}; for (const t of ORDER257) { const v = q('SELECT dEUI_pct e, dpeak_pct p FROM results_257 WHERE tag=?', [t]); r[t] = { e: median(v.map(x => x.e)), p: median(v.map(x => x.p)), both: v.filter(x => x.e < 0 && x.p < 0).length, n: v.length }; }
   const eMeds = Object.values(r).map(x => x.e);
   const obs = cls => q("SELECT dEUI_pct e, dpeak_pct p FROM v_results WHERE tag=? AND obstruction_class=?", [cls[0], cls[1]]);
-  const f0hi = obs(['F0', '많이 가려짐']), lhlo = obs(['LH_F0', '적게 가려짐']);
+  const f0hi = obs(['F0', '많이 가려짐']), lhlo = obs(['LH_F0', '적게 가려짐']), lhhi = obs(['LH_F0', '많이 가려짐']);
   const cb = JSON.parse(META.class_bounds);
   $('#page-home').innerHTML = `
   <div class="titleblock">
@@ -133,7 +133,7 @@ function pageHome() {
   </div>
   <div class="purpose"><b>연구 목적</b><br>${esc(META.purpose)}</div>
   <div class="grid g4" style="margin:18px 0">
-    <div class="card tick stat"><b>${nB}동</b><span>역삼역 일대 4개 대블록의 업무시설</span><em>상세 모델 3개 동 포함</em></div>
+    <div class="card tick stat"><b>${nB}동</b><span>역삼역 일대 4개 대블록의 업무 용도 건물</span><em>상세 모델 3개 동 포함</em></div>
     <div class="card tick stat"><b>${nAlt}개</b><span>외피 성능 개선안</span><em>고정형 차양 3 · 키네틱 파사드 6</em></div>
     <div class="card tick stat"><b class="sun">${pct(Math.min(...eMeds))} ~ ${pct(Math.max(...eMeds))}</b><span>257동 건물별 EUI 변화 중앙값의 범위</span><em>9개 대안, 주변 차폐 포함</em></div>
     <div class="card tick stat"><b class="kin">${r.BT_T300.both}동</b><span>EUI와 피크전력을 함께 줄인 건물(블라인드 일사량 기준 제어, 257동 중)</span><em>나머지 8개 대안은 ${Math.max(...ORDER257.filter(t => t !== 'BT_T300').map(t => r[t].both))}동 이하</em></div>
@@ -151,7 +151,7 @@ function pageHome() {
   <div class="grid g3">
     <div class="card"><h3>① 연중 작동하는 키네틱은 EUI를 높였다</h3><p>EUI 중앙값이 줄어든 대안은 고정형 3종(블라인드 고정 ${pct(r.F0.e)})과 냉방기에만 작동하는 일사량 기준 제어 2종(블라인드 ${pct(r.BT_T300.e)}, 수평 루버 ${pct(r.LT_T300.e)})이었다. 연중 작동하는 키네틱 4종(컷오프 각도 제어 3종, 피크 시간대 차양 폐쇄)은 모두 늘었다(${pct(Math.min(...['S3', 'LH_C', 'VF_C', 'PK'].map(t => r[t].e)))}~${pct(Math.max(...['S3', 'LH_C', 'VF_C', 'PK'].map(t => r[t].e)))}). 원인은 컷오프 각도 제어에서는 겨울 일사 취득 감소에 따른 난방 증가, 피크 시간대 차양 폐쇄에서는 자연채광 감소에 따른 조명 증가였다.</p><a href="#/results">결과 →</a></div>
     <div class="card"><h3>② 피크전력을 줄인 것은 하나</h3><p>블라인드 일사량 기준 제어(냉방기)만 피크전력을 줄였고 EUI와 피크전력을 함께 줄인 건물도 가장 많았으나(${r.BT_T300.both}동), 크기는 매우 작았다(EUI ${pct(r.BT_T300.e)}, 피크전력 ${pct(r.BT_T300.p)}, 블록 −0.34%·약 205 kW). 같은 대안을 연중 작동시키면 겨울 난방이 늘어 EUI가 +2.98%로 바뀐다. 피크 시간대 차양 폐쇄는 피크전력을 가장 크게 높였다(${pct(r.PK.p)}).</p><a href="#/alts">성능 개선안 →</a></div>
-    <div class="card"><h3>③ 밀집 조건이 방향을 바꾼다</h3><p>8개 대안은 주변 건물에 많이 가려진 건물일수록 EUI 증가가 작거나 감소가 컸다(ρ = −0.59~−0.74). 많이 가려진 건물에서는 연중 작동하는 키네틱 일부도 EUI가 줄었다(블라인드 컷오프 각도 제어 −1.07%, 수평 루버 컷오프 각도 제어 −0.75%). 블라인드 일사량 기준 제어만 덜 가려진 건물에서 감소가 컸다(ρ = +0.57). 많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)에서는 블라인드 고정 EUI ${pct(median(f0hi.map(x => x.e)))}, 적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)에서는 수평 루버 고정도 EUI ${pct(median(lhlo.map(x => x.e)))}로 방향이 뒤집혔다. 같은 건물에서 주변 차폐를 빼고 계산하면 블라인드 일사량 기준 제어를 제외한 8개 대안의 EUI 변화가 모두 높아졌다(블라인드 고정 −1.18% → +0.02%, 연중 작동 키네틱 4종 +3.51~+7.28%). 고정형의 절감은 주로 주변 건물에 이미 가려진 조건에서 나타났고, 블라인드 일사량 기준 제어만 차폐를 빼도 감소를 유지하였다(−0.13%).</p><a href="#/traits">건물 특성별 →</a></div>
+    <div class="card"><h3>③ 밀집 조건이 방향을 바꾼다</h3><p>8개 대안은 주변 건물에 많이 가려진 건물일수록 EUI 증가가 작거나 감소가 컸다(ρ = −0.59~−0.74). 많이 가려진 건물에서는 연중 작동하는 키네틱 일부도 EUI가 줄었다(블라인드 컷오프 각도 제어 −1.07%, 수평 루버 컷오프 각도 제어 −0.75%). 블라인드 일사량 기준 제어만 덜 가려진 건물에서 감소가 컸다(ρ = +0.57). 많이 가려진 건물(평균 차폐각 ${cb.obstruction_deg[1]}° 초과)에서는 블라인드 고정의 EUI 감소가 ${pct(median(f0hi.map(x => x.e)))}로 가장 컸고, 수평 루버 고정은 많이 가려진 건물에서 ${pct(median(lhhi.map(x => x.e)))}, 적게 가려진 건물(${cb.obstruction_deg[0]}° 이하)에서 ${pct(median(lhlo.map(x => x.e)))}로 방향이 뒤집혔다(구간에 따라 방향이 뒤집힌 대안 6개). 같은 건물에서 주변 차폐를 빼고 계산하면 블라인드 일사량 기준 제어를 제외한 8개 대안의 EUI 변화가 모두 높아졌다(블라인드 고정 −1.18% → +0.02%, 연중 작동 키네틱 4종 +3.51~+7.28%). 고정형의 절감은 주로 주변 건물에 이미 가려진 조건에서 나타났고, 블라인드 일사량 기준 제어만 차폐를 빼도 감소를 유지하였다(−0.13%).</p><a href="#/traits">건물 특성별 →</a></div>
   </div>
   ${note('결론의 성격: "키네틱 파사드가 좋다"를 보이는 것이 아니라, 서울 업무시설 밀집지역의 기존 건물에서 어떤 성능 개선이 어떤 건물 조건에서 얼마만큼 효과가 있고 없는지를 수치로 밝히는 평가 연구이다. ' + SIMNOTE)}`;
 }
@@ -165,7 +165,7 @@ function pageSite() {
   const alts = ORDER257.map(t => `<option value="${t}">${esc(altName(t))}</option>`).join('');
   $('#page-site').innerHTML = `
   <div class="kicker">대상지 · 건물 데이터베이스</div>
-  <h1>역삼역 일대 4개 대블록, 업무시설 257동</h1>
+  <h1>역삼역 일대 4개 대블록, 업무 용도 건물 257동</h1>
   <p>강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
   <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">향후 계획</a>). 지금까지 EnergyPlus 계산을 마친 것은 강남 권역의 이 257동이며(그중 140동이 테헤란로제2지구 가구 40개 안), 이 페이지와 결과 페이지의 수치는 모두 이 257동의 예비 결과이다. 도심·여의도와 강남의 나머지 가구는 2027년 1~3월에 계산한다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>에서 볼 수 있다).</p>
   <div class="ctrl">
@@ -248,13 +248,13 @@ function selectBuilding(s, pan) {
 function pageAlts() {
   const rows = q('SELECT * FROM alternatives');
   const main = ORDER.map(t => rows.find(r => r.tag === t));
-  const cols = [{ h: '구분', k: 'category' }, { h: '대안', k: 'name', f: (v, r) => `<b>${esc(v)}</b>${r.principle ? ` <span class="tag kin">${r.principle}</span>` : ''}` }, { h: '장치', k: 'device' }, { h: '작동', k: 'operation' }, { h: '기간', k: 'period' }, { h: '작동하지 않을 때', k: 'idle_state' }, { h: '자연채광', k: 'daylight' }, { h: '계산 범위', k: 'in_257', f: (v, r) => [r.in_3bldg ? '3개 동' : '', v ? '257동' : ''].filter(Boolean).join(' · ') }];
+  const cols = [{ h: '구분', k: 'category' }, { h: '대안', k: 'name', f: (v, r) => `<b>${esc(v)}</b>${r.principle ? ` <span class="tag kin">${r.principle.replace(/P(\d)/g, (m, d) => 'P' + '₀₁₂₃₄₅₆₇₈₉'[d])}</span>` : ''}` }, { h: '장치', k: 'device' }, { h: '작동', k: 'operation' }, { h: '기간', k: 'period' }, { h: '작동하지 않을 때', k: 'idle_state' }, { h: '자연채광', k: 'daylight' }, { h: '계산 범위', k: 'in_257', f: (v, r) => [r.in_3bldg ? '3개 동' : '', v ? '257동' : ''].filter(Boolean).join(' · ') }];
   const extra = rows.filter(r => !ORDER.includes(r.tag) && r.tag !== 'S1');
   $('#page-alts').innerHTML = `
   <div class="kicker">외피 성능 개선안</div><h1>고정형 차양 3종 · 키네틱 파사드 6종</h1>
   <p>개선 전은 장치 없이 주변 건물 차폐만 반영한 모델이다. 본 연구에서 키네틱 파사드는 외피 요소가 물리적으로 움직이는 가동형 외부 차양(블라인드·루버)으로 한정한다(고정형·가동형 구분: 「건축물의 에너지절약설계기준」 제5조). 장치를 ① 무엇이 움직이는가(장치)와 ② 언제 움직이는가(제어)의 두 축으로 정리하였다.</p>
   ${table(cols, main)}
-  ${note('모든 장치는 설계일 계산에서 작동하지 않게 하여, 같은 건물의 대안들이 같은 공조 용량을 쓰게 하였다. 9개 대안은 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월)으로 계산하였다(2026-10-27 재계산). 일사량 기준 제어 2종은 냉방기(5~9월)에만 작동하고 난방기에는 걷어 올림(블라인드)·수평(수평 루버)으로 두며, 연중 작동시킨 결과는 작동 기간 비교 자료로만 쓴다. <span class="tag kin">P2</span> 표시는 생체모방 원리에서 유도한 규칙과 대응하는 대안이다(<a href="#/bio">생체모방 원리</a>).')}
+  ${note('모든 장치는 설계일 계산에서 작동하지 않게 하여, 같은 건물의 대안들이 같은 공조 용량을 쓰게 하였다. 9개 대안은 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월)으로 계산하였다(2026-10-27 재계산). 일사량 기준 제어 2종은 냉방기(5~9월)에만 작동하고 난방기에는 걷어 올림(블라인드)·수평(수평 루버)으로 두며, 연중 작동시킨 결과는 작동 기간 비교 자료로만 쓴다. <span class="tag kin">P₂</span> 표시는 생체모방 원리에서 유도한 규칙과 대응하는 대안이다(<a href="#/bio">생체모방 원리</a>).')}
   <h2>자연채광을 유지하는가</h2>
   <div class="grid g2"><div class="card"><h3>자연채광 손실형</h3><p>작동하지 않을 때도 장치가 창 앞에 남는다. 고정형 3종, 컷오프 각도 제어 3종, 수평 루버 일사량 기준 제어, 피크 시간대 차양 폐쇄가 여기에 속한다. 일사를 막아 냉방을 줄이지만, 자연채광을 잃어 조명 전력이 늘어난다.</p></div>
   <div class="card"><h3>자연채광 유지형</h3><p>작동 기준을 넘을 때만 창을 가리고 그 밖에는 창에서 빠진다. 블라인드 일사량 기준 제어(걷어 올림)가 유일하다. 냉방기(5~9월)에만 작동시켜 EUI와 피크전력을 함께 줄였으나(−0.07%, −0.01%) 크기는 매우 작다. 연중 작동시키면 겨울 일사 취득을 막아 난방이 늘었다(EUI +2.98%).</p></div></div>
@@ -284,17 +284,17 @@ function pageResults() {
   <div class="kicker">예비 결과 · 9개 대안(2026-10-27~28 재계산)</div><h1>개선 전후 비교</h1>
   <p>9개 대안은 같은 257동, 같은 보정 모델, 같은 기상(서울 TMYx 2011–2025), 같은 계산 간격(10분), 같은 계산 기간(연중 1~12월)으로 계산하였다. 일사량 기준 제어 2종만 냉방기(5~9월)에 작동하고 난방기에는 걷어 올림·수평으로 둔다. 설계일에는 모든 장치가 작동하지 않아 같은 건물의 대안들이 같은 공조 용량을 쓴다.</p>
   <h2>1. 상세 3개 동</h2>
-  <p>아크플레이스·강남파이낸스센터·GS타워의 상세 모델. 개선 전 블록 EUI ${num(base.EUI, 2)} kWh/m²·yr, 블록 피크전력 ${num(base.peak_kW)} kW 대비 변화이다. 오른쪽 두 열은 주변 건물 차폐를 뺀 같은 계산이다.</p>
+  <p>아크플레이스·강남파이낸스센터·GS타워의 상세 모델. 개선 전 블록 EUI ${num(base.EUI, 2)} kWh/m²·yr, 블록 피크전력 ${num(base.peak_kW)} kW 대비 변화이다. 오른쪽 두 열은 주변 건물 차폐를 뺀 같은 계산(차폐 제외 개선 전 대비)이다.</p>
   ${table([{ h: '구분', k: 'category' }, { h: '대안', k: 'name' }, { h: '블록 EUI', k: 'dEUI_pct', num: 1, f: v => pct(v), cls: bad }, { h: '블록 피크전력', k: 'dpeak_pct', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI(3개 동, %p)', k: 'dUDI_ARK', num: 1, f: (v, r) => rng(r, 'dUDI') }, { h: '열쾌적(3개 동, %p)', k: 'dPMV_ARK', num: 1, f: (v, r) => rng(r, 'dPMV') }, { h: 'EUI(차폐 제외)', k: 'dEUI_nosh_pct', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력(차폐 제외)', k: 'dpeak_nosh_pct', num: 1, f: v => pct(v), cls: bad }], r3, { nw: 1 })}
   ${barsChart(r3.map(r => ({ label: r.name, e: r.dEUI_pct, p: r.dpeak_pct })), [{ key: 'e', label: '블록 EUI 변화', color: COL.ink }, { key: 'p', label: '블록 피크전력 변화', color: COL.sun }])}
-  <p>EUI를 줄인 대안은 고정형 3종과 냉방기에만 작동하는 일사량 기준 제어 2종이었고, 연중 작동하는 키네틱 4종은 모두 EUI가 늘었다. 컷오프 각도 제어는 세 장치 모두 같은 장치의 고정보다 EUI와 피크전력이 컸다(수직 루버 피크전력은 예외). 서울 사무소에서 고정 차양의 절감이 키네틱 운전보다 컸다는 Lee(2019)와 같은 방향이다. 피크전력을 줄인 것은 블라인드 일사량 기준 제어뿐이었고(−0.48%), 피크 시간대 차양 폐쇄는 가장 크게 높였다.</p>
+  <p>EUI를 줄인 대안은 고정형 3종과 냉방기에만 작동하는 일사량 기준 제어 2종이었고, 연중 작동하는 키네틱 4종은 모두 EUI가 늘었다. 컷오프 각도 제어는 세 장치 모두 같은 장치의 고정보다 EUI와 피크전력이 컸다(수직 루버 피크전력은 예외). 서울 사무소에서 고정 차양의 절감이 키네틱 운전보다 컸다는 Lee(2019)와 같은 방향이다. 피크전력을 줄인 것은 블라인드 일사량 기준 제어뿐이었고(−0.48%), 피크 시간대 차양 폐쇄는 가장 크게 높였다. 3개 동의 피크 시각(7월 31일 16시)에 부하를 나누어 보면, 피크 시간대 차양 폐쇄는 냉방 부하가 565 kW 줄었으나 그에 따른 공조 전력 감소는 142 kW에 그쳤고, 조명 전력이 487 kW 늘어 피크전력이 345 kW 늘었다.</p>
   <h2>2. 257동(건물별)</h2>
   ${table([{ h: '대안', k: 'label' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(median(v)), cls: v => bad(median(v)) }, { h: '사분위 범위', k: 'e', num: 1, f: v => iqr(v) }, { h: 'EUI 감소 동수', k: 'e', num: 1, f: (v, r) => `${v.filter(x => x < 0).length} (${Math.round(100 * v.filter(x => x < 0).length / r.n)}%)` }, { h: '피크전력 중앙값', k: 'p', num: 1, f: v => pct(median(v)), cls: v => bad(median(v)) }, { h: '피크전력 감소 동수', k: 'p', num: 1, f: (v, r) => `${v.filter(x => x < 0).length} (${Math.round(100 * v.filter(x => x < 0).length / r.n)}%)` }, { h: '둘 다 감소', k: 'both', num: 1, f: (v, r) => `${v} (${Math.round(100 * v / r.n)}%)` }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(median(v), 1), cls: v => good(median(v)) }, { h: '열쾌적 중앙값', k: 'c', num: 1, f: v => pp(median(v), 1), cls: v => good(median(v)) }], g, { nw: 1 })}
   <div><div><h3>EUI 변화 분포</h3>${stripChart(g.map(x => ({ label: x.label, v: x.e })), { color: COL.ink })}</div><div><h3>건물 피크전력 변화 분포</h3>${stripChart(g.map(x => ({ label: x.label, v: x.p })), { color: COL.sun })}</div></div>
   <p class="small">점 = 건물, 상자 = 사분위 범위, 주황 선 = 중앙값. 보정 기준(기기 밀도 1.0, 냉동기 COP 배수 2.0) 대비.</p>
   <h2>3. EUI 변화의 용도별 원인(257동 합산)</h2>
   ${table([{ h: '대안', k: 'name' }, { h: '난방(가스)', k: 'heat', num: 1, f: v => sgn(v, 2) }, { h: '냉방', k: 'cool', num: 1, f: v => sgn(v, 2) }, { h: '조명', k: 'light', num: 1, f: v => sgn(v, 2) }, { h: '팬·펌프·냉각탑', k: 'fan_pump_tower', num: 1, f: v => sgn(v, 2) }, { h: '합계(EUI)', k: 'EUI', num: 1, f: (v, r) => `${sgn(v, 2)} (${pct(r.dEUI_pct)})`, cls: bad }], euR, { nw: 1 })}
-  <p>단위: 개선 전 대비 kWh/m²·yr. 개선 전 기준값은 난방 ${num(eu0.heat, 2)}, 냉방 ${num(eu0.cool, 2)}, 조명 ${num(eu0.light, 2)}, 합계 ${num(eu0.EUI, 2)} kWh/m²·yr이다. 냉방 감소는 모든 대안에서 작았고(−0.06~−0.28), 자연채광을 막는 대안은 조명이 늘었다. EUI의 방향은 대부분의 대안에서 난방이 정했다. 고정형과 수평 루버 일사량 기준 제어(난방기 수평)는 난방이 줄어 EUI가 줄었고, 컷오프 각도 제어는 겨울 낮에 일사 취득을 막아 난방이 늘었다. 블라인드 일사량 기준 제어(냉방기)는 난방 증가가 작고(+0.18) 냉방·팬·펌프·냉각탑 감소가 더 커 EUI가 조금 줄었다. 피크 시간대 차양 폐쇄는 조명 증가로 EUI가 늘었다.</p>
+  <p>단위: 개선 전 대비 kWh/m²·yr. 개선 전 기준값은 난방 ${num(eu0.heat, 2)}, 냉방 ${num(eu0.cool, 2)}, 조명 ${num(eu0.light, 2)}, 합계 ${num(eu0.EUI, 2)} kWh/m²·yr이다. 냉방 감소는 모든 대안에서 작았고(−0.06~−0.28), 자연채광을 막는 대안은 조명이 늘었다. EUI의 방향은 대부분의 대안에서 난방이 정했다. 고정형과 수평 루버 일사량 기준 제어(난방기 수평)는 난방이 줄어 EUI가 줄었고(블라인드 고정의 난방 감소는 야간 −3.4 GWh가 주간 −2.5 GWh보다 커, 창 외측의 차양층이 창의 열손실을 줄인 효과로 해석된다), 컷오프 각도 제어는 겨울 낮에 일사 취득을 막아 난방이 늘었다. 블라인드 일사량 기준 제어(냉방기)는 난방 증가가 작고(+0.18) 냉방·팬·펌프·냉각탑 감소가 더 커 EUI가 조금 줄었다. 피크 시간대 차양 폐쇄는 조명 증가로 EUI가 늘었다.</p>
   <h2>4. 주변 차폐 포함·제외 비교(같은 건물끼리)</h2>
   ${nsDone < 257 ? `<div class="warn">차폐 제외 계산 진행 중: 257동을 모두 계산한 대안만 표에 넣었다(${sh.filter(r => r.n >= 257).map(r => esc(r.name)).join(', ')}). 나머지 대안은 2026-10-28에 반영한다.</div>` : ''}
   <p>같은 건물·같은 대안을 주변 건물 차폐를 넣고 뺀 두 경우로 계산하여, 밀집 환경이 개선 효과를 얼마나 바꾸는지 직접 분리한다. 주변 차폐 자체(개선 전)는 EUI를 ${pct(ctx.e)}, 피크전력을 ${pct(ctx.p)}, UDI를 ${pp(ctx.u, 1)} 바꾸었다(n = ${ctx.n}).</p>
@@ -302,7 +302,7 @@ function pageResults() {
   <p>차폐를 빼면 블라인드 일사량 기준 제어를 제외한 8개 대안의 EUI 변화가 모두 높아졌다. 고정형의 절감은 건물별 중앙값 기준으로 사라지거나 증가로 바뀌었고, 연중 작동하는 키네틱 4종은 EUI 증가가 4~6배로 커져 EUI를 줄인 건물이 한 동도 없었다. 주변 건물이 없으면 차양이 막는 겨울 일사와 잃게 하는 자연채광이 많아지기 때문으로 해석된다(블라인드 컷오프 각도 제어의 난방 증가 +1.04 → +6.69 kWh/m²·yr, 257동 합산). 난방기에 걷어 올리는 블라인드 일사량 기준 제어만 차폐를 빼도 EUI 감소를 유지하였다. 주변 건물을 넣지 않은 단일 건물 계산은 주변 건물보다 낮은 건물이 많은 밀집지역의 효과를 다르게 평가할 수 있다.</p>
   <h2>5. 작동 기간에 따른 차이(일사량 기준 제어)</h2>
   ${table([{ h: '대안', k: 'name' }, { h: '주변 차폐', k: 'sh' }, { h: '작동 기간', k: 'per' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: 'EUI 감소 동수', k: 'd', num: 1, f: (v, r) => `${v}/${r.n}` }, { h: '피크전력 중앙값', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(v, 1) }], per, { nw: 1 })}
-  <p>피크전력 중앙값은 두 기간에서 같았다(피크가 7월 31일에 생김). 연중 작동하면 겨울에도 창면 일사량이 300 W/m²를 넘는 시간마다 차양이 내려와 난방이 늘었다. 그래서 일사량 기준 제어는 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 하였다(연중 결과를 본 뒤 정한 것이다). 주변 차폐를 뺀 조건에서도 같은 방향이었다. 연중 작동시키면 EUI가 블라인드 일사량 기준 제어는 −0.13%에서 +8.92%로, 수평 루버 일사량 기준 제어는 +2.09%에서 +5.17%로 늘고, EUI를 줄인 건물이 한 동도 없었다(차폐 제외·연중 작동 행은 원고에 싣지 않은 비교 계산, 2026-10-28 완료). 각 행은 같은 주변 차폐 조건의 개선 전 대비이다.</p>
+  <p>피크전력 중앙값은 두 기간에서 같았다(피크가 7월 31일에 생김). 연중 작동하면 겨울에도 창면 일사량이 300 W/m²를 넘는 시간마다 차양이 내려와 난방이 늘었다. 그래서 일사량 기준 제어는 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 하였다(연중 결과를 본 뒤 정한 것이다). 주변 차폐를 뺀 조건에서도 같은 방향이었다. 연중 작동시키면 EUI가 블라인드 일사량 기준 제어는 −0.13%에서 +8.92%로, 수평 루버 일사량 기준 제어는 +2.09%에서 +5.17%로 늘고, EUI를 줄인 건물이 한 동도 없었다(차폐 제외·연중 작동 행은 원고에 싣지 않은 비교 계산, 2026-10-28 완료). 각 행은 같은 주변 차폐 조건의 개선 전 대비이다. 피크 시간대 차양 폐쇄는 상세 3개 동에서만 두 기간을 비교하였다(연중 평일 13~18시 EUI +0.56%·피크전력 +3.49%, 7~8월 평일 13~18시 EUI −1.31%·피크전력 +3.49%).</p>
   <h2>6. 블록 합산 피크전력(보조 지표)</h2>
   ${table([{ h: '대안', k: 'label' }, { h: '블록 피크전력(kW)', k: 'peak_kW', num: 1, f: v => num(v) }, { h: '변화', k: 'dpeak_pct', num: 1, f: (v, r) => r.scenario === 'S1' ? '—' : pct(v), cls: (v, r) => r.scenario === 'S1' ? '' : bad(v) }, { h: '동시율', k: 'CF', num: 1, f: v => num(v, 3) }, { h: '부하율', k: 'LF', num: 1, f: v => num(v, 3) }, { h: '블록 EUI 변화', k: 'dEUI_pct', num: 1, f: (v, r) => r.scenario === 'S1' || v == null ? '—' : pct(v) }], blk, { nw: 1 })}
   ${lineChart([{ label: '개선 전', v: hr('S1'), c: COL.ink }, { label: '블라인드 고정', v: hr('F0'), c: COL.sun }, { label: '블라인드 일사량 기준 제어', v: hr('BT_T300'), c: COL.ok, dash: '5 3' }, { label: '피크 시간대 차양 폐쇄', v: hr('PK'), c: COL.red, dash: '2 2' }], 24, { yl: '257동 합산 전력(kW)', xt: [[0, '0시'], [6, '6시'], [12, '12시'], [16, '16시'], [23, '23시']] })}
@@ -397,7 +397,7 @@ function pageBio() {
   $('#page-bio').innerHTML = `
   <div class="kicker">부록 · 생체모방 제어 원리 4개</div><h1>생물 원리에서 유도한 제어 규칙은 통했는가</h1>
   <p>본 연구의 이전 단계에서는 외피 장치의 제어 규칙 일부를 생물의 환경 반응 원리에서 유도하였다. 원리는 ISO 18458:2015의 하향식 절차(기능 분석 → 추상화 → 전이)로, ① 외피의 빛·열 조절과 같은 기능을 가진 생물 기작일 것, ② 기존 외피 장치의 제어 규칙으로 옮길 수 있을 것, ③ 생물학 문헌으로 기작이 확인될 것을 기준으로 후보 아홉 가지 가운데 네 가지를 골랐다.</p>
-  <div class="grid g2">${P.map(p => `<div class="card pcard"><h3><span class="mono">${p.code.replace('P', 'P')}</span>${esc(p.name)} <span class="small">— ${esc(p.organism)}</span></h3>
+  <div class="grid g2">${P.map(p => `<div class="card pcard"><h3><span class="mono">${p.code.replace(/P(\d)/, (m, d) => 'P' + '₀₁₂₃₄₅₆₇₈₉'[d])} </span>${esc(p.name)} <span class="small">— ${esc(p.organism)}</span></h3>
     <p><b>생물 원리.</b> ${esc(p.biology)}</p><p><b>외피 제어 규칙.</b> ${esc(p.rule)}</p><p><b>비교.</b> ${esc(p.comparison)}</p>
     <p><span class="verdict ${vcls(p.verdict)}">${esc(p.verdict)}</span></p><p class="small">${esc(p.evidence)}</p></div>`).join('')}</div>
   <h2>판정 기준</h2><p>원리 적용 안이 비교 안보다 블록 EUI와 블록 피크전력을 높이지 않고, 3개 동 모두에서 UDI와 열쾌적 비율을 낮추지 않으면서, 넷 가운데 하나 이상을 개선하면 채택이다. P₄는 분산 배정이 블록 피크전력을 낮추는지로 판정하였다. P₁~P₃의 판정 기준은 결과 일부를 본 뒤 정한 것이다.</p>
@@ -436,7 +436,7 @@ function gbdSection() {
   const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL'); if (!all) return '';
   const rows = ORDER257.map(t => ({ name: altName(t), dE: all[t + '_dE'], dP: all[t + '_dP'], both: all[t + '_both'], bothG: blk.filter(r => r[t + '_dE'] < 0 && r[t + '_dP'] < 0).length, rng: `${pct(Math.min(...blk.map(r => r[t + '_dE'])))} ~ ${pct(Math.max(...blk.map(r => r[t + '_dE'])))}` }));
   return `<h2>강남 권역 가구별 예비 수치 — 테헤란로제2지구 가구 ${blk.length}개, ${all.n}동</h2>
-  <p>역삼 257동 가운데 테헤란로제2지구 지구단위계획구역의 가구 안에 있는 ${all.n}동을 가구별로 묶어, 이미 계산한 EnergyPlus 시간별 결과를 더하였다(가구 EUI = 가구 안 건물의 연간 에너지 합 ÷ 연면적 합, 가구 피크전력 = 시간별 전력 합의 연간 최댓값, 개선 전(보정 기준) 대비). 가구 안의 다른 건물(6층 미만 등)은 아직 계산하지 않았으므로 가구 전체 값이 아니다.</p>
+  <p>역삼 257동 가운데 테헤란로제2지구 지구단위계획구역의 가구 안에 있는 ${all.n}동을 가구별로 묶어, 이미 계산한 EnergyPlus 시간별 결과를 더하였다(가구 EUI = 가구 안 건물의 연간 에너지 합 ÷ 연면적 합, 가구 피크전력 = 시간별 전력 합의 연간 최댓값, 개선 전(보정 기준) 대비). 가구 안의 다른 건물(6층 미만 등)은 아직 계산하지 않았으므로 가구 전체 값이 아니다. 블라인드 일사량 기준 제어에서 둘 다 감소한 가구 35개 가운데 4개는 피크전력 감소가 0.01% 미만이다(가구별 표에서 0.00%로 보임).</p>
   ${table([{ h: '대안', k: 'name' }, { h: '140동 합산 EUI', k: 'dE', num: 1, f: v => pct(v), cls: bad }, { h: '140동 합산 피크전력', k: 'dP', num: 1, f: v => pct(v), cls: bad }, { h: '가구별 EUI 범위', k: 'rng', num: 1 }, { h: '둘 다 감소한 가구', k: 'bothG', num: 1, f: v => `${v}/${blk.length}` }, { h: '둘 다 감소한 건물', k: 'both', num: 1, f: v => `${v}/${all.n}` }], rows, { nw: 1 })}
   <details><summary class="small">가구별 표 보기(${blk.length}개 가구)</summary>${table([{ h: '가구', k: 'gagu' }, { h: '건물', k: 'n', num: 1 }, ...['F0', 'S3', 'BT_T300'].flatMap(t => [{ h: altName(t) + ' EUI', k: t + '_dE', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력', k: t + '_dP', num: 1, f: v => pct(v), cls: bad }])], blk, { nw: 1, maxh: 420 })}</details>
   ${note('가구 번호는 서울 UPIS 지구단위계획구역(UQ161)을 도시계획도로(UQ151)로 나눈 순번이며 결정도의 가구 번호와는 재계산 전에 대조한다. ' + SIMNOTE)}`;
@@ -444,7 +444,7 @@ function gbdSection() {
 
 /* ---------------- 페이지: 데이터베이스 ---------------- */
 const PRESETS = {
-  '대안별 257동 요약': "SELECT a.name AS 대안, COUNT(*) AS 동수,\n       ROUND(AVG(r.dEUI_pct), 3) AS EUI_변화_평균,\n       SUM(r.dEUI_pct < 0) AS EUI_감소_동수,\n       SUM(r.dEUI_pct < 0 AND r.dpeak_pct < 0) AS 둘다_감소_동수\nFROM results_257 r JOIN alternatives a ON a.tag = r.tag\nWHERE a.category NOT LIKE '범위 제외%' AND a.tag <> 'S1'\nGROUP BY r.tag ORDER BY a.sort",
+  '대안별 257동 요약': "-- 평균값(원고와 사이트의 표는 중앙값)\nSELECT a.name AS 대안, COUNT(*) AS 동수,\n       ROUND(AVG(r.dEUI_pct), 3) AS EUI_변화_평균,\n       SUM(r.dEUI_pct < 0) AS EUI_감소_동수,\n       SUM(r.dEUI_pct < 0 AND r.dpeak_pct < 0) AS 둘다_감소_동수\nFROM results_257 r JOIN alternatives a ON a.tag = r.tag\nWHERE a.category NOT LIKE '범위 제외%' AND a.tag <> 'S1'\nGROUP BY r.tag ORDER BY a.sort",
   '많이 가려진 건물 상위 10동': "SELECT name, block, floors, obstruction_deg, obstruction_class\nFROM buildings ORDER BY obstruction_deg DESC LIMIT 10",
   '가려진 정도 × 블라인드 고정': "SELECT obstruction_class, COUNT(*) n, ROUND(AVG(dEUI_pct), 3) EUI_평균, ROUND(AVG(dpeak_pct), 3) 피크전력_평균\nFROM v_results WHERE tag = 'F0' GROUP BY obstruction_class",
   '대블록별 블록 피크전력': "SELECT block, scenario, peak_kW, dpeak_pct, CF, peak_time\nFROM block_257_by_block WHERE scenario IN ('S1', 'F0', 'BT_T300', 'PK') ORDER BY block, scenario",

@@ -211,7 +211,7 @@ function pageLive() {
       <div id="lbinfo"></div>
     </div>
   </div>
-  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 건물 입면마다 중앙(높이 1/2) 한 점에서 판정한 길이 가중 평균이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 실제 기상)이므로, 구름이 있는 날은 맑은 날 일사와 맞지 않을 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다.')}`;
+  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 건물 입면마다 중앙(높이 1/2) 한 점에서 판정한 길이 가중 평균이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(LIVE.map);
@@ -339,7 +339,7 @@ function liveCompass(sp) {
 }
 function liveLegend() {
   const m = LIVE.mode;
-  $('#lleg').innerHTML = m === 'state' ? '대상 건물 색 = 지금 움직여 작동 중인 입면의 비율(파랑 0% → 주황 100%), 회색 = 고정형(움직이지 않음) · 회색 반투명 = 그림자 · 흰색 = 주변 건물(차폐용)'
+  $('#lleg').innerHTML = m === 'state' ? '대상 건물 색 = 지금 작동 중인 입면의 비율(파랑 0% → 주황 100%), 회색 = 고정형(움직이지 않음) · 회색 반투명 = 그림자 · 흰색 = 주변 건물(차폐용)'
     : m === 'irr' ? '대상 건물 색 = 입면이 받는 평균 일사(직달+확산+반사, 맑은 날 가정, 0 → 600 W/m² 이상)' : '대상 건물 색 = 해가 드는 방향 입면 가운데 주변 건물에 가려진 비율(파랑 0% → 주황 100%), 진회색 = 해가 드는 입면 없음';
 }
 function liveStats() {
