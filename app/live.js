@@ -211,7 +211,7 @@ function pageLive() {
       <div id="lbinfo"></div>
     </div>
   </div>
-  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 건물 입면마다 중앙(높이 1/2) 한 점에서 판정한 길이 가중 평균이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 실제 기상)이므로, 구름이 있는 날은 맑은 날 일사와 맞지 않을 수 있다. 다른 지역의 에너지 성능은 재계산 단계에서 EnergyPlus로 계산한다.')}`;
+  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 건물 입면마다 중앙(높이 1/2) 한 점에서 판정한 길이 가중 평균이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 실제 기상)이므로, 구름이 있는 날은 맑은 날 일사와 맞지 않을 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(LIVE.map);
