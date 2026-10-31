@@ -20,7 +20,7 @@ const quant = (a, p) => { const s = a.filter(v => v != null).sort((x, y) => x - 
 function ranks(a) { const idx = a.map((v, i) => [v, i]).sort((x, y) => x[0] - y[0]); const r = new Array(a.length); let i = 0; while (i < idx.length) { let j = i; while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++; const avg = (i + j) / 2 + 1; for (let k = i; k <= j; k++) r[idx[k][1]] = avg; i = j + 1; } return r; }
 function spearman(x, y) { const ok = x.map((v, i) => v != null && y[i] != null); const xs = x.filter((_, i) => ok[i]), ys = y.filter((_, i) => ok[i]); const rx = ranks(xs), ry = ranks(ys); const n = rx.length, mx = rx.reduce((a, b) => a + b, 0) / n, my = ry.reduce((a, b) => a + b, 0) / n; let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { sxy += (rx[i] - mx) * (ry[i] - my); sxx += (rx[i] - mx) ** 2; syy += (ry[i] - my) ** 2; } return { rho: sxy / Math.sqrt(sxx * syy), n }; }
 
-// 본문 범위의 대안(전기변색 유리 제외)과 표시 순서
+// 본문 범위의 대안과 표시 순서
 const ORDER = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK'];
 const ORDER257 = ORDER;   // 2026-10-27: 9개 대안 모두 257동에서 같은 계산 기간(연중)으로 계산, 일사량 기준 제어는 냉방기 작동
 let ALT = {};
@@ -299,7 +299,6 @@ function pageAlts() {
   const rows = q('SELECT * FROM alternatives');
   const main = ORDER.map(t => rows.find(r => r.tag === t));
   const cols = [{ h: '구분', k: 'category' }, { h: '대안', k: 'name', f: (v, r) => `<b>${esc(v)}</b>` }, { h: '장치', k: 'device' }, { h: '작동', k: 'operation' }, { h: '기간', k: 'period' }, { h: '작동하지 않을 때', k: 'idle_state' }, { h: '자연채광', k: 'daylight' }, { h: '계산 범위', k: 'in_257', f: (v, r) => [r.in_3bldg ? '3개 동' : '', v ? '257동' : ''].filter(Boolean).join(' · ') }];
-  const extra = rows.filter(r => !ORDER.includes(r.tag) && r.tag !== 'S1');
   $('#page-alts').innerHTML = `
   <div class="kicker">외피 성능 개선안</div><h1>고정형 차양 3종 · 키네틱 파사드 6종</h1>
   <p>개선 전은 장치 없이 주변 건물 차폐만 반영한 모델이다. 본 연구에서 키네틱 파사드는 외피 요소가 물리적으로 움직이는 가동형 외부 차양(블라인드·루버)으로 한정한다(고정형·가동형 구분: 「건축물의 에너지절약설계기준」 제5조). 장치를 ① 무엇이 움직이는가(장치)와 ② 언제 움직이는가(제어)의 두 축으로 정리하였다.</p>
@@ -308,7 +307,7 @@ function pageAlts() {
   <h2>자연채광을 유지하는가</h2>
   <div class="grid g2"><div class="card"><h3>자연채광 손실형</h3><p>작동하지 않을 때도 장치가 창 앞에 남는다. 고정형 3종, 컷오프 각도 제어 3종, 수평 루버 일사량 기준 제어, 피크 시간대 차양 폐쇄가 여기에 속한다. 일사를 막아 냉방을 줄이지만, 자연채광을 잃어 조명 전력이 늘어난다.</p></div>
   <div class="card"><h3>자연채광 유지형</h3><p>작동 기준을 넘을 때만 창을 가리고 그 밖에는 창에서 빠진다. 블라인드 일사량 기준 제어(걷어 올림)가 유일하다. 냉방기(5~9월)에만 작동시켜 EUI와 피크전력을 함께 줄였으나(−0.07%, −0.01%) 크기는 매우 작다. 연중 작동시키면 겨울 일사 취득을 막아 난방이 늘었다(EUI +2.98%).</p></div></div>
-  <details style="margin-top:18px"><summary><b>범위 밖 대안(참고)</b> — 전기변색 유리(가변 유리)</summary>${table(cols, extra)}<p class="small">전기변색 유리는 움직이지 않고 재료의 성질이 바뀌는 가변 유리이므로 연구 범위에서 제외하였다. 계산 결과는 데이터베이스에 참고로 보존한다.</p></details>`;
+`;
 }
 
 /* ---------------- 페이지: 결과 ---------------- */
@@ -459,7 +458,7 @@ function pagePlan() {
   ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
   ${gbdSection()}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
-  <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다. 전기변색 유리 같은 가변 유리는 범위에서 제외하였다.</li><li>컷오프 각도 제어와 피크 시간대 차양 폐쇄는 연중 작동시켰으므로, 계절별로 작동을 달리하는 실제 운영과는 다를 수 있다. 작동 기간의 영향은 일사량 기준 제어(257동)와 피크 시간대 차양 폐쇄(상세 3개 동)에서만 비교하였다. 또한 약 100동에서 워밍업 미수렴 경고가 있었으며, 민감도 계산(20동)에서 대안 간 비교에 미치는 영향은 작았다.</li></ol>
+  <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다.</li><li>컷오프 각도 제어와 피크 시간대 차양 폐쇄는 연중 작동시켰으므로, 계절별로 작동을 달리하는 실제 운영과는 다를 수 있다. 작동 기간의 영향은 일사량 기준 제어(257동)와 피크 시간대 차양 폐쇄(상세 3개 동)에서만 비교하였다. 또한 약 100동에서 워밍업 미수렴 경고가 있었으며, 민감도 계산(20동)에서 대안 간 비교에 미치는 영향은 작았다.</li></ol>
   <h2>일정(안)</h2>${table([{ h: '시기', k: 'a' }, { h: '내용', k: 'b' }], [{ a: '2026년 11월 9일', b: '예비심사: 목적·방법·예비 결과·재계산과 확장 계획 발표' }, { a: '2026년 11~12월', b: '대안·지표 확정(컷오프 각도 제어·피크 시간대 차양 폐쇄의 작동 기간 포함), sDA·ASE 추가, 워밍업 미수렴 건물 재계산' }, { a: '2027년 1~3월', b: '3권역 가구별 자료 확보(건축물대장 결합), 간이 모델 검증, 가구별 계산' }, { a: '2027년 4~6월', b: '분석·집필, 본심사 원고' }, { a: '2027년 9월', b: '학위 수여' }])}`;
 }
 
