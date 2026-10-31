@@ -298,17 +298,17 @@ function selectBuilding(s, pan) {
 function pageAlts() {
   const rows = q('SELECT * FROM alternatives');
   const main = ORDER.map(t => rows.find(r => r.tag === t));
-  const cols = [{ h: '구분', k: 'category' }, { h: '대안', k: 'name', f: (v, r) => `<b>${esc(v)}</b>${r.principle ? ` <span class="tag kin">${r.principle.replace(/P(\d)/g, (m, d) => 'P' + '₀₁₂₃₄₅₆₇₈₉'[d])}</span>` : ''}` }, { h: '장치', k: 'device' }, { h: '작동', k: 'operation' }, { h: '기간', k: 'period' }, { h: '작동하지 않을 때', k: 'idle_state' }, { h: '자연채광', k: 'daylight' }, { h: '계산 범위', k: 'in_257', f: (v, r) => [r.in_3bldg ? '3개 동' : '', v ? '257동' : ''].filter(Boolean).join(' · ') }];
+  const cols = [{ h: '구분', k: 'category' }, { h: '대안', k: 'name', f: (v, r) => `<b>${esc(v)}</b>` }, { h: '장치', k: 'device' }, { h: '작동', k: 'operation' }, { h: '기간', k: 'period' }, { h: '작동하지 않을 때', k: 'idle_state' }, { h: '자연채광', k: 'daylight' }, { h: '계산 범위', k: 'in_257', f: (v, r) => [r.in_3bldg ? '3개 동' : '', v ? '257동' : ''].filter(Boolean).join(' · ') }];
   const extra = rows.filter(r => !ORDER.includes(r.tag) && r.tag !== 'S1');
   $('#page-alts').innerHTML = `
   <div class="kicker">외피 성능 개선안</div><h1>고정형 차양 3종 · 키네틱 파사드 6종</h1>
   <p>개선 전은 장치 없이 주변 건물 차폐만 반영한 모델이다. 본 연구에서 키네틱 파사드는 외피 요소가 물리적으로 움직이는 가동형 외부 차양(블라인드·루버)으로 한정한다(고정형·가동형 구분: 「건축물의 에너지절약설계기준」 제5조). 장치를 ① 무엇이 움직이는가(장치)와 ② 언제 움직이는가(제어)의 두 축으로 정리하였다.</p>
   ${table(cols, main)}
-  ${note('모든 장치는 설계일 계산에서 작동하지 않게 하여, 같은 건물의 대안들이 같은 공조 용량을 쓰게 하였다. 9개 대안은 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월)으로 계산하였다(2026-10-27 재계산). 일사량 기준 제어 2종은 냉방기(5~9월)에만 작동하고 난방기에는 블라인드는 걷어 올리고 수평 루버는 수평으로 두며, 연중 작동시킨 결과는 작동 기간 비교 자료로만 쓴다. <span class="tag kin">P₂</span> 표시는 생체모방 원리에서 유도한 규칙과 대응하는 대안이다(<a href="#/bio">생체모방 원리</a>).')}
+  ${note('모든 장치는 설계일 계산에서 작동하지 않게 하여, 같은 건물의 대안들이 같은 공조 용량을 쓰게 하였다. 9개 대안은 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월)으로 계산하였다(2026-10-27 재계산). 일사량 기준 제어 2종은 냉방기(5~9월)에만 작동하고 난방기에는 블라인드는 걷어 올리고 수평 루버는 수평으로 두며, 연중 작동시킨 결과는 작동 기간 비교 자료로만 쓴다.')}
   <h2>자연채광을 유지하는가</h2>
   <div class="grid g2"><div class="card"><h3>자연채광 손실형</h3><p>작동하지 않을 때도 장치가 창 앞에 남는다. 고정형 3종, 컷오프 각도 제어 3종, 수평 루버 일사량 기준 제어, 피크 시간대 차양 폐쇄가 여기에 속한다. 일사를 막아 냉방을 줄이지만, 자연채광을 잃어 조명 전력이 늘어난다.</p></div>
   <div class="card"><h3>자연채광 유지형</h3><p>작동 기준을 넘을 때만 창을 가리고 그 밖에는 창에서 빠진다. 블라인드 일사량 기준 제어(걷어 올림)가 유일하다. 냉방기(5~9월)에만 작동시켜 EUI와 피크전력을 함께 줄였으나(−0.07%, −0.01%) 크기는 매우 작다. 연중 작동시키면 겨울 일사 취득을 막아 난방이 늘었다(EUI +2.98%).</p></div></div>
-  <details style="margin-top:18px"><summary><b>범위 밖·원리 시험 대안(참고)</b> — 전기변색 유리(가변 유리)와 생체모방 원리 시험용 규칙</summary>${table(cols, extra)}<p class="small">전기변색 유리는 움직이지 않고 재료의 성질이 바뀌는 가변 유리이므로 연구 범위에서 제외하였다. 계산 결과는 데이터베이스에 참고로 보존한다.</p></details>`;
+  <details style="margin-top:18px"><summary><b>범위 밖 대안(참고)</b> — 전기변색 유리(가변 유리)</summary>${table(cols, extra)}<p class="small">전기변색 유리는 움직이지 않고 재료의 성질이 바뀌는 가변 유리이므로 연구 범위에서 제외하였다. 계산 결과는 데이터베이스에 참고로 보존한다.</p></details>`;
 }
 
 /* ---------------- 페이지: 결과 ---------------- */
@@ -440,22 +440,6 @@ function pageValid() {
   ${note('실측 원자료는 지번 단위 월별 사용량이며, 지역난방·가스 흡수식 냉방 등 모델(전기 냉동기)과 다른 설비의 영향이 섞여 있을 수 있다.')}`;
 }
 
-/* ---------------- 페이지: 생체모방 원리 ---------------- */
-function pageBio() {
-  const P = q('SELECT * FROM principles');
-  const vcls = v => v.startsWith('채택') ? 'ok' : v.startsWith('기각') ? 'no' : 'mix';
-  $('#page-bio').innerHTML = `
-  <div class="kicker">부록 · 생체모방 제어 원리 4개</div><h1>생물 원리에서 유도한 제어 규칙은 통했는가</h1>
-  <p>본 연구의 이전 단계에서는 외피 장치의 제어 규칙 일부를 생물의 환경 반응 원리에서 유도하였다. ISO 18458:2015의 하향식 절차(기능 분석 → 추상화 → 전이)에 따라, ① 외피의 빛·열 조절과 같은 기능을 가진 생물 기작일 것, ② 기존 외피 장치의 제어 규칙으로 옮길 수 있을 것, ③ 생물학 문헌으로 기작이 확인될 것을 기준으로 후보 아홉 가지 가운데 네 가지를 골랐다.</p>
-  <div class="grid g2">${P.map(p => `<div class="card pcard"><h3><span class="mono">${p.code.replace(/P(\d)/, (m, d) => 'P' + '₀₁₂₃₄₅₆₇₈₉'[d])} </span>${esc(p.name)} <span class="small">— ${esc(p.organism)}</span></h3>
-    <p><b>생물 원리.</b> ${esc(p.biology)}</p><p><b>외피 제어 규칙.</b> ${esc(p.rule)}</p><p><b>비교.</b> ${esc(p.comparison)}</p>
-    <p><span class="verdict ${vcls(p.verdict)}">${esc(p.verdict)}</span></p><p class="small">${esc(p.evidence)}</p></div>`).join('')}</div>
-  <h2>판정 기준</h2><p>원리 적용 안이 비교 안보다 블록 EUI와 블록 피크전력을 높이지 않고, 3개 동 모두에서 UDI와 열쾌적 비율을 낮추지 않으면서, 넷 가운데 하나 이상을 개선하면 채택이다. P₄는 분산 배정이 블록 피크전력을 낮추는지로 판정하였다. P₁~P₃의 판정 기준은 결과 일부를 본 뒤 정한 것이다.</p>
-  <h2>본 연구에서의 위치</h2>
-  <div class="card"><p>네 원리 가운데 P₂·P₃·P₄는 기각되었고, 채택된 P₁(ZB)도 비교 대상인 전 구역 컷오프 각도 제어보다 나았을 뿐 개선 전(장치 없음)보다 나은 것은 아니었다. 또한 컷오프 각도 제어(P₂)와 두 신호 작동(P₃)은 공학에서 이미 쓰이는 제어 규칙과 겹친다. 따라서 본 연구는 생체모방 원리를 연구의 틀로 두지 않고, 키네틱 파사드 제어 대안의 일부를 생물 원리에서 유도한 규칙으로 함께 시험한 결과로만 보고한다(예비심사 원고 부록).</p></div>
-  ${note('상세 3개 동 블록의 EnergyPlus 시뮬레이션 값. P₃의 전기변색 유리 두 신호 안(이전 계산에서 채택)은 전기변색 유리를 연구 범위에서 제외함에 따라 판정에서 뺐다.')}`;
-}
-
 /* ---------------- 페이지: 향후 계획 ---------------- */
 function pagePlan() {
   const D = q('SELECT * FROM districts');
@@ -502,7 +486,7 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', principles: '생체모방 제어 원리 4개와 판정', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위·원리)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `
@@ -524,7 +508,7 @@ function runQ() {
 }
 
 /* ---------------- 라우팅 ---------------- */
-const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, bio: pageBio, plan: pagePlan, db: pageDb, gen: () => pageGen(), live: () => pageLive() };
+const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, gen: () => pageGen(), live: () => pageLive() };
 const BUILT = {};
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';
