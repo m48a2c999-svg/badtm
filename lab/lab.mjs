@@ -249,9 +249,9 @@ $('#record').addEventListener('click',()=>{
   const stream=c.captureStream(30),chunks=[];
   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000});S.recorder=rec;
   rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
-  rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());if(chunks.length)download(new Blob(chunks,{type:mime}),'FacadeLab_60s_'+S.id+(mime.includes('mp4')?'.mp4':'.webm'));$('#record').textContent='↓ 60초 무음 영상 저장';S.recorder=null;status('영상 저장이 준비되었습니다. 브라우저의 다운로드를 확인하세요.');};
+  rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());$('#record').textContent='↓ 60초 무음 영상 저장';S.recorder=null;if(!chunks.length){status('영상이 생성되지 않았습니다. 다시 녹화해 주세요.');return;}const link=$('#video-ready'),preview=$('#video-preview');if(link.href.startsWith('blob:'))URL.revokeObjectURL(link.href);link.href=URL.createObjectURL(new Blob(chunks,{type:mime}));link.download='FacadeLab_60s_'+S.id+(mime.includes('mp4')?'.mp4':'.webm');link.hidden=false;preview.src=link.href;preview.hidden=false;status('영상이 완성되었습니다. 아래 미리보기로 확인한 뒤 녹화한 영상 다운로드를 눌러 저장하세요.');};
   rec.onerror=e=>{status('영상 저장 중 오류가 발생했습니다. PNG 저장이나 과정 재생을 이용해 주세요.');stopTour();};
-  startTour();rec.start(1000);$('#record').textContent='■ 녹화 종료 · 저장';status('60초 무음 영상 녹화 중입니다. 끝나면 자동 저장됩니다. 탭을 열어 두세요.');
+  startTour();rec.start(1000);$('#record').textContent='■ 녹화 종료 · 저장';status('60초 무음 영상 녹화 중입니다. 완료 후 미리보기와 다운로드가 표시됩니다. 탭을 열어 두세요.');
  }catch(e){status('영상 저장을 시작하지 못했습니다: '+e.message);}
 });
 if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embedded');
