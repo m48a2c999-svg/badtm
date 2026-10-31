@@ -209,7 +209,9 @@ SCENES.push({
 /* ---- 페이지 ---- */
 function pageStory() {
   const D = storyData();
+  const film = /film=1/.test(location.hash); document.body.classList.toggle('film', film);
   $('#page-story').innerHTML = `<h1>시뮬레이션 과정 — 수치가 만들어지는 길</h1>
+  <div class="svideo"><video controls preload="metadata" playsinline poster="media/story_poster.jpg" src="media/story.mp4">브라우저가 동영상을 지원하지 않는다.</video><p class="small">위 영상은 아래 자동 재생 장면을 녹화한 것이다(약 1분 30초, 소리 없음). 아래에서는 장면을 멈추거나 건너뛰며 볼 수 있다.</p></div>
   <p class="lead">대상지에서 건물을 고르고 모델을 만들어 EnergyPlus로 계산한 뒤, 개선 전 대비 변화율을 257동으로 모으기까지를 7개 장면으로 보여 준다. 표본 건물은 상세 모델 3개 동 가운데 <b>${esc(D.B.name)}</b>, 장면 ④의 하루 그림(태양 위치·창면 일사)만 설명용 간이 값이고, 그 밖의 숫자는 모두 연구 DB의 값이다.</p>
   <div class="splayer">
     <div class="sbar"><button class="btn" id="spp">⏸ 일시정지</button><button class="btn ghost" id="sprev">‹ 이전</button><button class="btn ghost" id="snext">다음 ›</button>

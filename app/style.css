@@ -333,3 +333,7 @@ section h2{margin-top:30px}
 .tmap td:first-child{font-family:var(--mono);white-space:nowrap;color:var(--sun);font-weight:600}
 @media (max-width:480px){.s6t .tag,.s4r .tag{display:none}.stg .sl{font-size:15px}}
 .reflist{padding-left:22px;font-size:13.5px}.reflist li{margin:0 0 9px;line-height:1.55}
+.svideo{margin:10px 0 18px}.svideo video{width:100%;max-width:960px;background:#000;border:1px solid var(--line);display:block}
+body.film header.top,body.film footer.foot,body.film #page-story>h1,body.film #page-story>.lead,body.film .svideo,body.film #page-story>h2,body.film #page-story>.slist,body.film #page-story>.note,body.film .sbar,body.film .sprog{display:none!important}
+body.film main{max-width:none;padding:0}body.film .splayer{margin:0;border:0;padding:22px 28px;min-height:100vh;box-sizing:border-box}
+body.film .splayer h2{font-size:22px;margin:0 0 14px}body.film .stg{gap:26px}body.film .sside p,body.film .slist{font-size:15px}body.film .stbl{font-size:14px}
