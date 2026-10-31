@@ -15,8 +15,8 @@ const LRULE = {   // 9개 대안 — 원고 표 2와 같은 작동 규칙(일사
   S3: { name: '블라인드 컷오프 각도 제어', kind: 'track', ep: 'S3', txt: '입면에 직달일사가 들면 직달일사를 막는 각도(컷오프 각도)로 슬랫을 조절, 아니면 수평' },
   LH_C: { name: '수평 루버 컷오프 각도 제어', kind: 'track', ep: 'LH_C', txt: '같은 방식의 컷오프 각도 제어(수평 루버)' },
   VF_C: { name: '수직 루버 컷오프 각도 제어', kind: 'track', ep: 'VF_C', txt: '같은 방식의 컷오프 각도 제어(동·서 수직 루버). 간이 계산의 작동 비율은 모든 입면의 직달일사 비율로 표시' },
-  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 내림, 그 밖과 난방기(10~4월)에는 걷어 올림' },
-  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖과 난방기(10~4월)에는 수평' },
+  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방기(5~9월)에는 창면 입사 일사량 300 W/m² 초과 시 내리고 그 밖에는 걷어 올림. 난방기(10~4월)에는 걷어 올림' },
+  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖에는 수평. 난방기(10~4월)에는 수평' },
   PK: { name: '피크 시간대 차양 폐쇄', kind: 'peak', ep: 'PK', txt: '연중 평일 13~18시 슬랫 폐쇄, 그 밖에는 수평(요일은 EnergyPlus 계산과 같은 2023년 달력 기준)' },
 };
 // ASHRAE 맑은 날 모델 월별 계수(A: W/m², B: 무차원, C: 확산 계수)
@@ -181,7 +181,7 @@ function pageLive() {
   const regionOpts = [['yeoksam', '역삼 257동 — EnergyPlus 결과 연동'], ...Object.keys(PRESET).map(k => ['p:' + k, k + ' 권역(가구 안 전체 건물)']), ['gen', '자료 생성기에서 만든 지역']];
   $('#page-live').innerHTML = `
   <div class="kicker">연구 시스템 · 실시간 시뮬레이션</div><h1>지도 위에서 태양·그림자·키네틱 파사드를 움직여 본다</h1>
-  <p>지역을 고르고 날짜와 성능 개선 대안을 정하면, 시간에 따라 태양 위치와 건물 그림자, 입면이 받는 일사, 키네틱 파사드의 작동 상태가 지도 위에서 움직인다. 다른 지역(권역·구역 이름)을 넣으면 그 지역의 가구·건물 자료를 바로 만들어 같은 계산을 하고, 결과를 CSV로 내려받을 수 있다. <b>역삼 257동</b>을 고르면 같은 날의 EnergyPlus 시간별 전력 결과가 함께 움직인다.</p>
+  <p>지역을 고르고 날짜와 성능 개선안을 정하면, 시간에 따라 태양 위치와 건물 그림자, 입면이 받는 일사, 키네틱 파사드의 작동 상태가 지도 위에서 움직인다. 다른 지역(권역·구역 이름)을 넣으면 그 지역의 가구·건물 자료를 바로 만들어 같은 계산을 하고, 결과를 CSV로 내려받을 수 있다. <b>역삼 257동</b>을 고르면 같은 날의 EnergyPlus 시간별 전력 결과가 함께 움직인다.</p>
   <div class="live-grid">
     <div class="card live-ctrl">
       <h3>① 지역</h3>
@@ -195,7 +195,7 @@ function pageLive() {
         <button data-d="${LIVE.peakDate}">257동 연간 피크전력일</button><button data-d="2026-06-21">하지</button><button data-d="2026-03-20">춘분</button><button data-d="2026-09-23">추분</button><button data-d="2026-12-21">동지</button></div>
       <div class="ctrl"><label style="flex:1">성능 개선안(작동 규칙)<select id="lrule">${Object.entries(LRULE).map(([k, r]) => `<option value="${k}"${k === LIVE.rule ? ' selected' : ''}>${r.kind === 'fixed' ? '고정형 · ' : '키네틱 · '}${esc(r.name)}</option>`).join('')}</select></label></div>
       <p class="small" id="lruletxt"></p>
-      <div class="ctrl"><label>지도 색<select id="lmode"><option value="state">작동 상태</option><option value="irr">입면 평균 일사(W/m²)</option><option value="shade">주변 건물에 가려진 직사 입면 비율</option></select></label></div>
+      <div class="ctrl"><label>지도 색<select id="lmode"><option value="state">작동 상태</option><option value="irr">입면 평균 일사(W/m²)</option><option value="shade">직달일사가 주변 건물에 가려진 입면 비율</option></select></label></div>
       <h3>③ 시간</h3>
       <div class="timebar"><button class="btn sun" id="lplay">▶ 재생</button><b id="lclock" class="mono">12:00</b><select id="lspeed"><option value="10">10분/초</option><option value="30" selected>30분/초</option><option value="60">60분/초</option></select></div>
       <input type="range" id="ltime" min="0" max="1430" step="10" value="720" style="width:100%">
@@ -211,7 +211,7 @@ function pageLive() {
       <div id="lbinfo"></div>
     </div>
   </div>
-  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 건물 입면마다 중앙(높이 1/2) 한 점에서 판정한 길이 가중 평균이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
+  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(LIVE.map);
