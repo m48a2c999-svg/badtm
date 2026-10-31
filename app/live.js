@@ -156,7 +156,7 @@ async function liveLoadYeoksam(msg) {
       if (targets.some(t => inRing(c, t.ring) || inRing(t.c, ring) || t.ring.some(p => inRing(p, ring)))) continue;
       const hh = liveHeight(el.tags || {}); obstacles.push({ id: 'w' + el.id, name: (el.tags || {}).name || '', ring, h: hh.h, hsrc: hh.src, noH: !!hh.noH, c });
     }
-    note2 = `주변 건물 ${obstacles.length}동(OpenStreetMap)을 차폐에 포함.`;
+    note2 = `주변 건물 ${obstacles.length.toLocaleString()}동(OpenStreetMap)을 차폐에 포함.`;
   } catch (x) { note2 = '주변 건물(OpenStreetMap)을 불러오지 못해 257동끼리의 차폐만 반영.'; }
   return { name: '역삼역 일대 257동', targets, obstacles, ep: true, note: note2 };
 }

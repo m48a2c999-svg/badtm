@@ -212,7 +212,7 @@ function pageStory() {
   const film = /film=1/.test(location.hash); document.body.classList.toggle('film', film);
   $('#page-story').innerHTML = `<h1>시뮬레이션 과정 — 수치가 만들어지는 길</h1>
   <div class="svideo"><video controls preload="metadata" playsinline poster="media/story_poster.jpg" src="media/story.mp4">브라우저가 동영상을 지원하지 않는다.</video><p class="small">위 영상은 아래 자동 재생 장면을 녹화한 것이다(약 1분 30초, 소리 없음). 아래에서는 장면을 멈추거나 건너뛰며 볼 수 있다.</p></div>
-  <p class="lead">대상지에서 건물을 고르고 모델을 만들어 EnergyPlus로 계산한 뒤, 개선 전 대비 변화율을 257동으로 모으기까지를 7개 장면으로 보여 준다. 표본 건물은 상세 모델 3개 동 가운데 <b>${esc(D.B.name)}</b>, 장면 ④의 하루 그림(태양 위치·창면 일사)만 설명용 간이 값이고, 그 밖의 숫자는 모두 연구 DB의 값이다.</p>
+  <p class="lead">대상지에서 건물을 고르고 모델을 만들어 EnergyPlus로 계산한 뒤, 개선 전 대비 변화율을 257동으로 모으기까지를 7개 장면으로 보여 준다. 표본 건물은 상세 모델 3개 동 가운데 <b>${esc(D.B.name)}</b>이고, 장면 ④의 하루 그림(태양 위치·창면 일사)만 설명용 간이 값이며, 그 밖의 숫자는 모두 연구 DB의 값이다.</p>
   <div class="splayer">
     <div class="sbar"><button class="btn" id="spp">⏸ 일시정지</button><button class="btn ghost" id="sprev">‹ 이전</button><button class="btn ghost" id="snext">다음 ›</button>
       <label class="small">속도 <select id="sspd"><option value="0.6">느리게</option><option value="1" selected>보통</option><option value="1.6">빠르게</option></select></label>
@@ -255,6 +255,6 @@ async function pageRefs() {
   <p>논문 원고의 참고문헌 목록과 같다(저자명 가나다·알파벳순). DOI가 있는 문헌은 링크로 열 수 있다. 검증되지 않은 문헌, 미투고 논문, 저자 본인의 논문은 포함하지 않는다.</p>
   <div class="ctrl"><label>검색 <input id="refq" type="search" placeholder="저자·제목·학술지·연도" style="min-width:260px"></label> <span class="small" id="refn"></span></div>
   <div id="reflist"></div>
-  ${note('서지 사항은 원고 참고문헌 기준이며, 국내 문헌 일부는 KCI·DBpia에서 권호·쪽수를 다시 확인하는 중이다(인계문서 1-2).')}`;
+  ${note('서지 사항은 원고 참고문헌 기준이다.')}`;
   $('#refq').addEventListener('input', e => render(e.target.value)); render();
 }
