@@ -158,11 +158,11 @@ function pageHome() {
   <tr><td>4.2 · 4.3</td><td>모델(DOE 기준 모델, 보정) → 시뮬레이션 과정; 성능 개선안 9개와 작동 규칙(표 2) → 성능 개선안</td><td><a href="#/story">시뮬레이션 과정</a> · <a href="#/alts">성능 개선안</a></td></tr>
   <tr><td>4.5 · 5.9</td><td>실측 비교(건축HUB 월별 전기, CV(RMSE)·NMBE)</td><td><a href="#/valid">실측 비교</a></td></tr>
   <tr><td>5.1~5.3 · 5.5~5.7</td><td>상세 3개 동(표 3), 257동(표 4), 용도별 원인(표 5), 차폐 포함·제외(표 7), 작동 기간(표 8), 블록 합산(표 9)</td><td><a href="#/results">결과</a></td></tr>
-  <tr><td>5.4 · 5.10</td><td>밀집 조건에 따른 효과(표 6), 예비 적용 조건(표 11)</td><td><a href="#/traits">건물 특성별</a></td></tr>
-  <tr><td>5.8 · 7장</td><td>가구 단위 예비 수치(표 10), 재계산·확장 계획, 한계, 일정(표 12) (6장 기대 기여는 원고에만)</td><td><a href="#/plan">향후 계획</a></td></tr>
+  <tr><td>5.4 · 5.10</td><td>밀집 조건에 따른 효과(표 6), 적용 조건(표 11)</td><td><a href="#/traits">건물 특성별</a></td></tr>
+  <tr><td>5.8 · 7장</td><td>가구 단위 수치(표 10, 테헤란로제2지구 140동), 재계산·확장 계획, 한계, 일정(표 12) (6장 기대 기여는 원고에만)</td><td><a href="#/plan">향후 계획</a></td></tr>
   <tr><td>8장</td><td>연구 시스템(표 13), 자료 생성기 시험(표 14), 지도 위 실시간 시뮬레이션</td><td><a href="#/db">데이터베이스</a> · <a href="#/gen">자료 생성기</a> · <a href="#/live">실시간 시뮬레이션</a></td></tr>
   </table>
-  <h2>예비 결과 요약</h2>
+  <h2>결과 요약</h2>
   <div class="grid g3">
     <div class="card"><h3>① 연중 작동하는 키네틱은 EUI를 높였다</h3><p>EUI를 줄인 것은 고정형 3종(블라인드 고정 ${pct(r.F0.e)})과 냉방기에만 작동하는 일사량 기준 제어 2종(블라인드 ${pct(r.BT_T300.e)}, 수평 루버 ${pct(r.LT_T300.e)}). 연중 작동하는 키네틱 4종(컷오프 각도 제어 3종, 피크 시간대 차양 폐쇄)은 모두 늘었다(${pr(Math.min(...['S3', 'LH_C', 'VF_C', 'PK'].map(t => r[t].e)), Math.max(...['S3', 'LH_C', 'VF_C', 'PK'].map(t => r[t].e)))}). 컷오프 각도 제어는 겨울 일사를 막아 난방이, 피크 시간대 차양 폐쇄는 자연채광을 막아 조명이 늘었다.</p><a href="#/results">결과 →</a></div>
     <div class="card"><h3>② 피크전력을 줄인 것은 하나</h3><p>블라인드 일사량 기준 제어(냉방기)만 피크전력을 줄였고, EUI와 피크전력을 함께 줄인 건물도 가장 많았다(${r.BT_T300.both}동). 크기는 매우 작다(EUI ${pct(r.BT_T300.e)}, 피크전력 ${pct(r.BT_T300.p)}, 257동 합산 −0.34%·약 205 kW). 연중 작동시키면 겨울 난방이 늘어 EUI +2.98%. 피크 시간대 차양 폐쇄는 피크전력을 가장 크게 높였다(${pct(r.PK.p)}).</p><a href="#/alts">성능 개선안 →</a></div>
@@ -182,7 +182,7 @@ function pageSite() {
   <div class="kicker">대상지 · 건물 데이터베이스</div>
   <h1>서울 오피스 3권역 — 계산을 마친 역삼 257동과 계산 예정 가구</h1>
   <p>지도에는 연구 대상인 3권역(도심, 강남, 여의도·마포)의 지구단위계획구역과 가구 경계가 모두 나온다. 그 가운데 EnergyPlus 계산을 마친 것은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이며, 건물별 결과 색은 이 257동에만 있다. 나머지 가구(도심·여의도와 강남의 다른 가구)는 경계만 표시하고 2027년 1~3월에 계산한다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
-  <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">향후 계획</a>). 지금까지 EnergyPlus 계산을 마친 것은 강남 권역의 이 257동이며(그중 140동이 테헤란로제2지구 가구 40개 안), 이 페이지와 결과 페이지의 수치는 모두 이 257동의 예비 결과이다. 도심·여의도와 강남의 나머지 가구는 2027년 1~3월에 계산한다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>에서 볼 수 있다).</p>
+  <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">향후 계획</a>). 지금까지 EnergyPlus 계산을 마친 것은 강남 권역의 이 257동이며(그중 140동이 테헤란로제2지구 가구 40개 안), 이 페이지와 결과 페이지의 수치는 모두 이 257동의 결과이다. 도심·여의도와 강남의 나머지 가구는 2027년 1~3월에 계산한다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>에서 볼 수 있다).</p>
   <div class="ctrl">
     <label>권역<select id="mregion"><option value="">3권역 전체</option><option value="강남(GBD)">강남 — 역삼 257동 계산 완료</option><option value="도심(CBD)">도심 — 계산 예정</option><option value="여의도·마포(YBD)">여의도·마포 — 계산 예정</option><option value="yeoksam">역삼 4개 대블록(확대)</option></select></label>
     <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 피크전력 변화</option></select></label>
@@ -264,7 +264,7 @@ async function drawRegions() {
         for (const b of blocks[f.properties.id] || []) {
           const k = `${b.properties.plan_id}-${b.properties.block}`; const nd = nDone[k];
           L.geoJSON(b, { style: { color: col, weight: 0.8, fillColor: col, fillOpacity: nd ? 0.22 : 0.06 } })
-            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 예비 수치)` : ` · EnergyPlus 계산 예정(2027년 1~3월)`)).addTo(g); nb++;
+            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 수치)` : ` · EnergyPlus 계산 예정(2027년 1~3월)`)).addTo(g); nb++;
         }
       }
       g.addTo(MAP); REG.layers[reg] = g;
@@ -387,7 +387,7 @@ function pageTraits() {
   <label>x축<select id="sx">${Object.entries(CONT).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
   <label>y축<select id="sy">${Object.entries(METRIC).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}</select></label></div>
   <div id="scat"></div>
-  <h2>예비 적용 조건</h2><div id="tcond"></div>
+  <h2>적용 조건</h2><div id="tcond"></div>
   ${note('구간 경계: 가려진 정도와 평면 면적은 257동의 3분위, 층수는 6~10·11~20·21층 이상(21층 이상은 10동뿐이므로 경향으로만 본다). 3권역 계산에서는 구간 경계를 그 결과를 보기 전에 정한다. ' + SIMNOTE)}`;
   ['tcls', 'tmet'].forEach(id => $('#' + id).addEventListener('change', drawTraitTable));
   ['salt', 'sx', 'sy'].forEach(id => $('#' + id).addEventListener('change', drawScatter));
@@ -472,16 +472,16 @@ function pagePlan() {
   ${gbdSection()}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
   <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다.</li><li>컷오프 각도 제어와 피크 시간대 차양 폐쇄는 연중 작동시켰으므로, 계절별로 작동을 달리하는 실제 운영과는 다를 수 있다. 작동 기간의 영향은 일사량 기준 제어(257동)와 피크 시간대 차양 폐쇄(상세 3개 동)에서만 비교하였다. 또한 약 100동에서 워밍업 미수렴 경고가 있었으며, 민감도 계산(20동)에서 대안 간 비교에 미치는 영향은 작았다.</li></ol>
-  <h2>일정(안)</h2>${table([{ h: '시기', k: 'a' }, { h: '내용', k: 'b' }], [{ a: '2026년 11월 9일', b: '예비심사: 목적·방법·예비 결과·재계산과 확장 계획 발표' }, { a: '2026년 11~12월', b: '대안·지표 확정(컷오프 각도 제어·피크 시간대 차양 폐쇄의 작동 기간 포함), sDA·ASE 추가, 워밍업 미수렴 건물 재계산' }, { a: '2027년 1~3월', b: '3권역 가구별 자료 확보(건축물대장 결합), 간이 모델 검증, 가구별 계산' }, { a: '2027년 4~6월', b: '분석·집필, 본심사 원고' }, { a: '2027년 9월', b: '학위 수여' }])}`;
+  <h2>향후 일정</h2>${table([{ h: '시기', k: 'a' }, { h: '내용', k: 'b' }], [{ a: '2026년 11~12월', b: '대안·지표 확정(컷오프 각도 제어·피크 시간대 차양 폐쇄의 작동 기간 포함), sDA·ASE 추가, 워밍업 미수렴 건물 재계산' }, { a: '2027년 1~3월', b: '3권역 가구별 자료 확보(건축물대장 결합), 간이 모델 검증, 가구별 계산' }, { a: '2027년 4~6월', b: '분석·집필, 본심사 원고' }, { a: '2027년 9월', b: '학위 수여' }])}`;
 }
 
 
-/* 강남 권역 가구별 예비 수치(테헤란로제2지구 가구 안 140동) */
+/* 강남 권역 가구별 수치(테헤란로제2지구 가구 안 140동) */
 function gbdSection() {
   const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
   const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL'); if (!all) return '';
   const rows = ORDER257.map(t => ({ name: altName(t), dE: all[t + '_dE'], dP: all[t + '_dP'], both: all[t + '_both'], bothG: blk.filter(r => r[t + '_dE'] < 0 && r[t + '_dP'] < 0).length, rng: `${pr(Math.min(...blk.map(r => r[t + '_dE'])), Math.max(...blk.map(r => r[t + '_dE'])))}` }));
-  return `<h2>강남 권역 가구별 예비 수치 — 테헤란로제2지구 가구 ${blk.length}개, ${all.n}동</h2>
+  return `<h2>강남 권역 가구별 수치 — 테헤란로제2지구 가구 ${blk.length}개, ${all.n}동</h2>
   <p>역삼 257동 가운데 테헤란로제2지구 가구 안의 ${all.n}동을 가구별로 더한 값(가구 EUI = 연간 에너지 합 ÷ 연면적 합, 가구 피크전력 = 시간별 전력 합의 연간 최댓값, 개선 전 대비). 가구 안의 6층 미만 건물 등은 계산하지 않았으므로 가구 전체 값은 아니다. 블라인드 일사량 기준 제어에서 둘 다 감소한 가구 35개 가운데 4개는 피크전력 감소가 0.01% 미만이다(가구 049·062·071·078).</p>
   ${table([{ h: '대안', k: 'name' }, { h: '140동 합산 EUI', k: 'dE', num: 1, f: v => pct(v), cls: bad }, { h: '140동 합산 피크전력', k: 'dP', num: 1, f: v => pct(v), cls: bad }, { h: '가구별 EUI 범위', k: 'rng', num: 1 }, { h: '둘 다 감소한 가구', k: 'bothG', num: 1, f: v => `${v}/${blk.length}` }, { h: '둘 다 감소한 건물', k: 'both', num: 1, f: v => `${v}/${all.n}` }], rows, { nw: 1 })}
   <details><summary class="small">가구별 표 보기(${blk.length}개 가구)</summary>${table([{ h: '가구', k: 'gagu' }, { h: '건물', k: 'n', num: 1 }, ...['F0', 'S3', 'BT_T300'].flatMap(t => [{ h: altName(t) + ' EUI', k: t + '_dE', num: 1, f: v => pct(v), cls: bad }, { h: '피크전력', k: t + '_dP', num: 1, f: v => pct(v), cls: bad }])], blk, { nw: 1, maxh: 420 })}</details>
@@ -498,12 +498,12 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 예비 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `
   <div class="kicker">연구 데이터베이스</div><h1>SQLite 하나에 모든 수치를 담았다</h1>
-  <p>이 사이트의 모든 표와 그림은 <code>data/db/research.sqlite</code>를 브라우저에서 열어(sql.js) 질의한 결과이다. 데이터베이스는 계산 결과 내보내기와 원자료에서 <code>tools/build_db.py</code>로 다시 만들 수 있다. 생성 시각 ${esc(META.built)}.</p>
+  <p>이 사이트의 모든 표와 그림은 <code>data/db/research.sqlite</code>를 브라우저에서 열어(sql.js) 질의한 결과이다. 데이터베이스는 계산 결과 내보내기와 원자료에서 <code>tools/build_db.py</code>로 다시 만들 수 있다.</p>
   <p><a class="btn sun" href="data/db/research.sqlite" download>research.sqlite 내려받기</a> &nbsp; ${csv.map(t => `<a class="tag" href="data/db/csv/${t.name}.csv" download>${t.name}.csv</a>`).join('')}</p>
   <h2>구성</h2>${table([{ h: '이름', k: 'name', f: v => `<code>${v}</code>` }, { h: '종류', k: 'type' }, { h: '행', k: 'n', num: 1, f: v => num(v) }, { h: '내용', k: 'd' }, { h: '열', k: 'cols', f: v => `<span class="small mono">${esc(v)}</span>` }], sch)}
   <h2>연구 시스템(원고 8장)</h2>
@@ -517,7 +517,7 @@ function pageDb() {
     { m: 'M6 지표·DB', f: '건물·가구·블록 지표를 계산해 데이터베이스에 모은다', i: 'M4·M5 결과, M1·M2 속성', o: 'SQLite 데이터베이스, CSV', t: 'Python(sqlite3)' },
     { m: 'M7 공개', f: '결과 탐색, 자료 생성, 실시간 시뮬레이션(간이)을 웹에서 제공한다', i: 'M6 데이터베이스, M1 가구, M2 건물', o: '연구 홈페이지, 자료 생성기, 실시간 시뮬레이션', t: 'HTML·JavaScript(sql.js, Leaflet)' }])}
   <p class="small"><b>자료 생성기 시험 결과(원고 표 14, OpenStreetMap 건물 자료)</b></p>
-  ${table([{ h: '권역', k: 'a' }, { h: '예비 구역', k: 'b' }, { h: '가구', k: 'c', num: 1 }, { h: '가구 안 건물', k: 'd', num: 1 }, { h: '층수 정보가 있는 건물', k: 'e', num: 1 }], [
+  ${table([{ h: '권역', k: 'a' }, { h: '구역', k: 'b' }, { h: '가구', k: 'c', num: 1 }, { h: '가구 안 건물', k: 'd', num: 1 }, { h: '층수 정보가 있는 건물', k: 'e', num: 1 }], [
     { a: '강남', b: '테헤란로제2지구 지구단위계획구역', c: '82', d: '679', e: '422(62%)' },
     { a: '여의도·마포', b: '여의도 금융중심 지구단위계획구역', c: '21', d: '215', e: '211(98%)' },
     { a: '도심', b: '세종로, 종로2·3가, 종로4·5가, 명동관광특구 지구단위계획구역 4개 + 도심 핵심부 도시정비형 재개발구역 등 23개(계 27개 구역)', c: '87', d: '1,879', e: '292(16%)' }])}
