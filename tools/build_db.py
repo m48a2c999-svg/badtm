@@ -197,6 +197,12 @@ CREATE VIEW v_results AS
 ''')
 con.commit()
 
+# ---- 키네틱 장치 작동 횟수(tools/drive_counts.py, 2026-11-01) ----
+DRV = json.load(open(os.path.join(W, 'tools', 'derived', 'drive_counts.json')))
+con.execute('CREATE TABLE drive_257(sim_name TEXT, tag TEXT, facade TEXT, win_area_m2 REAL, tilt_moves REAL, lift_moves REAL, floor_area_m2 REAL)')
+con.executemany('INSERT INTO drive_257 VALUES(?,?,?,?,?,?,?)', [(n, tag, f, v['area'], v['tilt'], v['lift'], round(d['area'], 1)) for n, d in DRV['data'].items() for tag, fs in d['rec'].items() for f, v in fs.items()])
+con.commit()
+
 # CSV exports
 for (t,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchall():
     if t == 'block_257_hourly':

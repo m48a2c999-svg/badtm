@@ -321,7 +321,23 @@ function pageAlts() {
   <h2>자연채광을 유지하는가</h2>
   <div class="grid g2"><div class="card"><h3>자연채광 손실형</h3><p>작동하지 않을 때도 장치가 창 앞에 남는다. 고정형 3종, 컷오프 각도 제어 3종, 수평 루버 일사량 기준 제어, 피크 시간대 차양 폐쇄가 여기에 속한다. 일사를 막아 냉방을 줄이지만, 자연채광을 잃어 조명 전력이 늘어난다.</p></div>
   <div class="card"><h3>자연채광 유지형</h3><p>작동 기준을 넘을 때만 창을 가리고 그 밖에는 창에서 빠진다. 블라인드 일사량 기준 제어(걷어 올림)가 유일하다. 냉방기(5~9월)에만 작동시켜 EUI와 피크전력을 함께 줄였으나(−0.07%, −0.01%) 크기는 매우 작다. 연중 작동시키면 겨울 일사 취득을 막아 난방이 늘었다(EUI +2.98%).</p></div></div>
+
+  <h2>구동 전력 — 키네틱 장치를 움직이는 데 드는 전력</h2>
+  <p>EnergyPlus 결과에는 장치를 움직이는 모터의 전력이 들어 있지 않다. 아래는 원고 표 2의 작동 규칙을 기상 파일·태양 위치·입면 방위에 적용해 10분 간격으로 센 <b>연간 작동 횟수</b>(건물·입면별, 주변 차폐는 창면 입사 일사의 차폐 포함÷제외 비율로 반영)에 제품 사양을 곱한 추정값이다. 제품 사양을 바꾸면 표가 다시 계산된다.</p>
+  <div class="ctrl" id="drvctl">
+    <label>작동 중 소비전력(W) <input type="number" id="dP" value="110" step="1" min="0" style="width:70px"></label>
+    <label>각도 조절 1회 시간(초) <input type="number" id="dTt" value="2" step="0.5" min="0" style="width:60px"></label>
+    <label>내림·올림 1회 시간(초) <input type="number" id="dTl" value="30" step="1" min="0" style="width:60px"></label>
+    <label>대기전력(W) <input type="number" id="dSb" value="0.5" step="0.1" min="0" style="width:60px"></label>
+    <label>모터 1대가 맡는 창 면적(m²) <input type="number" id="dA" value="6" step="0.5" min="0.5" style="width:60px"></label>
+    <button class="btn ghost" id="dReset">기본값</button>
+  </div>
+  <div id="drvtab"></div>
+  ${note('기본값: 외부 베네시안 블라인드용 모터 Somfy J4 WT 10/24(10 Nm, 24 rpm, 230 V)의 제조사 사양 "작동 중 소비전력 110 W, 정격전류 0.5 A"(somfypro.com.au 제품 페이지). 회당 작동 시간·대기전력·모터당 창 면적은 제조사 자료에 없어 가정값이며, 장치(300 mm 루버 등)에 따라 달라지므로 실제 제품값으로 바꿔 볼 것. 작동 횟수는 EnergyPlus의 슬랫 각도 시계열이 저장되지 않아 규칙으로 다시 센 추정값이다(tools/drive_counts.py). 고정형 3종은 움직이지 않아 0이다.')}
 `;
+  $$('#drvctl input').forEach(x => x.addEventListener('input', drawDrive));
+  $('#dReset').addEventListener('click', () => { $('#dP').value = 110; $('#dTt').value = 2; $('#dTl').value = 30; $('#dSb').value = 0.5; $('#dA').value = 6; drawDrive(); });
+  drawDrive();
 }
 
 /* ---------------- 페이지: 결과 ---------------- */
@@ -345,6 +361,7 @@ function pageResults() {
   const nsDone = Math.min(...sh.map(x => x.n));
   $('#page-results').innerHTML = `
   <div class="kicker">결과 · 9개 대안</div><h1>개선 전후 비교</h1>
+  ${note('이 페이지의 EUI 변화는 키네틱 장치의 구동(모터) 전력을 포함하지 않는다. 제품 사양에 따른 구동 전력과 "구동 포함 EUI 변화"는 <a href="#/alts">성능 개선안</a> 페이지의 구동 전력 표에서 확인한다(기본 사양으로 블라인드 일사량 기준 제어는 −0.07% → +0.03%, 수평 루버 일사량 기준 제어는 −0.20% → −0.10%).')}
   <p>9개 대안은 같은 257동, 같은 보정 모델, 같은 기상(서울 TMYx 2011–2025), 같은 계산 간격(10분), 같은 계산 기간(연중 1~12월)으로 계산하였다. 일사량 기준 제어 2종만 냉방기(5~9월)에 작동하고 난방기에는 블라인드를 걷어 올리고 수평 루버를 수평으로 둔다. 설계일에는 모든 장치가 작동하지 않아 같은 건물의 대안들이 같은 공조 용량을 쓴다.</p>
   <h2>1. 상세 3개 동</h2>
   <p>아크플레이스·강남파이낸스센터·GS타워의 상세 모델. 개선 전 블록 EUI ${num(base.EUI, 2)} kWh/m²·yr, 블록 피크전력 ${num(base.peak_kW)} kW 대비 변화이다. 오른쪽 두 열은 주변 건물 차폐를 뺀 같은 계산(차폐 제외 개선 전 대비)이다.</p>
@@ -476,6 +493,21 @@ function pagePlan() {
 }
 
 
+/* 구동 전력 표 */
+function drawDrive() {
+  const P = +$('#dP').value || 0, Tt = +$('#dTt').value || 0, Tl = +$('#dTl').value || 0, Sb = +$('#dSb').value || 0, Am = +$('#dA').value || 6;
+  const base = Object.fromEntries(q("SELECT sim_name, EUI FROM results_257 WHERE tag='S1'").map(r => [r.sim_name, r.EUI]));
+  const dE = {}; for (const r of q("SELECT sim_name, tag, dEUI_pct FROM results_257")) (dE[r.tag] = dE[r.tag] || {})[r.sim_name] = r.dEUI_pct;
+  const rows = [];
+  for (const t of ORDER257) {
+    const d = q('SELECT sim_name, SUM(win_area_m2) A, SUM(win_area_m2*tilt_moves) T, SUM(win_area_m2*lift_moves) L, MAX(floor_area_m2) F FROM drive_257 WHERE tag=? GROUP BY sim_name', [t]);
+    if (!d.length) { rows.push({ name: ALT[t].name, cat: ALT[t].category, tilt: 0, lift: 0, drv: 0, e0: median(Object.values(dE[t] || {})), e1: median(Object.values(dE[t] || {})) }); continue; }
+    const per = d.map(r => { const motors = r.A / Am; const kWh = motors * ((r.T / r.A) * P * Tt + (r.L / r.A) * P * Tl) / 3.6e6 + motors * Sb * 8760 / 1000; const drv = kWh / r.F; return { tilt: r.T / r.A, lift: r.L / r.A, drv, e0: dE[t][r.sim_name], e1: dE[t][r.sim_name] + drv / base[r.sim_name] * 100 }; });
+    rows.push({ name: ALT[t].name, cat: ALT[t].category, tilt: median(per.map(x => x.tilt)), lift: median(per.map(x => x.lift)), drv: median(per.map(x => x.drv)), e0: median(per.map(x => x.e0)), e1: median(per.map(x => x.e1)), n: per.filter(x => x.e1 < 0).length });
+  }
+  $('#drvtab').innerHTML = table([{ h: '대안', k: 'name', f: (v, r) => `<span class="tag ${r.cat === '고정형 차양' ? 'mut' : 'kin'}">${esc(r.cat)}</span> ${esc(v)}` }, { h: '각도 조절(회/년, 모터당)', k: 'tilt', num: 1, f: v => num(v) }, { h: '내림·올림(회/년)', k: 'lift', num: 1, f: v => num(v) }, { h: '구동 전력(kWh/m²·yr)', k: 'drv', num: 1, f: v => num(v, 3) }, { h: 'EUI 변화(구동 제외)', k: 'e0', num: 1, f: v => pct(v) }, { h: 'EUI 변화(구동 포함)', k: 'e1', num: 1, f: v => `<b>${pct(v)}</b>` }, { h: '구동 포함 감소 건물', k: 'n', num: 1, f: v => v == null ? '—' : v + '동' }], rows) +
+    `<p class="small">257동 건물별 중앙값, 주변 차폐 포함. 구동 전력 = (모터 수 × 각도 조절 횟수 × 전력 × 시간 + 모터 수 × 내림·올림 횟수 × 전력 × 시간 + 모터 수 × 대기전력 × 8,760시간) ÷ 바닥면적. 모터 수 = 창 면적 ÷ 모터당 창 면적(창면적비 40%). EUI 변화(구동 포함) = 건물별 EUI 변화 + 구동 전력 ÷ 개선 전 EUI × 100.</p>`;
+}
 /* 강남 권역 가구별 수치(테헤란로제2지구 가구 안 140동) */
 function gbdSection() {
   const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
@@ -498,7 +530,7 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', drive_257: '키네틱 장치 연간 작동 횟수(건물·대안·입면별 창 면적, 각도 조절·내림·올림 횟수, 바닥면적)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장 계획', gbd_blocks: '강남 테헤란로제2지구 가구별 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `
