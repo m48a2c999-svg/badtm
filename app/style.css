@@ -244,6 +244,7 @@ h1,h2,h3{text-wrap:balance}
 
 /* ---- v12 site (DB-driven) additions ---- */
 .titleblock h1{font-size:clamp(22px,3.4vw,34px);max-width:30ch}
+.titleblock .sub{font-size:clamp(11px,1.7vw,17px);font-weight:500;color:#4A5563;margin:10px 0 4px;letter-spacing:.01em}
 .titleblock .en{font-style:italic;color:var(--ink2);max-width:80ch;margin:6px 0 14px}
 .purpose{font-size:16px;line-height:1.75;border-left:4px solid var(--sun);background:#fff;padding:14px 18px;margin:14px 0}
 .qlist{counter-reset:q;list-style:none;padding:0;margin:0}
