@@ -289,3 +289,6 @@ section h2{margin-top:30px}
 .lcomp{position:absolute;right:10px;top:10px;z-index:460;background:rgba(255,255,255,.9);border:1px solid var(--line);padding:4px 6px;text-align:center;pointer-events:none}
 .lcur{pointer-events:none}
 @media (max-width:900px){.live-grid{grid-template-columns:minmax(0,1fr)}}
+
+.reglabel span{display:inline-block;background:rgba(255,255,255,.88);border:1.5px solid;border-radius:6px;padding:2px 7px;font-weight:700;font-size:12px;line-height:1.25;text-align:center;white-space:nowrap}
+.reglabel small{font-weight:400;font-size:10.5px}

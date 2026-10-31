@@ -166,10 +166,11 @@ function pageSite() {
   const alts = ORDER257.map(t => `<option value="${t}">${esc(altName(t))}</option>`).join('');
   $('#page-site').innerHTML = `
   <div class="kicker">대상지 · 건물 데이터베이스</div>
-  <h1>역삼역 일대 4개 대블록, 업무 용도 건물 257동</h1>
-  <p>강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
+  <h1>서울 오피스 3권역 — 계산을 마친 역삼 257동과 계산 예정 가구</h1>
+  <p>지도에는 연구 대상인 3권역(도심, 강남, 여의도·마포)의 지구단위계획구역과 가구 경계가 모두 나온다. 그 가운데 EnergyPlus 계산을 마친 것은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이며, 건물별 결과 색은 이 257동에만 있다. 나머지 가구(도심·여의도와 강남의 다른 가구)는 경계만 표시하고 2027년 1~3월에 계산한다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
   <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">향후 계획</a>). 지금까지 EnergyPlus 계산을 마친 것은 강남 권역의 이 257동이며(그중 140동이 테헤란로제2지구 가구 40개 안), 이 페이지와 결과 페이지의 수치는 모두 이 257동의 예비 결과이다. 도심·여의도와 강남의 나머지 가구는 2027년 1~3월에 계산한다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>에서 볼 수 있다).</p>
   <div class="ctrl">
+    <label>권역<select id="mregion"><option value="">3권역 전체</option><option value="강남(GBD)">강남 — 역삼 257동 계산 완료</option><option value="도심(CBD)">도심 — 계산 예정</option><option value="여의도·마포(YBD)">여의도·마포 — 계산 예정</option><option value="yeoksam">역삼 4개 대블록(확대)</option></select></label>
     <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 피크전력 변화</option></select></label>
     <label>대안<select id="malt">${alts}</select></label>
     <label>주변 차폐<select id="mcond"><option value="차폐 포함">포함(본 결과)</option><option value="차폐 제외">제외(비교)</option></select></label>
@@ -183,6 +184,7 @@ function pageSite() {
   <h2>건물 목록</h2><div id="btable"></div>
   ${note('평면 면적은 등가 직사각형 모델의 평면 면적, 가려진 정도는 창에서 본 주변 건물의 평균 차폐각이다. ' + SIMNOTE)}`;
   ['mcolor', 'malt', 'mblock', 'mcond'].forEach(id => $('#' + id).addEventListener('change', () => { drawMap(); drawBTable(); }));
+  $('#mregion').addEventListener('change', () => zoomRegion($('#mregion').value));
   $('#msearch').addEventListener('input', drawBTable);
 }
 const mcond = () => ($('#mcond') || {}).value || '차폐 포함';
@@ -205,6 +207,7 @@ function drawMap() {
     MAP = L.map('map', { scrollWheelZoom: false }).setView(c, 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(MAP);
     for (const b of q('SELECT * FROM blocks')) L.polygon(JSON.parse(b.polygon), { color: COL.ink, weight: 2, dashArray: '6 4', fill: false }).bindTooltip(`${b.block} 대블록 · ${b.n_buildings}동`).addTo(MAP);
+    drawRegions();
   }
   if (LAYER) LAYER.remove();
   LAYER = L.layerGroup().addTo(MAP);
@@ -219,6 +222,52 @@ function drawMap() {
   else if (CLASS_DEF[mode]) leg = `${CLASS_DEF[mode].label}: ` + CLASS_DEF[mode].levels.slice(0, 3).map((l, i) => `<span><i style="background:${seq3[i]}"></i>${l}</span>`).join(' ');
   else { const lim = mode === 'dEUI_pct' ? 2 : 3; leg = `${altName($('#malt').value)}(주변 차폐 ${mcond() === '차폐 제외' ? '제외' : '포함'}) · ${METRIC[mode].label}: ` + [-lim, -lim / 2, 0, lim / 2, lim].map(v => `<span><i style="background:${divColor(v, lim)}"></i>${pct(v, 1)}</span>`).join(' ') + ' (초록 = 감소, 빨강 = 증가)'; }
   $('#mleg').innerHTML = leg;
+}
+/* 3권역(도심·강남·여의도·마포)의 지구단위계획구역·가구 경계를 대상지 지도에 겹친다. 자료: data/upis(서울 UPIS 2026-09, 자료 생성기와 같은 파일).
+   계산을 마친 건물은 역삼 257동뿐이므로 다른 가구는 경계만 그린다(상태는 districts 표). */
+const REG = { layers: {}, bounds: {}, done: false };
+const REG_COL = { '도심(CBD)': '#7a4f9d', '강남(GBD)': '#1f6f8b', '여의도·마포(YBD)': '#b06a2a' };
+async function drawRegions() {
+  if (REG.done || typeof PRESET === 'undefined') return; REG.done = true;
+  const D = Object.fromEntries(q('SELECT code, name, status FROM districts').map(r => [r.code, r]));
+  const CODE = { '도심(CBD)': 'CBD', '강남(GBD)': 'GBD', '여의도·마포(YBD)': 'YBD' };
+  const gbdDone = new Set(q('SELECT DISTINCT plan_id || "-" || gagu k FROM gbd_assign').map(r => r.k));
+  const nDone = Object.fromEntries(q('SELECT plan_id || "-" || gagu k, COUNT(*) n FROM gbd_assign GROUP BY 1').map(r => [r.k, r.n]));
+  try {
+    const [plans, pj] = await Promise.all([fetch('data/upis/plans.geojson').then(r => r.json()), fetch('data/upis/plans.json').then(r => r.json())]);
+    const info = Object.fromEntries(pj.plans.map(p => [p.id, p]));
+    const gus = new Set(Object.values(PRESET).flat().map(id => info[id] && info[id].gu).filter(Boolean));
+    const blocks = {};
+    await Promise.all([...gus].map(async g => { try { const j = await (await fetch(`data/upis/blocks_${g}.geojson`)).json(); for (const f of j.features) (blocks[f.properties.plan_id] = blocks[f.properties.plan_id] || []).push(f); } catch (e) { } }));
+    for (const [reg, ids] of Object.entries(PRESET)) {
+      const col = REG_COL[reg], st = (D[CODE[reg]] || {}).status || '';
+      const g = L.featureGroup();
+      const sel = new Set(ids); let nb = 0;
+      for (const f of plans.features) {
+        if (!sel.has(f.properties.id)) continue;
+        const p = info[f.properties.id] || {};
+        L.geoJSON(f, { style: { color: col, weight: 2.2, dashArray: '8 5', fill: false } }).bindTooltip(`${esc(p.name || f.properties.id)} · ${reg} · ${esc(st)}`).addTo(g);
+        for (const b of blocks[f.properties.id] || []) {
+          const k = `${b.properties.plan_id}-${b.properties.block}`; const nd = nDone[k];
+          L.geoJSON(b, { style: { color: col, weight: 0.8, fillColor: col, fillOpacity: nd ? 0.22 : 0.06 } })
+            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 예비 수치)` : ` · EnergyPlus 계산 예정(2027년 1~3월)`)).addTo(g); nb++;
+        }
+      }
+      g.addTo(MAP); REG.layers[reg] = g;
+      if (g.getLayers().length) {
+        REG.bounds[reg] = g.getBounds();
+        L.marker(g.getBounds().getCenter(), { icon: L.divIcon({ className: 'reglabel', html: `<span style="border-color:${col};color:${col}">${esc(reg)}<br><small>가구 ${nb}개 · ${esc(st)}</small></span>`, iconSize: [160, 40], iconAnchor: [80, 20] }), interactive: false }).addTo(MAP);
+      }
+    }
+    const all = L.featureGroup(Object.values(REG.layers)); REG.bounds[''] = all.getBounds();
+    if (!$('#mregion').value) MAP.fitBounds(all.getBounds().pad(0.05));
+    MAP.on('zoomend', () => { const z = MAP.getZoom(); Object.values(REG.layers).forEach(g => g.eachLayer(l => { if (l.setStyle && l.options.style && !l.options.style.dashArray) l.setStyle({ weight: z >= 14 ? 0.8 : 0.3 }); })); });
+  } catch (e) { console.warn('권역 경계 표시 실패', e); }
+}
+function zoomRegion(v) {
+  if (!MAP) return;
+  if (v === 'yeoksam') { const c = JSON.parse(q1("SELECT value v FROM block_meta WHERE key='center'").v); MAP.setView(c, 16); return; }
+  const b = REG.bounds[v]; if (b) MAP.fitBounds(b.pad(0.05));
 }
 function drawBTable() {
   const rows = siteRows().sort((a, b) => { const x = a[SORT.k], y = b[SORT.k]; if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : x < y ? -1 : 0) * SORT.d; });
