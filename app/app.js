@@ -385,7 +385,7 @@ function pageValid() {
   $('#page-valid').innerHTML = `
   <div class="kicker">실측 비교</div><h1>모델은 개별 건물을 예측하지 못한다 — 그래서 상대 비교로만 쓴다</h1>
   <p>개선 전 모델의 월 전력을 건축HUB 건물에너지정보(2023–2024년 월별 전기)와 비교하여 ASHRAE Guideline 14의 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)에 대조하였다. 보정은 모든 건물에 공통인 전역 배율(${esc(META.calibration)})로 제한하였다.</p>
-  ${table([{ h: '집합', k: 'subset' }, { h: '단계', k: 'stage' }, { h: '동수', k: 'n', num: 1 }, { h: 'CV(RMSE) 중앙값', k: 'cv_rmse_median', num: 1, f: v => num(v, 1) + '%' }, { h: '사분위', k: 'cv_rmse_q1', num: 1, f: (x, r) => `${num(r.cv_rmse_q1, 1)} ~ ${num(r.cv_rmse_q3, 1)}%` }, { h: 'NMBE 중앙값', k: 'nmbe_median', num: 1, f: v => sgn(v, 1) + '%' }, { h: 'G14 충족', k: 'n_pass_g14', num: 1, f: (x, r) => `${x}/${r.n}동` }], v, { nw: 1 })}
+  ${table([{ h: '집합', k: 'subset' }, { h: '단계', k: 'stage' }, { h: '동수', k: 'n', num: 1 }, { h: 'CV(RMSE) 중앙값', k: 'cv_rmse_median', num: 1, f: v => num(v, 1) + '%' }, { h: '사분위', k: 'cv_rmse_q1', num: 1, f: (x, r) => `${num(r.cv_rmse_q1, 1)}~${num(r.cv_rmse_q3, 1)}%` }, { h: 'NMBE 중앙값', k: 'nmbe_median', num: 1, f: v => sgn(v, 1) + '%' }, { h: 'G14 충족', k: 'n_pass_g14', num: 1, f: (x, r) => `${x}/${r.n}동` }], v, { nw: 1 })}
   <h3>시험용 건물의 CV(RMSE) 분포</h3>${svgEl(W, H, s)}
   <p>보정 후 시험용 215동의 월 CV(RMSE) 중앙값은 ${num(v.find(r => r.subset.startsWith('시험') && r.stage === '보정 전').cv_rmse_median, 1)}%에서 ${num(v.find(r => r.subset.startsWith('시험') && r.stage === '보정 후').cv_rmse_median, 1)}%로 줄었으나, 기준을 충족한 건물은 보정용 ${v.find(r => r.subset.startsWith('보정') && r.stage === '보정 후').n_pass_g14}/31동, 시험용 ${v.find(r => r.subset.startsWith('시험') && r.stage === '보정 후').n_pass_g14}/215동이었다. 따라서 결과는 개별 건물의 에너지 사용 예측이 아니라 같은 모델 위에서 개선 전후를 비교한 상대값으로만 해석한다. 건물별 월별 비교는 <a href="#/site">대상지·건물</a>에서 건물을 선택하면 볼 수 있다.</p>
   ${note('실측 원자료는 지번 단위 월별 사용량이며, 지역난방·가스 흡수식 냉방 등 모델(전기 냉동기)과 다른 설비의 영향이 섞여 있을 수 있다.')}`;
@@ -422,7 +422,7 @@ function pagePlan() {
   <li><b>지표 추가</b> — 공간 주광 자율성(sDA)과 과다 일사 노출(ASE)을 추가하고, 눈부심은 대표 실에서 계산하거나 한계로 밝힌다.</li>
   <li><b>워밍업</b> — EnergyPlus 워밍업 미수렴 경고가 있었던 건물(약 100동)은 워밍업 기간을 늘려 다시 계산한다. 워밍업 기간을 25일에서 100일로 늘린 민감도 계산(20동)에서 블라인드 고정의 EUI 변화율은 중앙값 0.0004%p, 최대 0.10%p만 달라졌다.</li></ol>
   <h2>확장 — 업무 기능 지구단위계획구역의 가구별 전체 건물</h2>
-  <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>블록.</b> 국내에는 "업무지구"라는 법정 용도지역이 없으므로, 도시관리계획으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 가구(街區, 2,000 m² 이상)를 블록으로 쓴다(결정도의 가구 번호와는 재계산 전에 대조). 가구 안의 모든 건물을 모아 주변 차폐와 가구 합산에 쓰고, 개선 효과의 분석 대상은 업무시설 6층 이상 건물로 한다. <a href="#/gen">자료 생성기</a>에서 권역을 고르면 가구와 건물 자료를 바로 만들 수 있다.</p></div>
+  <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>가구(분석 단위).</b> 국내에는 "업무지구"라는 법정 용도지역이 없으므로, 도시관리계획으로 결정·고시된 지구단위계획구역을 도시계획도로로 나눈 가구(街區, 2,000 m² 이상)를 분석 단위로 쓴다(결정도의 가구 번호와는 재계산 전에 대조). 가구 안의 모든 건물을 모아 주변 차폐와 가구 합산에 쓰고, 개선 효과의 분석 대상은 업무시설 6층 이상 건물로 한다. <a href="#/gen">자료 생성기</a>에서 권역을 고르면 가구와 건물 자료를 바로 만들 수 있다.</p></div>
   ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
   ${gbdSection()}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
