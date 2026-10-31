@@ -147,8 +147,10 @@ async function liveLoadYeoksam(msg) {
     msg('주변 건물(OpenStreetMap) 불러오는 중…');
     let s = 90, w = 180, n = -90, e = -180; for (const t of targets) for (const [x, y] of t.ring) { s = Math.min(s, y); n = Math.max(n, y); w = Math.min(w, x); e = Math.max(e, x); }
     const pad = 0.003, bb = `${(s - pad).toFixed(6)},${(w - pad).toFixed(6)},${(n + pad).toFixed(6)},${(e + pad).toFixed(6)}`;
-    const ql = `[out:json][timeout:60];(way["building"](${bb}););out tags geom;`;
-    const { data } = await overpassQuery(ql, t => msg('주변 건물: ' + t), 70000);
+    // 저장소에 담아 둔 OSM 사본(2026-10-19)을 먼저 쓰고, 없을 때만 Overpass API를 부른다(외부 API 접근 없이 기본 지역이 열리도록).
+    let data; try { data = await (await fetch('data/osm/yeoksam_buildings.json')).json(); if (!data.elements) throw 0; } catch (z) {
+      const ql = `[out:json][timeout:60];(way["building"](${bb}););out tags geom;`;
+      data = (await overpassQuery(ql, t => msg('주변 건물: ' + t), 70000)).data; }
     for (const el of data.elements) {
       if (!el.geometry || el.geometry.length < 4) continue; const ring = el.geometry.map(p => [p.lon, p.lat]); const c = centroid(ring);
       if (targets.some(t => inRing(c, t.ring) || inRing(t.c, ring) || t.ring.some(p => inRing(p, ring)))) continue;
@@ -214,7 +216,7 @@ function pageLive() {
   ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(LIVE.map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(LIVE.map);
   LIVE.canvas = $('#lcanvas');
   LIVE.map.on('move zoom resize viewreset', liveDraw);
   LIVE.map.on('click', liveClick);
