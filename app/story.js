@@ -238,3 +238,21 @@ function pageStory() {
   };
   if (!STORY.raf) STORY.raf = requestAnimationFrame(loop);
 }
+
+/* ---------------- 참고문헌 ---------------- */
+async function pageRefs() {
+  const el = $('#page-refs'); el.innerHTML = '<p class="small">참고문헌을 불러오는 중…</p>';
+  let R = []; try { R = await (await fetch('data/refs.json')).json(); } catch (e) { el.innerHTML = '<div class="warn">참고문헌 파일(data/refs.json)을 불러오지 못했다.</div>'; return; }
+  const nK = R.filter(r => r.group === '국내 문헌').length, nF = R.length - nK;
+  const link = r => r.url ? ` <a href="${esc(r.url)}" target="_blank" rel="noopener" class="mono small">${esc(r.url.replace(/^https?:\/\/(doi\.org\/)?/, ''))}</a>` : '';
+  const render = (f = '') => { const q = f.trim().toLowerCase(); let n = 0; let h = '';
+    for (const g of ['국내 문헌', '국외 문헌']) { const rows = R.filter(r => r.group === g && (!q || (r.text + ' ' + r.url).toLowerCase().includes(q))); if (!rows.length) continue; n += rows.length;
+      h += `<h2>${g} <span class="small">${rows.length}편</span></h2><ol class="reflist">` + rows.map(r => `<li>${esc(r.text)}${link(r)}</li>`).join('') + '</ol>'; }
+    $('#reflist').innerHTML = h || '<p class="small">검색 결과 없음</p>'; $('#refn').textContent = `${n}편`; };
+  el.innerHTML = `<div class="kicker">참고문헌</div><h1>원고 참고문헌 ${R.length}편 — 국내 ${nK}편 · 국외 ${nF}편</h1>
+  <p>논문 원고의 참고문헌 목록과 같다(저자명 가나다·알파벳순). DOI가 있는 문헌은 링크로 열 수 있다. 검증되지 않은 문헌, 미투고 논문, 저자 본인의 논문은 포함하지 않는다.</p>
+  <div class="ctrl"><label>검색 <input id="refq" type="search" placeholder="저자·제목·학술지·연도" style="min-width:260px"></label> <span class="small" id="refn"></span></div>
+  <div id="reflist"></div>
+  ${note('서지 사항은 원고 참고문헌 기준이며, 국내 문헌 일부는 KCI·DBpia에서 권호·쪽수를 다시 확인하는 중이다(인계문서 1-2).')}`;
+  $('#refq').addEventListener('input', e => render(e.target.value)); render();
+}

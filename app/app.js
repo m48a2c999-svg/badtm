@@ -153,6 +153,7 @@ function pageHome() {
   <p class="small">논문 원고의 장·절과 표가 이 사이트의 어느 페이지에 있는지. 원고의 수치는 모두 아래 페이지와 <a href="#/db">데이터베이스</a>에서 다시 확인할 수 있다.</p>
   <table class="tmap"><tr><th>원고</th><th>내용</th><th>사이트</th></tr>
   <tr><td>요약 · 1.4 · 2장</td><td>요약, 독창성, 연구 목적·질문 3개 (1~3장의 배경·선행연구(표 1)는 원고에만)</td><td><a href="#/">개요</a></td></tr>
+  <tr><td>참고문헌</td><td>원고 참고문헌 전체(국내·국외, DOI 링크)</td><td><a href="#/refs">참고문헌</a></td></tr>
   <tr><td>4.1 · 4.4 · 7.2</td><td>대상지(3권역, 지구단위계획구역·가구)와 257동, 지표·용어·건물 조건(가려진 정도·평면 면적 3분위, 층수 6~10·11~20·21층 이상)</td><td><a href="#/site">대상지·건물</a></td></tr>
   <tr><td>4.2 · 4.3</td><td>모델(DOE 기준 모델, 보정) → 시뮬레이션 과정; 성능 개선안 9개와 작동 규칙(표 2) → 성능 개선안</td><td><a href="#/story">시뮬레이션 과정</a> · <a href="#/alts">성능 개선안</a></td></tr>
   <tr><td>4.5 · 5.9</td><td>실측 비교(건축HUB 월별 전기, CV(RMSE)·NMBE)</td><td><a href="#/valid">실측 비교</a></td></tr>
@@ -534,7 +535,7 @@ function runQ() {
 }
 
 /* ---------------- 라우팅 ---------------- */
-const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, story: () => pageStory(), gen: () => pageGen(), live: () => pageLive() };
+const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, story: () => pageStory(), refs: () => pageRefs(), gen: () => pageGen(), live: () => pageLive() };
 const BUILT = {};
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';

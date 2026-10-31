@@ -332,3 +332,4 @@ section h2{margin-top:30px}
 .tmap th{font:600 11px/1.3 var(--mono);color:var(--muted)}
 .tmap td:first-child{font-family:var(--mono);white-space:nowrap;color:var(--sun);font-weight:600}
 @media (max-width:480px){.s6t .tag,.s4r .tag{display:none}.stg .sl{font-size:15px}}
+.reflist{padding-left:22px;font-size:13.5px}.reflist li{margin:0 0 9px;line-height:1.55}

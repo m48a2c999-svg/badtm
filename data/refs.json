@@ -1,0 +1,158 @@
+[
+{
+"group": "국내 문헌",
+"text": "공동석, 김두환, 장용성, 허정호. (2014). 성능진단 데이터로 보정된 모델을 이용한 기존건축물의 에너지시뮬레이션 기법. 설비공학논문집, 26(5), 231–239.",
+"url": "",
+"year": 2014
+},
+{
+"group": "국내 문헌",
+"text": "구기범, 정신규. (2022). 유전알고리즘을 이용한 오피스 건물의 피크전력 감소를 위한 일일 예냉설정온도 최적화 연구. 설비공학논문집, 34(1), 42–52.",
+"url": "https://doi.org/10.6110/KJACR.2022.34.1.042",
+"year": 2022
+},
+{
+"group": "국내 문헌",
+"text": "국토교통부. (2023). 건축물의 에너지절약설계기준(국토교통부고시 제2023-104호).",
+"url": "",
+"year": 2023
+},
+{
+"group": "국내 문헌",
+"text": "국토교통부, 한국부동산원. (2026). 상업용부동산 임대동향조사(국가승인통계 승인번호 제408001호). 한국부동산원 부동산통계정보시스템(R-ONE).",
+"url": "",
+"year": 2026
+},
+{
+"group": "국내 문헌",
+"text": "김세동. (2002). 업무용 빌딩의 전력소비 특성을 고려한 수용률/부등률의 적용에 관한 연구. 조명·전기설비학회논문지, 16(6), 74–79.",
+"url": "",
+"year": 2002
+},
+{
+"group": "국내 문헌",
+"text": "윤경, 박두용, 윤갑천, 김영민, 김영섭, 김강수. (2016). 회수기간을 고려한 기존건축물의 외피 및 열원설비 리모델링 최적 설계안 선정에 관한 연구. 한국건축친환경설비학회 논문집, 10(2), 130–137.",
+"url": "",
+"year": 2016
+},
+{
+"group": "국내 문헌",
+"text": "윤성환, 김영진, 박철수. (2014). 기축 건물의 에너지 모델에 대한 베이지안 보정. 대한건축학회논문집 계획계, 30(10), 189–197.",
+"url": "",
+"year": 2014
+},
+{
+"group": "국내 문헌",
+"text": "윤영일, 송정석, 이효원. (2011). 농어촌주택 표준설계의 유용조도 분석에 관한 연구 – 기상데이터 기반 동적 자연채광 시뮬레이션을 기반으로 –. KIEAE Journal, 11(1), 47–55.",
+"url": "",
+"year": 2011
+},
+{
+"group": "국내 문헌",
+"text": "이동석, 최수지, 조재훈. (2015). 키네틱 파사드의 유형에 따른 일사 열취득 및 조명에너지 사용량 계산방법 개발. 대한건축학회논문집 계획계, 31(12), 203–214.",
+"url": "https://doi.org/10.5659/JAIK_PD.2015.31.12.203",
+"year": 2015
+},
+{
+"group": "국내 문헌",
+"text": "이소연, 강재식, 김강수. (2010). 주거건물용 이중외피 시스템의 블라인드 조절에 따른 에너지 성능평가에 관한 연구. 한국태양에너지학회 논문집, 30(6), 1–9.",
+"url": "",
+"year": 2010
+},
+{
+"group": "국내 문헌",
+"text": "이한솔, 최경석. (2022). 그린리모델링을 통한 에너지 성능 개선 효과 분석. 한국생활환경학회지, 29(3), 281–288.",
+"url": "",
+"year": 2022
+},
+{
+"group": "국내 문헌",
+"text": "장윤배, 이성룡. (2001). 천공차폐율 계산모형 개발에 관한 연구. 국토계획, 36(5), 125–137.",
+"url": "",
+"year": 2001
+},
+{
+"group": "국내 문헌",
+"text": "최동탁, 박상원, 백용규. (2016). 도심지 내 인근 건축물의 일사차폐를 고려한 냉방부하 및 에너지사용량 변화에 관한 연구. 대한건축학회 학술발표대회 논문집, 36(2), 551–556.",
+"url": "",
+"year": 2016
+},
+{
+"group": "국내 문헌",
+"text": "최세영, 최정민. (2023). 주거용 건물의 에너지 사용량 및 원단위 특성 연구. 대한건축학회논문집, 39(12), 193–200.",
+"url": "https://doi.org/10.5659/JAIK.2023.39.12.193",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "ASHRAE. (2014). ASHRAE Guideline 14-2014: Measurement of energy, demand, and water savings. American Society of Heating, Refrigerating and Air-Conditioning Engineers.",
+"url": "",
+"year": 2014
+},
+{
+"group": "국외 문헌",
+"text": "Attia, S., Bilir, S., Safy, T., Struck, C., Loonen, R., & Goia, F. (2018). Current trends and future challenges in the performance assessment of adaptive façade systems. Energy and Buildings, 179, 165–182.",
+"url": "https://doi.org/10.1016/j.enbuild.2018.09.017",
+"year": 2018
+},
+{
+"group": "국외 문헌",
+"text": "Crawley, D. B., Lawrie, L. K., Winkelmann, F. C., Buhl, W. F., Huang, Y. J., Pedersen, C. O., Strand, R. K., Liesen, R. J., Fisher, D. E., Witte, M. J., & Glazer, J. (2001). EnergyPlus: Creating a new-generation building energy simulation program. Energy and Buildings, 33(4), 319–331.",
+"url": "https://doi.org/10.1016/S0378-7788(00)00114-6",
+"year": 2001
+},
+{
+"group": "국외 문헌",
+"text": "Deru, M., Field, K., Studer, D., Benne, K., Griffith, B., Torcellini, P., Liu, B., Halverson, M., Winiarski, D., Rosenberg, M., Yazdanian, M., Huang, J., & Crawley, D. (2011). U.S. Department of Energy commercial reference building models of the national building stock (NREL/TP-5500-46861). National Renewable Energy Laboratory.",
+"url": "",
+"year": 2011
+},
+{
+"group": "국외 문헌",
+"text": "Hong, T., Chen, Y., Luo, X., Luo, N., & Lee, S. H. (2020). Ten questions on urban building energy modeling. Building and Environment, 168, 106508.",
+"url": "https://doi.org/10.1016/j.buildenv.2019.106508",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "International Organization for Standardization [ISO]. (2005). ISO 7730:2005 Ergonomics of the thermal environment — Analytical determination and interpretation of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria. ISO.",
+"url": "",
+"year": 2005
+},
+{
+"group": "국외 문헌",
+"text": "Konstantoglou, M., & Tsangrassoulis, A. (2016). Dynamic operation of daylighting and shading systems: A literature review. Renewable and Sustainable Energy Reviews, 60, 268–283.",
+"url": "https://doi.org/10.1016/j.rser.2015.12.246",
+"year": 2016
+},
+{
+"group": "국외 문헌",
+"text": "Kunwar, N., Cetin, K. S., Passe, U., Zhou, X., & Li, Y. (2019). Full-scale experimental testing of integrated dynamically-operated roller shades and lighting in perimeter office spaces. Solar Energy, 186, 17–28.",
+"url": "https://doi.org/10.1016/j.solener.2019.04.069",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Lee, B. (2019). Heating, cooling, and lighting energy demand simulation analysis of kinetic shading devices with automatic dimming control for Asian countries. Sustainability, 11(5), 1253.",
+"url": "https://doi.org/10.3390/su11051253",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Lee, E. S., DiBartolomeo, D. L., & Selkowitz, S. E. (1998). Thermal and daylighting performance of an automated venetian blind and lighting system in a full-scale private office. Energy and Buildings, 29(1), 47–63.",
+"url": "https://doi.org/10.1016/S0378-7788(98)00035-8",
+"year": 1998
+},
+{
+"group": "국외 문헌",
+"text": "Nabil, A., & Mardaljevic, J. (2005). Useful daylight illuminance: A new paradigm for assessing daylight in buildings. Lighting Research & Technology, 37(1), 41–57.",
+"url": "https://doi.org/10.1191/1365782805li128oa",
+"year": 2005
+},
+{
+"group": "국외 문헌",
+"text": "Yi, D. H., Choi, S., Kim, D. W., & Yoon, S. (2026). Quantifying urban building shading effect for data-driven building energy modeling. Building and Environment, 289, 114011.",
+"url": "https://doi.org/10.1016/j.buildenv.2025.114011",
+"year": 2026
+}
+]
