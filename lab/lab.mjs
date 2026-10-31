@@ -244,7 +244,7 @@ $('#copy').addEventListener('click',async()=>{try{await navigator.clipboard.writ
 $('#record').addEventListener('click',()=>{
  if(S.recorder&&S.recorder.state==='recording'){stopTour();return;}
  try{
-  const types=['video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  const types=['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1.42001E','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
   const mime=types.find(t=>MediaRecorder.isTypeSupported(t));if(!mime)throw new Error('지원되는 영상 형식이 없습니다.');
   const stream=c.captureStream(30),chunks=[];
   const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000});S.recorder=rec;
