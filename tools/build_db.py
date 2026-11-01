@@ -203,6 +203,28 @@ con.execute('CREATE TABLE drive_257(sim_name TEXT, tag TEXT, facade TEXT, win_ar
 con.executemany('INSERT INTO drive_257 VALUES(?,?,?,?,?,?,?)', [(n, tag, f, v['area'], v['tilt'], v['lift'], round(d['area'], 1)) for n, d in DRV['data'].items() for tag, fs in d['rec'].items() for f, v in fs.items()])
 con.commit()
 
+# ---- 서울 오피스 3권역 계산 결과(tools/r3_analysis.py, 맥 EnergyPlus 23.2) — 모든 대상 건물의 20개 조건이 끝난 권역만 넣는다 ----
+R3P = os.path.join(W, 'tools', 'derived', 'r3.json')
+if os.path.exists(R3P):
+    R3 = json.load(open(R3P, encoding='utf-8'))
+    con.execute('CREATE TABLE r3_summary(region TEXT, region_name TEXT, n_bldg INTEGER, alt TEXT, label TEXT, cond TEXT, dEUI_med REAL, dEUI_q1 REAL, dEUI_q3 REAL, eui_dec INTEGER, dpeak_med REAL, peak_dec INTEGER, both_dec INTEGER, dUDI_med REAL, dPMV_med REAL, rho_obstr REAL, sign_flip INTEGER, PRIMARY KEY(region, alt, cond))')
+    con.execute('CREATE TABLE r3_tertile(region TEXT, alt TEXT, tertile TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, dpeak_med REAL, PRIMARY KEY(region, alt, tertile))')
+    con.execute('CREATE TABLE r3_blocks(region TEXT, alt TEXT, label TEXT, n_blocks INTEGER, dEUI_min REAL, dEUI_max REAL, dEUI_med REAL, dpeak_med REAL, both_dec INTEGER, PRIMARY KEY(region, alt))')
+    for reg, R in R3['regions'].items():
+        if not R.get('complete'):
+            continue
+        for a in R['alts']:
+            for cond, k in (('차폐 포함', 'with_'), ('차폐 제외', 'nosh')):
+                v = a.get(k)
+                if not v: continue
+                con.execute('INSERT INTO r3_summary VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', (reg, R['name'], v['n'], a['alt'], a['label'], cond, v['eui'], v['eui_q1'], v['eui_q3'], v['eui_dec'], v['pk'], v['pk_dec'], v['both'], v['udi'], v['pmv'],
+                            a.get('rho_obstr') if cond == '차폐 포함' else None, a.get('sign_flip') if cond == '차폐 포함' else None))
+            for t, v in (a.get('tertile') or {}).items():
+                if v: con.execute('INSERT INTO r3_tertile VALUES(?,?,?,?,?,?,?)', (reg, a['alt'], t, v['n'], v['eui'], v['eui_dec'], v['pk']))
+        for b in R.get('blocks', []):
+            con.execute('INSERT INTO r3_blocks VALUES(?,?,?,?,?,?,?,?,?)', (reg, b['alt'], b['label'], b['n_blocks'], b['eui_range'][0], b['eui_range'][1], b['eui_med'], b['pk_med'], b['both']))
+    con.commit()
+
 # CSV exports
 for (t,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchall():
     if t == 'block_257_hourly':

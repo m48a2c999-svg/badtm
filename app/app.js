@@ -488,6 +488,7 @@ function pagePlan() {
   <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>가구(분석 단위).</b> 지구단위계획구역을 도시계획도로로 나눈 가구(2,000 m² 이상). 가구 안의 모든 건물을 주변 차폐와 가구 합산에 쓰고, 분석 대상은 업무시설 6층 이상 건물로 한다(<a href="#/gen">자료 생성기</a>).</p></div>
   ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
   ${gbdSection()}
+  ${r3Section()}
   <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>저층·소규모는 간이 모델 — 오차는 역삼 257동에서 상세 모델과 먼저 비교</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
   <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다.</li><li>컷오프 각도 제어와 피크 시간대 차양 폐쇄는 연중 작동시켰으므로, 계절별로 작동을 달리하는 실제 운영과는 다를 수 있다. 작동 기간의 영향은 일사량 기준 제어(257동)와 피크 시간대 차양 폐쇄(상세 3개 동)에서만 비교하였다. 또한 약 100동에서 워밍업 미수렴 경고가 있었으며, 민감도 계산(20동)에서 대안 간 비교에 미치는 영향은 작았다.</li><li>키네틱 장치의 구동 전력은 작동 규칙으로 다시 센 작동 횟수와 제품 사양으로 추정한 값이며(원고 5.11절, <a href="#/alts">성능 개선안</a>에서 사양을 바꿔 다시 계산), 회당 작동 시간·대기전력·모터당 창 면적은 가정값이다.</li></ol>`;
 }
@@ -509,6 +510,20 @@ function drawDrive() {
     `<p class="small">257동 건물별 중앙값, 주변 차폐 포함. 구동 전력 = (모터 수 × 각도 조절 횟수 × 전력 × 시간 + 모터 수 × 내림·올림 횟수 × 전력 × 시간 + 모터 수 × 대기전력 × 8,760시간) ÷ 바닥면적. 모터 수 = 창 면적 ÷ 모터당 창 면적(창면적비 40%). EUI 변화(구동 포함) = 건물별 EUI 변화 + 구동 전력 ÷ 개선 전 EUI × 100.</p>`;
 }
 /* 강남 권역 가구별 수치(테헤란로제2지구 가구 안 140동) */
+function r3Section() {
+  let S; try { S = q('SELECT * FROM r3_summary'); } catch (e) { return ''; }
+  if (!S.length) return '';
+  const regs = [...new Set(S.map(r => r.region))];
+  const ord = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PKY'];
+  const body = regs.map(reg => {
+    const W = S.filter(r => r.region === reg && r.cond === '차폐 포함'), N = S.filter(r => r.region === reg && r.cond === '차폐 제외');
+    const rows = ord.map(a => { const w = W.find(r => r.alt === a) || {}, n = N.find(r => r.alt === a) || {}; return { label: w.label, e: w.dEUI_med, q: pr(w.dEUI_q1, w.dEUI_q3), ed: `${w.eui_dec}/${w.n_bldg}`, p: w.dpeak_med, b: w.both_dec, u: w.dUDI_med, rho: w.rho_obstr, en: n.dEUI_med, fl: w.sign_flip }; });
+    const nm = (W[0] || {}).region_name, nb = (W[0] || {}).n_bldg;
+    return `<h3>${esc(nm)} — 업무시설 6층 이상 ${nb}동</h3>${table([{ h: '대안', k: 'label' }, { h: 'EUI 변화 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: '사분위 범위', k: 'q', num: 1 }, { h: 'EUI 감소 동수', k: 'ed', num: 1 }, { h: '피크전력 변화', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: '둘 다 감소', k: 'b', num: 1 }, { h: 'UDI 변화', k: 'u', num: 1, f: v => v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(1) + '%p' }, { h: 'ρ(가려진 정도)', k: 'rho', num: 1, f: v => v == null ? '—' : v.toFixed(2) }, { h: '차폐 제외 EUI', k: 'en', num: 1, f: v => pct(v), cls: bad }, { h: '증감 방향이 바뀐 건물', k: 'fl', num: 1 }], rows, { nw: 1 })}`;
+  }).join('');
+  return `<h2>서울 오피스 3권역 계산 결과</h2><p>역삼 257동과 같은 모델·기상·계산 간격·계산 기간과 같은 20개 조건(개선 전과 9개 대안 × 주변 차폐 포함·제외)으로 계산한 결과이다. 건물별 값의 중앙값(개선 전 대비)이며, 계산을 모두 마친 권역만 싣는다. 강남은 역삼 257동과 겹치는 건물의 결과를 그대로 썼다.</p>${body}${note('3권역 계산은 EnergyPlus 23.2 macOS 공식 배포본으로 하였다(역삼 257동은 Linux 배포본). 같은 건물 4개 조건의 비교에서 두 환경의 EUI 차이는 10⁻⁵ 수준, 개선 전후 변화율 차이는 0.0005%p 이하였다. ' + SIMNOTE)}`;
+}
+
 function gbdSection() {
   const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
   const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL'); if (!all) return '';
