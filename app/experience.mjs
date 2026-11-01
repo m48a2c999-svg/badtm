@@ -23,6 +23,7 @@ document.addEventListener('pointermove',e=>{if(!enabled||e.pointerType==='touch'
 document.addEventListener('pointerout',e=>{if(!e.relatedTarget){visible=false;cursor.style.opacity='0';}},{passive:true});
 toggle.addEventListener('click',()=>setEffects(!enabled,true));reduce.addEventListener('change',()=>setEffects(!reduce.matches&&fine.matches));fine.addEventListener('change',()=>setEffects(enabled));window.addEventListener('resize',resize,{passive:true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(running);running=0;drops.length=0;cursor.style.opacity='0';g.clearRect(0,0,innerWidth,innerHeight);}});resize();setEffects(enabled);
+let beforeFullscreen=enabled;document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement){beforeFullscreen=enabled;setEffects(false);}else setEffects(beforeFullscreen);});
 
 let serial=0;
 function mount(host){
