@@ -160,7 +160,7 @@ function performance(t){
  text('아크플레이스 · 차폐 포함 · 수평 루버 일사량 기준 제어(LT_T300)',66,368,20,'#91a3ad');
  const specs=[['EUI','dEUI_pct','에너지원단위','%','kWh/m²·yr'],['peak_kW','dpeak_pct','피크전력','%','kW'],['UDI','dUDI_pp','유용조도 UDI','%p','%'],['PMV_ok','dPMV_pp','열쾌적 허용시간','%p','%']];
  specs.forEach(([key,delta,label,unit,valueUnit],i)=>{
-  const x=64+i*462,reveal=ramp(t,51+i*.7,52.3+i*.7);ctx.save();ctx.globalAlpha=reveal;ctx.fillStyle='#071017ed';ctx.fillRect(x-10,445,432,225);line2([x,447],[x+405,447],'#4d6874',1,reveal);
+  const x=64+i*462,reveal=ramp(t,51+i*.7,52.3+i*.7);ctx.save();ctx.globalAlpha=reveal;ctx.fillStyle='#071017ed';ctx.fillRect(x-10,445,432,225);line2([x,447],[x+405,447],'#4d6874',1,reveal);ctx.globalAlpha=reveal;
   text(label,x,489,21,'#9bafb9');text(signed(r[delta]),x,571,64,i<2?(r[delta]<0?C.cyan:C.gold):(r[delta]>0?C.cyan:C.gold),300,'left',mono);text(unit,x+315,569,24,'#849ca8',400,'left',mono);
   text(fmt(base[key])+' → '+fmt(r[key]),x,619,20,'#cfdbdf',400,'left',mono);text(valueUnit,x,652,16,'#718996',400,'left',mono);ctx.restore();
  });
@@ -220,7 +220,7 @@ $('#record').addEventListener('click',()=>{
   play(true);rec.start(1000);$('#record').textContent='녹화 종료 · 미리보기';$('#data-status').textContent='60초 영상을 녹화하고 있습니다. 이 탭을 열어 두세요.';
  }catch(e){$('#data-status').textContent='영상 저장을 시작하지 못했습니다: '+e.message;}
 });
-$('#embed').addEventListener('click',()=>{const url=new URL('./',location.href);url.search='embed=1';$('#embed-code').value='<div style="position:relative;padding-top:calc(56.25% + 112px)"><iframe src="'+url.href+'" title="빛에 응답하는 외피 개념 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="fullscreen" loading="lazy"></iframe></div>';$('#embed-dialog').showModal();});
+$('#embed').addEventListener('click',()=>{const url=new URL('./',location.href);url.search='embed=1';$('#embed-code').value='<div style="position:relative;padding-top:calc(56.25% + 128px)"><iframe src="'+url.href+'" title="빛에 응답하는 외피 개념 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="fullscreen" loading="lazy"></iframe></div>';$('#embed-dialog').showModal();});
 $('#copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#embed-code').value);$('#copy').textContent='복사 완료';}catch{$('#embed-code').select();$('#copy').textContent='선택한 코드를 복사하세요';}});$('#close-dialog').addEventListener('click',()=>$('#embed-dialog').close());
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.playing){pause();$('#data-status').textContent='화면을 벗어나 재생을 멈췄습니다. 재생 버튼으로 이어 볼 수 있습니다.';}});
 window.addEventListener('pagehide',()=>{stopRecording();if(S.recordURL)URL.revokeObjectURL(S.recordURL);});
