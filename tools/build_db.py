@@ -225,6 +225,28 @@ if os.path.exists(R3P):
             con.execute('INSERT INTO r3_blocks VALUES(?,?,?,?,?,?,?,?,?)', (reg, b['alt'], b['label'], b['n_blocks'], b['eui_range'][0], b['eui_range'][1], b['eui_med'], b['pk_med'], b['both']))
     con.commit()
 
+# ---- 검토 반영 계산(tools/review_analysis.py): 같은 작동 기간 비교, 워밍업 100일, 모델 가정 민감도 — 모든 계산이 끝났을 때만 넣는다 ----
+RVP = os.path.join(W, 'tools', 'derived', 'review.json')
+if os.path.exists(RVP):
+    RV = json.load(open(RVP, encoding='utf-8'))
+    _sp, _wu, _se = RV['same_period'], RV['warmup'], RV['sensitivity']
+    _ready = all(r.get('n') for r in _sp['cooling']) and len(_wu['rows']) == 9 and all(r.get('k10') and r.get('e13') for r in _se['rows'])
+    if _ready:
+        con.execute('CREATE TABLE review_same_period(period TEXT, tag TEXT, label TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, dpeak_med REAL, peak_dec INTEGER, both_dec INTEGER, dUDI_med REAL, dPMV_med REAL)')
+        for per, k in (('연중', 'yearround'), ('냉방기', 'cooling')):
+            for r in _sp[k]:
+                con.execute('INSERT INTO review_same_period VALUES(?,?,?,?,?,?,?,?,?,?,?)', (per, r['tag'], r['label'], r['n'], r['eui'], r['eui_dec'], r['pk'], r['pk_dec'], r['both'], r.get('udi'), r.get('pmv')))
+        con.execute('CREATE TABLE review_warmup(alt TEXT, n INTEGER, dEUI_absdiff_med REAL, dEUI_absdiff_max REAL, dpeak_absdiff_med REAL, dpeak_absdiff_max REAL, sign_same INTEGER)')
+        for r in _wu['rows']:
+            con.execute('INSERT INTO review_warmup VALUES(?,?,?,?,?,?,?)', (r['alt'], r['n'], r['EUI_med'], r['EUI_max'], r['PK_med'], r['PK_max'], r['sign_same']))
+        con.execute('CREATE TABLE review_sensitivity(alt TEXT, model TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, dpeak_med REAL, rho REAL, sign_same INTEGER, n_pairs INTEGER)')
+        for r in _se['rows']:
+            con.execute('INSERT INTO review_sensitivity VALUES(?,?,?,?,?,?,?,?,?)', (r['alt'], '보정 기준', r['base']['n'], r['base']['eui'], r['base']['eui_dec'], r['base']['pk'], None, None, None))
+            for v, nm in (('k10', '냉동기 COP 배수 1.0'), ('e13', '기기 밀도 1.3')):
+                x = r[v]
+                con.execute('INSERT INTO review_sensitivity VALUES(?,?,?,?,?,?,?,?,?)', (r['alt'], nm, x['n'], x['eui'], x['eui_dec'], x['pk'], r.get(v + '_rho'), r.get(v + '_sign_same'), r.get(v + '_n')))
+        con.commit()
+
 # CSV exports
 for (t,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchall():
     if t == 'block_257_hourly':

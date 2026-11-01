@@ -384,12 +384,38 @@ function pageResults() {
   <h2>5. 작동 기간에 따른 차이(일사량 기준 제어)</h2>
   ${table([{ h: '대안', k: 'name' }, { h: '주변 차폐', k: 'sh' }, { h: '작동 기간', k: 'per' }, { h: 'EUI 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: 'EUI 감소 동수', k: 'd', num: 1, f: (v, r) => `${v}/${r.n}` }, { h: '피크전력 중앙값', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: 'UDI 중앙값', k: 'u', num: 1, f: v => pp(v, 1) }], per, { nw: 1 })}
   <p>피크전력 중앙값은 두 기간에서 같았다(피크가 7월 31일에 생김). 연중 작동하면 겨울에도 창면 일사량이 300 W/m²를 넘는 시간마다 차양이 내려와 난방이 늘었다. 그래서 일사량 기준 제어는 냉방기(5~9월)에만 작동시키는 것을 본 대안으로 하였다(연중 결과를 본 뒤 정한 것이다). 주변 차폐를 뺀 조건에서도 같은 방향이었다. 연중 작동시키면 EUI가 블라인드 일사량 기준 제어는 −0.13%에서 +8.92%로, 수평 루버 일사량 기준 제어는 +2.09%에서 +5.17%로 늘고, EUI를 줄인 건물이 한 동도 없었다(차폐 제외·연중 작동 행은 원고에 싣지 않은 비교 계산). 각 행은 같은 주변 차폐 조건의 개선 전 대비이다. 피크 시간대 차양 폐쇄는 상세 3개 동에서만 두 기간을 비교하였다(연중 평일 13~18시 EUI +0.56%·피크전력 +3.49%, 7~8월 평일 13~18시 EUI −1.31%·피크전력 +3.49%).</p>
+  ${samePeriodSection()}
   <h2>6. 블록 합산 피크전력(보조 지표)</h2>
   ${table([{ h: '대안', k: 'label' }, { h: '블록 피크전력(kW)', k: 'peak_kW', num: 1, f: v => num(v) }, { h: '변화', k: 'dpeak_pct', num: 1, f: (v, r) => r.scenario === 'S1' ? '—' : pct(v), cls: (v, r) => r.scenario === 'S1' ? '' : bad(v) }, { h: '동시율', k: 'CF', num: 1, f: v => num(v, 3) }, { h: '부하율', k: 'LF', num: 1, f: v => num(v, 3) }, { h: '블록 EUI 변화', k: 'dEUI_pct', num: 1, f: (v, r) => r.scenario === 'S1' || v == null ? '—' : pct(v) }], blk, { nw: 1 })}
   ${lineChart([{ label: '개선 전', v: hr('S1'), c: COL.ink }, { label: '블라인드 고정', v: hr('F0'), c: COL.sun }, { label: '블라인드 일사량 기준 제어', v: hr('BT_T300'), c: COL.ok, dash: '5 3' }, { label: '피크 시간대 차양 폐쇄', v: hr('PK'), c: COL.red, dash: '2 2' }], 24, { yl: '257동 합산 전력(kW)', xt: [[0, '0시'], [6, '6시'], [12, '12시'], [16, '16시'], [23, '23시']] })}
   <p class="small">${dl}(개선 전 블록 피크전력이 생긴 날)의 시간별 합산 전력. 부하율은 연평균 전력 ÷ 블록 피크전력이다.</p>
   <p>9개 대안의 동시율 0.993~1.000은 257동이 거의 같은 시각에 피크 부하를 낸다는 뜻이며, 블록 피크전력은 건물별 효과의 합과 같은 방향으로 움직였다. 블록 피크전력을 가장 크게 낮춘 것은 외피가 아니라 건물 운전 시간의 시차였다(±2시간 −3.31%).</p>
   ${note(SIMNOTE)}`;
+}
+
+/* ---------------- 검토 반영 계산(원고 표 3·표 10) ---------------- */
+function samePeriodSection() {
+  let S; try { S = q('SELECT * FROM review_same_period'); } catch (e) { return ''; }
+  if (!S.length) return '';
+  const Y = Object.fromEntries(S.filter(r => r.period === '연중').map(r => [r.tag, r])), C = Object.fromEntries(S.filter(r => r.period === '냉방기').map(r => [r.tag, r]));
+  const rows = [['블라인드 고정', 'F0c', null], ['수평 루버 고정', 'LH_F0c', null], ['수직 루버 고정', 'VF_F0c', null], ['블라인드 컷오프 각도 제어', 'S3@c', 'SC@c'], ['수평 루버 컷오프 각도 제어', 'LH_C@c', 'LH_CS@c'], ['수직 루버 컷오프 각도 제어', 'VF_C@c', 'VF_CS@c'], ['블라인드 일사량 기준 제어', 'BT_T300@y', 'BT_T300c'], ['수평 루버 일사량 기준 제어', 'LT_T300@y', 'LT_T300c'], ['피크 시간대 차양 폐쇄', 'PKY@c', 'PKS@c']]
+    .map(([n, y, c]) => { const a = Y[y] || {}, b = c ? (C[c] || {}) : {}; return { n, ye: a.dEUI_med, yd: `${a.eui_dec}/${a.n}`, yp: a.dpeak_med, yu: a.dUDI_med, ce: c ? b.dEUI_med : null, cd: c ? `${b.eui_dec}/${b.n}` : '고정형', cp: c ? b.dpeak_med : null, cu: c ? b.dUDI_med : null }; });
+  const f = v => v == null ? '—' : pct(v), fu = v => v == null ? '—' : sgn(v, 1) + '%p';
+  return `<h2>5-1. 같은 작동 기간 비교(원고 표 10)</h2>
+  <p>대안마다 작동 기간이 달라 장치와 작동 기간의 효과가 섞이지 않도록, 9개 대안을 모두 연중 작동시킨 비교와 키네틱 6종을 모두 냉방기(5~9월)에만 작동시킨 비교를 같은 257동에서 계산하였다. 냉방기 작동판은 난방기에 블라인드를 걷어 올리고, 수평 루버는 수평, 수직 루버는 고정 위치에 둔다.</p>
+  ${table([{ h: '대안', k: 'n' }, { h: '연중: EUI', k: 'ye', num: 1, f, cls: bad }, { h: '감소 동수', k: 'yd', num: 1 }, { h: '피크전력', k: 'yp', num: 1, f, cls: bad }, { h: 'UDI', k: 'yu', num: 1, f: fu }, { h: '냉방기: EUI', k: 'ce', num: 1, f, cls: v => v == null ? '' : bad(v) }, { h: '감소 동수', k: 'cd', num: 1 }, { h: '피크전력', k: 'cp', num: 1, f, cls: v => v == null ? '' : bad(v) }, { h: 'UDI', k: 'cu', num: 1, f: fu }], rows)}
+  <p class="small">257동 건물별 중앙값, 주변 차폐 포함, 개선 전(보정 기준) 대비. 본 결과(위 2절)는 컷오프 각도 제어·피크 시간대 차양 폐쇄가 연중, 일사량 기준 제어가 냉방기 작동이다.</p>`;
+}
+function sensSection() {
+  let W, S; try { W = q('SELECT * FROM review_warmup'); S = q('SELECT * FROM review_sensitivity'); } catch (e) { return ''; }
+  if (!W.length) return '';
+  const alts = W.map(r => r.alt);
+  const rows = alts.map(a => { const w = W.find(r => r.alt === a), g = m => S.find(r => r.alt === a && r.model === m) || {}; const b = g('보정 기준'), k = g('냉동기 COP 배수 1.0'), e = g('기기 밀도 1.3');
+    return { a, wd: `${num(w.dEUI_absdiff_med, 2)}%p (${num(w.dEUI_absdiff_max, 2)}%p)`, ws: `${w.sign_same}/${w.n}`, b: b.dEUI_med, k: k.dEUI_med, e: e.dEUI_med, ss: `${k.sign_same}/${k.n_pairs} · ${e.sign_same}/${e.n_pairs}`, rho: `${num(k.rho, 2)} · ${num(e.rho, 2)}` }; });
+  return `<h2>워밍업 기간과 모델 가정에 따른 민감도(원고 표 3)</h2>
+  <p>모델이 실측 기준을 거의 충족하지 못하므로, 결과를 어디까지 해석할 수 있는지 두 가지 계산으로 확인하였다. ① 워밍업 최대 기간을 25일에서 100일로 늘린 계산(무작위 20동, 개선 전과 9개 대안), ② 냉동기 COP 배수를 2.0에서 1.0으로, 기기 밀도를 1.0에서 1.3으로 바꾼 모델(가려진 정도 3분위에서 고르게 고른 40동, 9개 대안).</p>
+  ${table([{ h: '대안', k: 'a' }, { h: '워밍업 25→100일: EUI 변화 차이 중앙값(최대)', k: 'wd', num: 1 }, { h: '부호 유지', k: 'ws', num: 1 }, { h: '보정 기준 EUI', k: 'b', num: 1, f: v => pct(v), cls: bad }, { h: 'COP 배수 1.0', k: 'k', num: 1, f: v => pct(v), cls: bad }, { h: '기기 밀도 1.3', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: '부호 유지(COP · 기기)', k: 'ss', num: 1 }, { h: '순위 상관 ρ(COP · 기기)', k: 'rho', num: 1 }], rows)}
+  <p class="small">EUI는 개선 전 대비 변화의 건물별 중앙값. 부호 유지 = EUI 변화의 증감 방향이 기본 계산과 같은 건물 수. 결과는 효과의 크기보다 대안 간 방향과 건물 간 순위로 해석한다.</p>`;
 }
 
 /* ---------------- 페이지: 건물 특성별 ---------------- */
@@ -468,6 +494,7 @@ function pageValid() {
   ${table([{ h: '집합', k: 'subset' }, { h: '단계', k: 'stage' }, { h: '동수', k: 'n', num: 1 }, { h: 'CV(RMSE) 중앙값', k: 'cv_rmse_median', num: 1, f: v => num(v, 1) + '%' }, { h: '사분위', k: 'cv_rmse_q1', num: 1, f: (x, r) => `${num(r.cv_rmse_q1, 1)}~${num(r.cv_rmse_q3, 1)}%` }, { h: 'NMBE 중앙값', k: 'nmbe_median', num: 1, f: v => sgn(v, 1) + '%' }, { h: 'G14 충족', k: 'n_pass_g14', num: 1, f: (x, r) => `${x}/${r.n}동` }], v, { nw: 1 })}
   <h3>시험용 건물의 CV(RMSE) 분포</h3>${svgEl(W, H, s)}
   <p>보정 후 시험용 215동의 월 CV(RMSE) 중앙값은 ${num(v.find(r => r.subset.startsWith('시험') && r.stage === '보정 전').cv_rmse_median, 1)}%에서 ${num(v.find(r => r.subset.startsWith('시험') && r.stage === '보정 후').cv_rmse_median, 1)}%로 줄었으나, 기준을 충족한 건물은 보정용 ${v.find(r => r.subset.startsWith('보정') && r.stage === '보정 후').n_pass_g14}/31동, 시험용 ${v.find(r => r.subset.startsWith('시험') && r.stage === '보정 후').n_pass_g14}/215동이었다. 따라서 결과는 개별 건물의 에너지 사용 예측이 아니라 같은 모델 위에서 개선 전후를 비교한 상대값으로만 해석한다. 건물별 월별 비교는 <a href="#/site">대상지·건물</a>에서 건물을 선택하면 볼 수 있다.</p>
+  ${sensSection()}
   ${note('실측 원자료는 지번 단위 월별 사용량이며, 지역난방·가스 흡수식 냉방 등 모델(전기 냉동기)과 다른 설비의 영향이 섞여 있을 수 있다.')}`;
 }
 
