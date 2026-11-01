@@ -60,7 +60,7 @@ function renderResults(){
  $('#alternatives-chart').innerHTML=rr.map(x=>chartBar(x.a.name.replace('각도 제어','').replace('일사량 기준 제어','일사량 제어'),x.r.dEUI_pct,mx,x.tag===S.tag,x.tag)).join('');
  const dE=r.dEUI_pct||0,dP=r.dpeak_pct||0;
  let title='모든 지표의 방향과 크기를 함께 확인하세요.';
- let text='이 값은 명시된 입력 가정의 예비 시뮬레이션 결과입니다. 상대 효과도 추가 검증이 필요합니다.';
+ let text='이 값은 명시된 입력 가정의 시뮬레이션 결과이며 실측값이 아닙니다. 상대 비교로만 해석합니다.';
  if(S.tag==='S1'){title='개선 전 기준 모델입니다.';text='성능 개선안을 선택하면 같은 차폐 조건의 기준값과 비교합니다.';}
  else if(Math.abs(dE)<.1){title='EUI 변화가 0.1% 미만인 작은 차이입니다.';text='부호만으로 실용적인 절감을 판단하지 않습니다. 수치 안정성·입력 가정·구동 에너지·비용을 함께 확인해야 합니다.';}
  else if(dE<0&&dP>0){title='연간 에너지가 줄어도 피크전력은 늘 수 있습니다.';text='난방·냉방·조명의 변화와 채광·열쾌적 손실을 함께 읽어야 합니다. 하나의 지표만으로 적용을 권장하지 않습니다.';}
