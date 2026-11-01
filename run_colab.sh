@@ -17,7 +17,7 @@ for t in "$OUT"/chunk_*.tar; do [ -f "$t" ] && tar xf "$t" -C $RES; done
 echo "restored $(ls $RES | wc -l) results"
 ( while true; do sleep 1800; cd $RES; ls *.pkl 2>/dev/null | sort > /tmp/all.txt; cat "$OUT"/chunk_*.list 2>/dev/null | sort > /tmp/sent.txt; comm -23 /tmp/all.txt /tmp/sent.txt > /tmp/new.txt; if [ -s /tmp/new.txt ]; then n=$(date +%Y%m%d_%H%M%S); tar cf "$OUT/chunk_$n.tar" -T /tmp/new.txt && cp /tmp/new.txt "$OUT/chunk_$n.list"; fi; done ) &
 cd /content/b/mb/py
-REGION=$REG EP_DIR=$EPD RES_DIR=$RES python3 sim_r3.py jobs_r3_$REG.json $(nproc) 2>&1 | tee -a /content/log_$REG.txt | grep -v cached
+REGION=$REG EP_DIR=$EPD RES_DIR=$RES python3 sim_r3.py jobs_r3_$REG.json $(nproc) 2>&1 | tee -a /content/log_$REG.txt | grep -v cached || true
 # 끝나면 남은 파일도 옮긴다
 cd $RES; ls *.pkl | sort > /tmp/all.txt; cat "$OUT"/chunk_*.list 2>/dev/null | sort > /tmp/sent.txt; comm -23 /tmp/all.txt /tmp/sent.txt > /tmp/new.txt
 [ -s /tmp/new.txt ] && { n=$(date +%Y%m%d_%H%M%S); tar cf "$OUT/chunk_$n.tar" -T /tmp/new.txt; cp /tmp/new.txt "$OUT/chunk_$n.list"; }
