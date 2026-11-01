@@ -213,7 +213,7 @@ function pageLive() {
       <div id="lbinfo"></div>
     </div>
   </div>
-  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 2027년 1~3월에 EnergyPlus로 계산한다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
+  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 같은 절차로 EnergyPlus 계산을 진행하고 있다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 5장의 결과에 쓰지 않는다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(LIVE.map);
@@ -385,7 +385,7 @@ function liveCharts() {
     const sum = a => a.reduce((x, y) => x + y, 0);
     const txt = alt ? `이 날 257동 합산 전력량: 개선 전 ${num(sum(base) / 1000, 1)} MWh → ${esc(LRULE[LIVE.rule].name)} ${num(sum(alt) / 1000, 1)} MWh(${pct(100 * (sum(alt) - sum(base)) / sum(base))}), 일 최대 ${num(Math.max(...base))} → ${num(Math.max(...alt))} kW(${pct(100 * (Math.max(...alt) - Math.max(...base)) / Math.max(...base))}).` : '이 대안은 257동에서 계산하지 않았다(상세 3개 동만 계산).';
     $('#lchart2').innerHTML = chartSvg('lc3', `EnergyPlus 23.2 · 257동 합산 시간별 전력(${LIVE.date}, 서울 TMYx)`, s3, 'kW', { xs, lo: 0 }) + `<p class="small">${txt} ${SIMNOTE}</p>`;
-  } else $('#lchart2').innerHTML = `<p class="small">이 지역의 에너지(전력) 값은 아직 EnergyPlus로 계산하지 않았다. 위 곡선은 맑은 날 가정의 일사와 작동 상태이며, 에너지 계산은 재계산 단계(2027년 1~3월)에서 건축물대장을 결합한 뒤 수행한다.</p>`;
+  } else $('#lchart2').innerHTML = `<p class="small">이 지역의 에너지(전력) 값은 아직 EnergyPlus로 계산하지 않았다. 위 곡선은 맑은 날 가정의 일사와 작동 상태이며, 에너지 계산은 건축물대장을 결합하여 진행하고 있다.</p>`;
   liveCursor();
 }
 function liveCursor() { for (const id of ['lc1', 'lc2', 'lc3']) { const sv = document.getElementById(id); if (!sv) continue; const x = +sv.dataset.l + LIVE.t / 1440 * +sv.dataset.w; const ln = document.getElementById(id + '-cur'); ln.setAttribute('x1', x); ln.setAttribute('x2', x); } }

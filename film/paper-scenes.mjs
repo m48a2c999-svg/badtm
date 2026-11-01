@@ -72,8 +72,8 @@ export function createPaperRenderer(api,S){
    caption('09 / LIMITATIONS','상대적인 개선 효과도 추가 검증이 필요합니다.','보정 개선·수렴 재계산·입력 가정 민감도·구동 에너지와 비용 검토');
   }else{
    const P=camera([178,78,240],[0,0,0],[1500,500],1050);panel(P,.32+Math.sin(local*.2)*.12,{alpha:.36});
-   text('CONCLUSION / NEXT RESEARCH',66,183,18,gold,400,'left',mono);text('건물 조건에 맞는',64,290,64,white,500);text('적용 근거를 찾는 연구.',64,382,64,white,500);
-   ['제어 방식 · 작동 계절 · 주변 차폐를 함께 평가','보정·워밍업·민감도 검증을 보강','구동 에너지·비용과 서울 3권역 확장 검토'].forEach((v,k)=>{text('0'+(k+1),66,527+k*89,26,gold,400,'left',mono);text(v,145,527+k*89,31,white);});
+   text('CONCLUSION / EXTENSION',66,183,18,gold,400,'left',mono);text('건물 조건에 맞는',64,290,64,white,500);text('적용 근거를 찾는 연구.',64,382,64,white,500);
+   ['제어 방식 · 작동 계절 · 주변 차폐를 함께 평가','보정·워밍업·민감도 검증을 보강','구동 전력 추정과 서울 3권역 가구별 계산(진행 중)'].forEach((v,k)=>{text('0'+(k+1),66,527+k*89,26,gold,400,'left',mono);text(v,145,527+k*89,31,white);});
    caption('10 / RESEARCH CONTRIBUTION','이번 257동의 연구 결과를 후속 검증으로 이어갑니다.','도심·여의도·마포 등 확장 범위의 결과를 이미 계산한 것으로 해석하지 않습니다.');
   }
   const fade=1-ramp(local,0,.45);if(t>0&&fade>0){ctx.fillStyle='rgba(3,5,7,'+fade*.75+')';ctx.fillRect(0,110,1920,905);}frame(t);
