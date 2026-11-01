@@ -73,7 +73,7 @@ SCENES.push({
     <div class="sside"><p><b>기준 모델</b>: DOE 대형 사무소 기준 모델(Deru et al., 2011)의 외피·설비 사양을 모든 건물에 같은 방식으로 적용하고, 건물마다 윤곽·층수·높이·연면적을 바꾼다.</p>
     <ul class="slist"><li class="s2i">층수 <b>${nf}층</b>, 높이 <b>${ft(B.height_m)} m</b>, 연면적 <b>${ft(B.gross_area_m2)} m²</b></li>
     <li class="s2i">주변 건물 <b>${B.n_neighbors}동</b>을 차폐물로 넣음 → 가려진 정도 <b>${ft(B.obstruction_deg, 1)}°</b></li>
-    <li class="s2i">같은 건물을 <b>주변 차폐 제외</b>로도 한 번 더 계산(원고 5.5절)</li>
+    <li class="s2i">같은 건물을 <b>주변 차폐 제외</b>로도 한 번 더 계산(원고 4.5절)</li>
     <li class="s2i">개선 전(S1)·9개 대안 × 차폐 포함·제외 = 건물당 20회 계산</li></ul></div></div>`;
   },
   tick(p, el, D) {
@@ -97,7 +97,7 @@ SCENES.push({
     <div class="sside"><p>개선 전 모델의 월 전력을 건축HUB 건물에너지정보(2023–2024년 월별 전기)와 비교해 CV(RMSE)·NMBE를 구한다. 보정은 <b>기기 밀도 1.0, 냉동기 COP 배수 2.0</b> 두 값만 바꾸고 보정용 31동으로 정한 뒤, 시험용 215동에는 손대지 않고 적용한다. ${esc(D.B.name)}의 CV(RMSE)는 보정 전 ${ft(D.B.cv_rmse_uncal, 1)}% → 보정 후 ${ft(D.B.cv_rmse_cal, 1)}%로, 전역 배율이므로 이 건물은 보정 후 오차가 오히려 커졌다.</p>
     <table class="stbl"><tr><th></th><th>보정 전</th><th>보정 후</th></tr>
     ${['보정용 31동', '시험용 215동'].map(s => { const a = row(s); return `<tr><td>${s} CV(RMSE) 중앙값</td><td>${ft(a[0].cv_rmse_median, 1)}%</td><td><b>${ft(a[1].cv_rmse_median, 1)}%</b></td></tr>`; }).join('')}</table>
-    <p class="small">ASHRAE Guideline 14 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)을 만족한 건물은 보정 후 31동 중 ${row('보정용 31동')[1].n_pass_g14}동, 215동 중 ${row('시험용 215동')[1].n_pass_g14}동 — 결과를 <b>개선 전후의 상대 비교</b>로만 해석한다는 한계를 원고 5.9·7.3절에 밝힌다.</p></div></div>`;
+    <p class="small">ASHRAE Guideline 14 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)을 만족한 건물은 보정 후 31동 중 ${row('보정용 31동')[1].n_pass_g14}동, 215동 중 ${row('시험용 215동')[1].n_pass_g14}동 — 결과를 <b>개선 전후의 상대 비교</b>로만 해석한다는 한계를 원고 3.6·6.3절에 밝힌다.</p></div></div>`;
   },
   tick(p, el) {
     const bs = el.querySelectorAll('.bs'); bs.forEach((b, i) => { const h = +b.dataset.h * rng(p, 0.05 + i * 0.04, 0.3 + i * 0.04); b.setAttribute('height', h.toFixed(1)); b.setAttribute('y', (280 - h).toFixed(1)); });
@@ -195,7 +195,7 @@ SCENES.push({
     return `<div class="stg"><svg viewBox="0 0 ${W} ${Hh}" class="smap"><line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--ink)"/>${bars}
     <g id="s7m" style="opacity:0"><line x1="${(x0 + (x1 - x0) * mi / n).toFixed(1)}" y1="30" x2="${(x0 + (x1 - x0) * mi / n).toFixed(1)}" y2="${y0 + 100}" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="${(x0 + (x1 - x0) * mi / n + 8).toFixed(1)}" y="42" class="sl">중앙값 ${pct(m.e)} (${n}동 중 ${m.dec}동 감소)</text></g>
     <text x="${x0}" y="${Hh - 10}" class="sl">블라인드 고정 — 257동의 ΔEUI(%)를 작은 값부터 늘어놓은 것. 초록 = 감소, 주황 = 증가</text></svg>
-    <div class="sside"><p>건물별 변화율을 대안마다 ${n}동 모아 <b>중앙값</b>으로 보고하고(원고 표 4), 가려진 정도·평면 면적·층수 구간별로 다시 나눈다(표 6, 건물 특성별 페이지).</p>
+    <div class="sside"><p>건물별 변화율을 대안마다 ${n}동 모아 <b>중앙값</b>으로 보고하고(원고 표 5), 가려진 정도·평면 면적·층수 구간별로 다시 나눈다(표 6, 건물 특성별 페이지).</p>
     <table class="stbl s7t"><tr><th>대안</th><th>ΔEUI 중앙값</th><th>Δ피크 중앙값</th><th>감소 건물</th></tr>${ORDER257.map(t => `<tr class="s7r"><td>${esc(ALT[t].name)}</td><td class="mono ${D.med[t].e < 0 ? 'ok' : 'bad'}">${pct(D.med[t].e)}</td><td class="mono ${D.med[t].p < 0 ? 'ok' : 'bad'}">${pct(D.med[t].p)}</td><td class="mono">${D.med[t].dec}동</td></tr>`).join('')}</table>
     <p class="small">가려진 정도 구간 경계 ${ft(D.cb.obstruction_deg[0], 1)}°·${ft(D.cb.obstruction_deg[1], 1)}°, 평면 면적 ${ft(D.cb.footprint_model_m2[0], 1)}·${ft(D.cb.footprint_model_m2[1], 1)} m²(3분위), 층수 6~10·11~20·21층 이상. 전체 결과는 <a href="#/results">결과</a>·<a href="#/traits">건물 특성별</a> 페이지.</p></div></div>`;
   },
