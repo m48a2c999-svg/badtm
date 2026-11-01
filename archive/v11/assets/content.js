@@ -5,7 +5,7 @@ window.CONTENT = {
     titleParts: ['건물군 키네틱 파사드의', '데이터 기반 성능 평가', '프레임워크 연구'],
     subKo: '역삼역 일대 업무시설의 시뮬레이션·실측 비교와 생체모방 제어 원리의 검증',
     titleEn: 'A Data-Driven Performance Evaluation Framework for Kinetic Facades in Building Clusters: Simulation–Measurement Comparison of Office Buildings around Yeoksam Station, Seoul, and Tests of Biomimetic Control Principles',
-    author: '조승완', advisor: '박미애', school: '국민대학교 일반대학원 건축학과 박사학위논문(예비심사 단계)',
+    author: '조승완', advisor: '박미애', school: '국민대학교 일반대학원 건축학과 박사학위논문',
     version: '2026-10-24 검토용 원고 v11 기준(계산: EnergyPlus 23.2, 계산 간격 10분, 건축물대장 면적 보정 형상)',
     status: '논문 전문(PDF)은 저자 승인 후 공개합니다. 이 사이트는 요약·결과·자료·도구만 제공합니다. 제목은 2026-10-24에 바꾼 안이며 지도교수 확인 전입니다.'
   },

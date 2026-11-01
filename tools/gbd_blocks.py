@@ -1,4 +1,4 @@
-"""테헤란로제2지구 가구별 예비 수치: 257동 중 가구 안 140동의 EnergyPlus 결과(res_sb10 시간별)를 가구별로 합산. 출력 gbd_blocks.json/csv (값은 소수 4자리, 표시는 2자리)."""
+"""테헤란로제2지구 가구별 수치: 257동 중 가구 안 140동의 EnergyPlus 결과(res_sb10 시간별)를 가구별로 합산. 출력 gbd_blocks.json/csv (값은 소수 4자리, 표시는 2자리)."""
 import json,sqlite3,pickle,numpy as np,statistics as st,csv
 MB='/tmp/claude-0/-home-claude/d855b01c-4d65-5c73-a219-ae59fd128dc1/scratchpad/mb/res_sb10/'
 PLAN='11680UQ161PS202505140001'
