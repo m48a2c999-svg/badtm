@@ -1,0 +1,37 @@
+name: calc2
+on:
+  push:
+    branches: [calc2]
+concurrency:
+  group: calc2
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: setup
+        run: |
+          pip install -q numpy==2.5.3 pandas==3.0.5 || pip install -q numpy pandas
+          sudo mkdir -p /opt/ep && sudo chown $USER /opt/ep && cd /opt/ep
+          curl -sSL -o ep.tgz https://github.com/NREL/EnergyPlus/releases/download/v23.2.0/EnergyPlus-23.2.0-7636e6b3e9-Linux-Ubuntu22.04-x86_64.tar.gz
+          tar xzf ep.tgz && rm ep.tgz
+          /opt/ep/EnergyPlus-23.2.0-7636e6b3e9-Linux-Ubuntu22.04-x86_64/energyplus --version
+          nproc; python3 -c "import numpy,pandas;print(numpy.__version__,pandas.__version__)"
+      - name: run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PF: res2
+          SF: shard2
+        run: bash calc/run_shard.sh ${{ matrix.shard }}
