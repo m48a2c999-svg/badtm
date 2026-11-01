@@ -2,6 +2,9 @@ name: calc
 on:
   push:
     branches: [calc]
+concurrency:
+  group: calc
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:

@@ -29,8 +29,8 @@ push() {
 }
 ( while true; do sleep 2400; push; done ) & PP=$!
 python3 - $K <<'PY'
-import json,sys
-R='calc'; K=int(sys.argv[1]); J=json.load(open(f'{R}/shard_{K:02d}.json'))
+import json,sys,os
+R=os.environ['GITHUB_WORKSPACE']+'/calc'; K=int(sys.argv[1]); J=json.load(open(f'{R}/shard_{K:02d}.json'))
 g={}
 for kind,reg,j in J: g.setdefault((kind,reg),[]).append(j)
 for (kind,reg),L in g.items():
