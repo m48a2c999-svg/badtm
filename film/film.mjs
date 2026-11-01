@@ -1,17 +1,11 @@
-import {parseCSV,numeric,regionAround} from '../lab/data-engine.mjs';
+import {regionAround} from '../lab/data-engine.mjs';
 import {clamp,mix,smooth,ramp,add,sub,mul,camera,rayHit,slatCorners,chapterAt} from './geometry.mjs';
+import {loadPaperData,CHAPTERS,chapterIndex} from './paper-data.mjs';
+import {createPaperRenderer} from './paper-scenes.mjs';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const canvas=$('#film'),ctx=canvas.getContext('2d',{alpha:false}),W=1920,H=1080,DURATION=60;
+const canvas=$('#film'),ctx=canvas.getContext('2d',{alpha:false}),W=1920,H=1080,DURATION=180;
 const C={white:'#e4e8e6',grey:'#78868e',gold:'#e7b881',cyan:'#9ed4d0'};
 const S={t:0,playing:false,last:0,ready:false,chapter:-1,rec:null,recordURL:null,buildings:[],region:[],points:[],results:null};
-const titles=[
- ['DATA / 01','도시의 정보가 하나의 형상이 됩니다.','위치·윤곽·높이를 모아 계산의 출발점을 만듭니다. 입자는 데이터가 모이는 과정을 표현합니다.'],
- ['ENVELOPE / 02','형상에서, 빛을 다루는 외피로.','도시의 규모에서 외피의 디테일로 이동합니다. 확대된 차양은 작동 원리를 설명하는 별도 모형입니다.'],
- ['LIGHT / 03','먼저, 입면에 닿는 빛을 읽습니다.','수평 루버 일사량 기준 제어의 작동 조건은 5~9월, 입면 일사량 300 W/m² 초과입니다.'],
- ['MOTION / 04','회전축을 중심으로 같은 각도를 바꿉니다.','모든 날개가 함께 회전하며 직달광의 경로를 바꿉니다. 회전각과 속도는 설명을 위한 연출입니다.'],
- ['SPACE / 05','통과한 빛이 실내 공간을 바꿉니다.','차양을 통과하거나 차단되는 경로를 비교합니다. 이 장면의 광선과 밝기는 실제 조도·열량 계산값이 아닙니다.'],
- ['PERFORMANCE / 06','움직임의 가치는 결과로 판단합니다.','아크플레이스·차폐 포함·수평 루버 일사량 기준 제어의 저장된 연간 결과입니다. 에너지·피크·채광·열쾌적을 함께 읽습니다.']
-];
 const rand=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453123;return x-Math.floor(x);};
 const fmt=(v,d=2)=>Number(v).toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const signed=(v,d=2)=>(v>0?'+':'')+fmt(v,d);
@@ -28,12 +22,6 @@ function base(t){
  const g=ctx.createRadialGradient(W*.56,H*.48,20,W*.52,H*.48,W*.65);g.addColorStop(0,'#101b22');g.addColorStop(.6,'#070d11');g.addColorStop(1,'#020304');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
  // Low-contrast spatial dust. Its density carries no quantitative meaning.
  for(let i=0;i<210;i++){const x=(rand(i+10)*W+t*(rand(i+200)-.5)*2+W)%W,y=rand(i+400)*H;ctx.fillStyle=`rgba(184,201,210,${.04+rand(i+700)*.2})`;ctx.fillRect(x,y,rand(i+80)>.96?2:1,rand(i+80)>.96?2:1);}
-}
-function frameLabels(t){
- text('F /',64,66,25,C.gold,500,'left',mono);text('FACADE RETROFIT LAB',126,64,15,'#c0caca',400,'left',mono);
- text('LIGHT → ENVELOPE → PERFORMANCE',W-64,64,13,'#65767e',400,'right',mono);
- text('CONCEPT VISUALIZATION · 움직임·광선은 설명용',64,H-36,15,'#75848d');text('ARK / SEOUL',W-64,H-36,14,'#88979e',400,'right',mono);
- const st=chapterAt(t);text(String(st+1).padStart(2,'0')+' / 06',W-64,118,17,C.gold,400,'right',mono);
 }
 function caption(k,title,subline,opacity=1){
  ctx.globalAlpha=opacity;text(k,64,867,15,C.gold,400,'left',mono);text(title,64,928,45,C.white,500);text(subline,66,975,20,'#95a3ac');ctx.globalAlpha=1;
@@ -97,111 +85,34 @@ function beams(P,angle,t,{alpha=1,detail=false}={}){
   }
  }
 }
-function orbitLines(P,t,alpha=1){
- for(let k=0;k<3;k++){
-  let prev=null;
-  for(let i=0;i<=90;i++){const a=i/90*Math.PI*1.7+t*.1+k*.9,p=[Math.cos(a)*(90+k*10),Math.sin(a)*(47+k*4),Math.sin(a*.75+k)*(50+k*10)];if(prev)line3(P,prev,p,k===0?C.gold:'#b4c5cc',.75,alpha*.14);prev=p;}
- }
-}
-function facade(t){
- const p=ramp(t,10,15);
- if(t<15)city(9+(t-10)*.5,1-p,p*.7);
- const orbit=(t-10)*.025;
- const angle=t<30?.12:mix(.12,1.08,ramp(t,30.5,36.5));
- const eye=t<20?[mix(210,138,p),mix(95,70,p),mix(260,205,p)]:[138+Math.sin(orbit)*20,70+Math.cos(orbit)*6,205];
- const P=camera(eye,[0,0,0],[1060,465],1390);
- if(t<20){orbitLines(P,t,p*(1-ramp(t,17,20)));panel(P,.12,{alpha:p});
-  // Gather particles along blade edges before resolving into a solid surface.
-  for(let i=0;i<400;i++){const blade=i%15,x=-48+rand(i+80)*96,a=i*.2+t*.3,collect=ramp(t,10,16),target=[x,(blade-7)*6,0];const source=[Math.cos(a)*140,Math.sin(a*.6)*85,Math.sin(a)*120];point(P,target.map((v,j)=>mix(source[j],v,collect)),1.4,i%7?C.white:C.gold,p*(1-ramp(t,16,19))*.8);}
-  const mark=P([55,0,0]);text('ROTATION AXIS',mark[0]+25,mark[1]+5,15,'#b9c7c8',400,'left',mono);line2(mark,[mark[0]+18,mark[1]],C.gold,1,.8);
- }else{
-  const lightAlpha=ramp(t,20,23);beams(P,angle,t,{alpha:lightAlpha});panel(P,angle);
-  if(t<30){const sensor=P([50,0,6]);glow(sensor[0],sensor[1],28,C.gold,.35);text('INCIDENT LIGHT',80,250,16,C.gold,400,'left',mono);text('300',76,335,76,C.white,300,'left',mono);text('W/m²',258,333,24,'#9dacb4',400,'left',mono);text('5—9월 · 일사량 초과 시 작동',80,378,20,'#a5b2b7');text('연구의 제어 조건 / 현재 일사 계측값 아님',80,414,15,'#617680');
-  }else{
-   const pt=P([53,0,0]),rad=64;ctx.strokeStyle=C.gold;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(pt[0],pt[1],rad*.5,rad,.1,-Math.PI/2,-Math.PI/2+angle*1.5);ctx.stroke();
-   text('ONE AXIS. ONE RESPONSE.',80,244,16,C.gold,400,'left',mono);text('함께 회전하고',80,305,37,C.white,500);text('빛의 경로를 바꿉니다.',80,355,30,'#b2c0c6');text('동일 제어각 · 고정 회전축',80,405,18,'#788f9c');
-  }
- }
- const labels=t<20?['02 / ENVELOPE','형상에서, 움직이는 외피로.','도시의 규모에서 차양의 회전축과 깊이로 이동합니다.']:t<30?['03 / SENSING','빛을 읽습니다.','일사량과 작동 계절이 차양을 움직이는 조건이 됩니다.']:['04 / RESPONSE','각도가 바뀌면, 빛의 길도 달라집니다.','수평 루버의 작동 원리 · 회전각·속도는 설명용 연출'];
- caption(...labels);
-}
-function room(P,angle,t,opacity=1){
- const floor=[[-55,-48,3],[55,-48,3],[55,-48,-110],[-55,-48,-110]];
- poly3(P,floor,'#0d1b23','#35505b',.8,opacity);poly3(P,[[-55,-48,-110],[55,-48,-110],[55,49,-110],[-55,49,-110]],'#0a1318','#243b47',.6,opacity);
- for(let z=-10;z>=-110;z-=20)line3(P,[-55,-48,z],[55,-48,z],'#28414c',.6,opacity*.6);
- for(let x=-50;x<=50;x+=20)line3(P,[x,-48,0],[x,-48,-110],'#28414c',.6,opacity*.6);
- for(const b of beamGeometry(angle)){
-  if(b.hit)continue;
-  const distance=(-48-b.origin[1])/b.direction[1],pt=add(b.origin,mul(b.direction,distance));
-  if(pt[2]<-110||pt[2]>0||Math.abs(pt[0])>52)continue;
-  const patch=[[pt[0]-3,-47.8,pt[2]-4],[pt[0]+3,-47.8,pt[2]-4],[pt[0]+3,-47.8,pt[2]+4],[pt[0]-3,-47.8,pt[2]+4]];
-  poly3(P,patch,'#9ac7c34d',null,1,opacity);
- }
- beams(P,angle,t,{alpha:opacity*.5});panel(P,angle,{alpha:opacity,edges:false});
-}
-function space(t){
- const P1=camera([174,112,213],[0,-2,-29],[495,475],1080),P2=camera([174,112,213],[0,-2,-29],[1420,475],1080);
- const a=ramp(t,40,41.5);
- ctx.save();ctx.beginPath();ctx.rect(0,150,930,665);ctx.clip();room(P1,.12,t,a);ctx.restore();
- ctx.save();ctx.beginPath();ctx.rect(990,150,930,665);ctx.clip();room(P2,1.08,t,a);ctx.restore();
- line2([960,160],[960,767],'#283b45',1,.8);
- text('OPEN / 수평 대기',462,164,21,'#a8b9c0',400,'center',mono);text('RESPONSE / 각도 조절',1390,164,21,C.gold,400,'center',mono);
- text('직달광의 통과 경로',462,785,20,'#96b6bb',400,'center');text('차양에서 차단·반사되는 경로',1390,785,20,C.gold,400,'center');
- caption('05 / SPACE','빛의 변화가 공간에 닿습니다.','광선 경로 개념 비교 · 실제 조도분포·냉방부하를 나타낸 화면은 아닙니다.');
-}
-function performance(t){
- const p=ramp(t,50,52),r=S.results,base=S.baseline;
- for(let k=0;k<4;k++){
-  const y=390+k*85;
-  for(let i=0;i<150;i++){const x=240+i*10,offset=(1-p)*Math.sin(i*.04-t*.2+k)*80;ctx.globalAlpha=.15+rand(i+k*45)*.25;ctx.fillStyle=k%2?C.gold:C.cyan;ctx.fillRect(x,y+offset,1.3,1.3);}
- }
- ctx.globalAlpha=1;
- text('SAVED ENERGYPLUS RESULTS',64,187,16,C.gold,400,'left',mono);text('움직였다는 사실보다,',64,256,45,C.white,500);text('무엇이 달라졌는가.',64,319,45,C.white,500);
- text('아크플레이스 · 차폐 포함 · 수평 루버 일사량 기준 제어(LT_T300)',66,368,20,'#91a3ad');
- const specs=[['EUI','dEUI_pct','에너지원단위','%','kWh/m²·yr'],['peak_kW','dpeak_pct','피크전력','%','kW'],['UDI','dUDI_pp','유용조도 UDI','%p','%'],['PMV_ok','dPMV_pp','열쾌적 허용시간','%p','%']];
- specs.forEach(([key,delta,label,unit,valueUnit],i)=>{
-  const x=64+i*462,reveal=ramp(t,51+i*.7,52.3+i*.7);ctx.save();ctx.globalAlpha=reveal;ctx.fillStyle='#071017ed';ctx.fillRect(x-10,445,432,225);line2([x,447],[x+405,447],'#4d6874',1,reveal);ctx.globalAlpha=reveal;
-  text(label,x,489,21,'#9bafb9');text(signed(r[delta]),x,571,64,i<2?(r[delta]<0?C.cyan:C.gold):(r[delta]>0?C.cyan:C.gold),300,'left',mono);text(unit,x+315,569,24,'#849ca8',400,'left',mono);
-  text(fmt(base[key])+' → '+fmt(r[key]),x,619,20,'#cfdbdf',400,'left',mono);text(valueUnit,x,652,16,'#718996',400,'left',mono);ctx.restore();
- });
- caption('06 / PERFORMANCE','에너지와 공간의 질을 함께 읽습니다.','저장된 연간 시뮬레이션 결과 · 실측값 아님 · 효과 크기와 한계는 추가 검증');
- if(t>57){text('EXPLORE THE DATA  ↗',W-66,750,16,C.gold,400,'right',mono);}
-}
-function draw(){
- if(!S.ready){base(0);text('LOADING RESEARCH DATA',W/2,H/2,20,C.grey,400,'center',mono);return;}
- const t=S.t;base(t);
- if(t<10){city(t);caption('01 / DATA','도시의 정보가 외피가 되기까지.','257동의 위치·윤곽·높이 → 모델의 형상과 입력 조건');
-  if(t<5){const opacity=1-ramp(t,2.5,5);ctx.globalAlpha=opacity;text('LIGHT IN',80,256,55,C.white,300,'left',mono);text('MOTION',80,325,55,C.white,300,'left',mono);ctx.globalAlpha=1;}
- }else if(t<40)facade(t);else if(t<50)space(t);else performance(t);
- // Brief dissolves connect changes of scale, while the objects keep smooth motion within shots.
- for(const cut of [20,40,50]){const opacity=1-Math.min(1,Math.abs(t-cut)/.45);if(opacity>0){ctx.fillStyle=`rgba(3,5,7,${opacity*.82})`;ctx.fillRect(0,0,W,H);}}
- frameLabels(t);
-}
+const paperRenderer=createPaperRenderer({ctx,text,line2,base,city,panel,beams,caption},S);
+const clock=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');
+$('#chapters').innerHTML=CHAPTERS.map((c,i)=>'<button data-time="'+c.start+'"><span>'+String(i+1).padStart(2,'0')+' / '+clock(c.start)+'</span>'+c.label+'</button>').join('');
+$('#transcript').innerHTML=CHAPTERS.map((c,i)=>'<article><h3>'+String(i+1).padStart(2,'0')+' · '+c.title+'</h3><p>'+c.copy+'</p><small>'+c.source+'</small></article>').join('');
+function draw(){if(!S.ready){base(0);text('LOADING RESEARCH DATA',W/2,H/2,20,C.grey,400,'center',mono);return;}paperRenderer();}
 function update(){
- $('#seek').value=S.t;$('#clock').textContent='00:'+String(Math.floor(Math.min(59,S.t))).padStart(2,'0')+' / 01:00';if(S.t>=60)$('#clock').textContent='01:00 / 01:00';
- const i=chapterAt(S.t);if(i!==S.chapter){S.chapter=i;$('#chapter-kicker').textContent=titles[i][0];$('#chapter-title').textContent=titles[i][1];$('#chapter-copy').textContent=titles[i][2];$$('[data-time]').forEach((el,k)=>el.setAttribute('aria-current',k===i?'true':'false'));}
+ $('#seek').value=S.t;$('#clock').textContent=clock(S.t)+' / '+clock(DURATION);
+ const i=chapterIndex(S.t);if(i!==S.chapter){S.chapter=i;const c=CHAPTERS[i];$('#chapter-kicker').textContent=String(i+1).padStart(2,'0')+' / '+c.key;$('#chapter-title').textContent=c.title;$('#chapter-copy').textContent=c.copy;$('#chapter-source').textContent=c.source;$$('[data-time]').forEach((el,k)=>el.setAttribute('aria-current',k===i?'true':'false'));}
  $('#play').textContent=S.playing?'Ⅱ':'▶';$('#play').setAttribute('aria-label',S.playing?'영상 일시정지':'영상 재생');
 }
 function stopRecording(){if(S.rec?.state==='recording')S.rec.stop();}
-function play(fromStart=false){if(!S.ready)return;if(fromStart||S.t>=60)S.t=0;S.playing=true;S.last=0;$('#start').hidden=true;update();}
+function play(fromStart=false){if(!S.ready)return;if(fromStart||S.t>=DURATION)S.t=0;S.playing=true;S.last=0;$('#start').hidden=true;update();}
 function pause(){S.playing=false;S.last=0;stopRecording();update();draw();}
-function seek(t){pause();S.t=clamp(t,0,60);$('#start').hidden=true;update();draw();}
+function seek(t){pause();S.t=clamp(t,0,DURATION);$('#start').hidden=true;update();draw();}
 function loop(ts){
- if(S.playing&&S.ready){if(S.last)S.t=Math.min(60,S.t+(ts-S.last)/1000);S.last=ts;update();draw();if(S.t>=60){pause();}}
+ if(S.playing&&S.ready){if(S.last)S.t=Math.min(DURATION,S.t+(ts-S.last)/1000);S.last=ts;update();draw();if(S.t>=DURATION){pause();}}
  requestAnimationFrame(loop);
 }
 async function init(){
  try{
-  const [bb,rr]=await Promise.all(['buildings.csv','results_257_cond.csv'].map(async name=>{const r=await fetch('../data/db/csv/'+name);if(!r.ok)throw Error(name+' '+r.status);return parseCSV(await r.text()).map(numeric);}));
+  const data=await loadPaperData();S.paper=data;const bb=data.buildings;
   S.buildings=bb;S.ark=bb.find(b=>b.sim_name==='ARK');S.region=regionAround(bb,'ARK').filter(b=>Math.hypot(b.x,b.y)<340);
-  S.results=rr.find(r=>r.sim_name==='ARK'&&r.cond==='차폐 포함'&&r.tag==='LT_T300');S.baseline=rr.find(r=>r.sim_name==='ARK'&&r.cond==='차폐 포함'&&r.tag==='S1');
-  if(bb.length!==257||!S.results||!S.baseline)throw Error('연구 자료를 확인할 수 없습니다.');
   for(let i=0;i<2100;i++){const b=S.region[i%S.region.length],ring=b.ring,j=Math.floor(rand(i+22)*ring.length),a=ring[j],q=ring[(j+1)%ring.length],f=rand(i+66),h=i%3===0?b.height_m:rand(i+99)*b.height_m;S.points.push([mix(a[0],q[0],f),h,mix(a[1],q[1],f)]);}
-  S.ready=true;$('#data-status').textContent='연구 자료 연결 완료 · 257동 / ARK / 차폐 포함 / LT_T300';
+  S.ready=true;$('#data-status').textContent='논문 데이터 연결 완료 · 257동 · 9개 대안 · 차폐 포함·제외 · 검증 자료';
   for(const id of ['start','play','poster'])$('#'+id).disabled=false;
   $('#record').disabled=!(canvas.captureStream&&window.MediaRecorder);if($('#record').disabled)$('#record').textContent='이 브라우저는 영상 저장 미지원';
   // The cover uses the same scene as the film, at its most legible formation state.
-  S.t=17;draw();S.t=0;update();
+  S.t=0;draw();update();
   if(new URLSearchParams(location.search).get('autoplay')==='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)play(true);
  }catch(e){$('#data-status').textContent='자료를 불러오지 못했습니다. 새로고침해 주세요. '+e.message;console.error(e);}
 }
@@ -209,18 +120,18 @@ $('#start').addEventListener('click',()=>play(true));$('#play').addEventListener
 $('#seek').addEventListener('input',e=>seek(Number(e.target.value)));$$('[data-time]').forEach(el=>el.addEventListener('click',()=>seek(Number(el.dataset.time)+.6)));
 $('#full').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('#player').requestFullscreen();}catch{$('#data-status').textContent='전체 화면을 열 수 없습니다. 브라우저 확대 기능을 이용해 주세요.';}});
 canvas.tabIndex=0;canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();S.playing?pause():play();}if(e.code==='ArrowRight'){e.preventDefault();seek(S.t+5);}if(e.code==='ArrowLeft'){e.preventDefault();seek(S.t-5);}});
-$('#poster').addEventListener('click',()=>canvas.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='Facade_Concept_'+String(Math.floor(S.t)).padStart(2,'0')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),15000);}));
+$('#poster').addEventListener('click',()=>canvas.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='Facade_Thesis_'+String(Math.floor(S.t)).padStart(2,'0')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),15000);}));
 $('#record').addEventListener('click',()=>{
  if(S.rec?.state==='recording'){pause();return;}
  try{
   const mime=['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1.42001E','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));if(!mime)throw Error('지원되는 영상 형식이 없습니다.');
   const stream=canvas.captureStream(30),chunks=[],rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000});S.rec=rec;
-  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());S.rec=null;$('#record').textContent='60초 영상 만들기';if(!chunks.length){$('#data-status').textContent='영상이 생성되지 않았습니다. 다시 시도해 주세요.';return;}if(S.recordURL)URL.revokeObjectURL(S.recordURL);S.recordURL=URL.createObjectURL(new Blob(chunks,{type:mime}));const link=$('#video-download');link.href=S.recordURL;link.download='Facade_Concept_Film'+(mime.includes('mp4')?'.mp4':'.webm');link.hidden=false;$('#video-preview').src=S.recordURL;$('#video-preview').hidden=false;$('#data-status').textContent='녹화가 완료되었습니다. 미리보기를 확인한 뒤 완성 영상 다운로드를 눌러 저장하세요.';};
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());S.rec=null;$('#record').textContent='3분 논문 영상 만들기';if(!chunks.length){$('#data-status').textContent='영상이 생성되지 않았습니다. 다시 시도해 주세요.';return;}if(S.recordURL)URL.revokeObjectURL(S.recordURL);S.recordURL=URL.createObjectURL(new Blob(chunks,{type:mime}));const link=$('#video-download');link.href=S.recordURL;link.download='Facade_Thesis_Film'+(mime.includes('mp4')?'.mp4':'.webm');link.hidden=false;$('#video-preview').src=S.recordURL;$('#video-preview').hidden=false;$('#data-status').textContent='녹화가 완료되었습니다. 미리보기를 확인한 뒤 완성 영상 다운로드를 눌러 저장하세요.';};
   rec.onerror=()=>{pause();$('#data-status').textContent='녹화 오류가 발생했습니다. 현재 장면 저장이나 웹 재생을 이용해 주세요.';};
-  play(true);rec.start(1000);$('#record').textContent='녹화 종료 · 미리보기';$('#data-status').textContent='60초 영상을 녹화하고 있습니다. 이 탭을 열어 두세요.';
+  play(true);rec.start(1000);$('#record').textContent='녹화 종료 · 미리보기';$('#data-status').textContent='3분 논문 영상을 녹화하고 있습니다. 이 탭을 열어 두세요.';
  }catch(e){$('#data-status').textContent='영상 저장을 시작하지 못했습니다: '+e.message;}
 });
-$('#embed').addEventListener('click',()=>{const url=new URL('./',location.href);url.search='embed=1';$('#embed-code').value='<div style="position:relative;padding-top:calc(56.25% + 128px)"><iframe src="'+url.href+'" title="빛에 응답하는 외피 개념 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="fullscreen" loading="lazy"></iframe></div>';$('#embed-dialog').showModal();});
+$('#embed').addEventListener('click',()=>{const url=new URL('./',location.href);url.search='embed=1';$('#embed-code').value='<div style="position:relative;padding-top:calc(56.25% + 200px)"><iframe src="'+url.href+'" title="외피 성능 개선 연구 3분 논문 영상" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="fullscreen" loading="lazy"></iframe></div>';$('#embed-dialog').showModal();});
 $('#copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#embed-code').value);$('#copy').textContent='복사 완료';}catch{$('#embed-code').select();$('#copy').textContent='선택한 코드를 복사하세요';}});$('#close-dialog').addEventListener('click',()=>$('#embed-dialog').close());
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.playing){pause();$('#data-status').textContent='화면을 벗어나 재생을 멈췄습니다. 재생 버튼으로 이어 볼 수 있습니다.';}});
 window.addEventListener('pagehide',()=>{stopRecording();if(S.recordURL)URL.revokeObjectURL(S.recordURL);});
