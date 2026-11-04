@@ -15,8 +15,8 @@ const LRULE = {   // 9개 대안 — 원고 표 2와 같은 작동 규칙(일사
   S3: { name: '블라인드 컷오프 각도 제어', kind: 'track', ep: 'S3', txt: '입면에 직달일사가 들면 직달일사를 막는 각도(컷오프 각도)로 슬랫을 조절, 아니면 수평' },
   LH_C: { name: '수평 루버 컷오프 각도 제어', kind: 'track', ep: 'LH_C', txt: '같은 방식의 컷오프 각도 제어(수평 루버)' },
   VF_C: { name: '수직 루버 컷오프 각도 제어', kind: 'track', ep: 'VF_C', txt: '같은 방식의 컷오프 각도 제어(동·서 수직 루버). 간이 계산의 작동 비율은 모든 입면의 직달일사 비율로 표시' },
-  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방기(5~9월)에는 창면 입사 일사량 300 W/m² 초과 시 내리고 그 밖에는 걷어 올림. 난방기(10~4월)에는 걷어 올림' },
-  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방기(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖에는 수평. 난방기(10~4월)에는 수평' },
+  BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방 기간(5~9월)에는 창면 입사 일사량 300 W/m² 초과 시 내리고 그 밖에는 걷어 올림. 난방 기간(10~4월)에는 걷어 올림' },
+  LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방 기간(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖에는 수평. 난방 기간(10~4월)에는 수평' },
   PK: { name: '피크 시간대 차양 폐쇄', kind: 'peak', ep: 'PK', txt: '연중 평일 13~18시 슬랫 폐쇄, 그 밖에는 수평(요일은 EnergyPlus 계산과 같은 2023년 달력 기준)' },
 };
 // ASHRAE 맑은 날 모델 월별 계수(A: W/m², B: 무차원, C: 확산 계수)
@@ -131,9 +131,9 @@ function liveSlot(R, ymd, minute) {
   });
   return { sp, cs, v: out };
 }
-// 원고 표 2: 일사량 기준 제어는 냉방기(5~9월), 나머지는 연중 작동(2026-10-27). 피크 시간대 차양 폐쇄는 평일 13~18시.
+// 원고 표 4-3: 일사량 기준 제어는 냉방 기간(5~9월), 나머지는 연중 작동(2026-10-27). 피크 시간대 차양 폐쇄는 평일 13~18시.
 // 요일은 EnergyPlus 계산 연도(2023년 달력, 1월 1일 일요일) 기준으로 판정하여 EnergyPlus 시간별 전력과 맞춘다.
-const isCooling = () => { const [, M] = LIVE.ymd || ymdOf(LIVE.date); return M >= 5 && M <= 9; };   // 일사량 기준 제어는 냉방기(5~9월)에만 작동(2026-10-27)
+const isCooling = () => { const [, M] = LIVE.ymd || ymdOf(LIVE.date); return M >= 5 && M <= 9; };   // 일사량 기준 제어는 냉방 기간(5~9월)에만 작동(2026-10-27)
 const isPeakTime = (minute = LIVE.t) => { const [, M, D] = LIVE.ymd || ymdOf(LIVE.date); const wd = new Date(Date.UTC(2023, M - 1, D)).getUTCDay(); const h = minute / 60; return wd >= 1 && wd <= 5 && h >= 13 && h < 18; };
 function moveFrac(rule, v, o, minute = LIVE.t) { const k = LRULE[rule].kind; return k === 'thresh' ? (isCooling() ? v[o + 2] : 0) : k === 'track' ? v[o + 1] : k === 'peak' ? (isPeakTime(minute) ? 1 : 0) : 0; }
 
@@ -373,7 +373,7 @@ function liveCharts() {
   const ser = [{ label: '입면 평균 일사(W/m²)', c: COL.ink, v: se.map(x => x.I) }];
   const ser2 = [{ label: '직달일사가 드는 입면(%)', c: COL.mut, v: se.map(x => x.lit), dash: '4 3' }];
   if (kind !== 'fixed') ser2.push({ label: '작동 중인 입면(%)', c: COL.sun, v: se.map(x => x.mv) });
-  let h = chartSvg('lc1', `${LIVE.src.name} · ${LIVE.date} · 맑은 날 간이 계산`, ser, 'W/m²') + chartSvg('lc2', `${LRULE[LIVE.rule].name}의 작동 — 하루 변화${LRULE[LIVE.rule].kind === 'thresh' && !isCooling() ? '(난방기: 작동 안 함)' : ''}`, ser2, '%', { hi: 100 });
+  let h = chartSvg('lc1', `${LIVE.src.name} · ${LIVE.date} · 맑은 날 간이 계산`, ser, 'W/m²') + chartSvg('lc2', `${LRULE[LIVE.rule].name}의 작동 — 하루 변화${LRULE[LIVE.rule].kind === 'thresh' && !isCooling() ? '(난방 기간: 작동 안 함)' : ''}`, ser2, '%', { hi: 100 });
   $('#lchart').innerHTML = h;
   // EnergyPlus 곡선(역삼 257동)
   if (LIVE.src.ep) {
@@ -398,7 +398,7 @@ function liveBInfo() {
   const b = LIVE.sel; if (!b) { $('#lbinfo').innerHTML = ''; return; } const R = LIVE.R, i = R.tg.indexOf(b), S = liveCur(); if (!S) return;
   const sp = S.sp, cs = S.cs, ux = Math.sin(sp.az * D2R), uy = Math.cos(sp.az * D2R), tanA = Math.tan(Math.max(sp.alt, 0.5) * D2R), ca = Math.cos(sp.alt * D2R);
   const dirName = a => ['북', '북동', '동', '남동', '남', '남서', '서', '북서'][Math.round(a / 45) % 8];
-  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (isCooling() && I > 300 ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평') + (isCooling() ? '' : '(난방기)')) : k === 'peak' ? (isPeakTime() ? '폐쇄' : '수평') : (Ib > 0 ? '컷오프 각도' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직달일사', I, st }; });
+  const rows = b.F.filter(f => f.len >= 5).map(f => { const cosT = ca * Math.cos((sp.az - f.naz) * D2R); const face = sp.alt > 0 && cosT > 0; const sh = face && shadedAt(R, b, f.mx, f.my, b.h / 2, ux, uy, tanA); const Ib = face && !sh ? cs.dn * cosT : 0; const I = Ib + cs.dh * 0.5 + 0.2 * (cs.dn * Math.sin(Math.max(sp.alt, 0) * D2R) + cs.dh) * 0.5; const k = LRULE[LIVE.rule].kind; const st = k === 'fixed' ? '고정(창 앞)' : k === 'thresh' ? (isCooling() && I > 300 ? (LIVE.rule === 'BT_T300' ? '내림' : '컷오프') : (LIVE.rule === 'BT_T300' ? '걷어 올림' : '수평') + (isCooling() ? '' : '(난방 기간)')) : k === 'peak' ? (isPeakTime() ? '폐쇄' : '수평') : (Ib > 0 ? '컷오프 각도' : '수평'); return { o: `${dirName(f.naz)}(${f.naz.toFixed(0)}°)`, len: f.len, s: !face ? '해 반대편' : sh ? '주변 건물에 가려짐' : '직달일사', I, st }; });
   let ep = '';
   if (b.sim) { const r = q('SELECT tag, dEUI_pct, dpeak_pct FROM results_257 WHERE sim_name=?', [b.sim]); const m = Object.fromEntries(r.map(x => [x.tag, x])); const t = LIVE.rule; ep = m[t] ? `<p class="small">EnergyPlus 결과(이 건물, ${esc(LRULE[t].name)}, 보정 기준 대비): EUI ${pct(m[t].dEUI_pct)}, 건물 피크전력 ${pct(m[t].dpeak_pct)}. <a href="#/site">대상지·건물</a>에서 자세히.</p>` : ''; }
   $('#lbinfo').innerHTML = `<div class="card"><h3>${esc(b.name || b.id)} <span class="small">${b.block ? '가구 ' + esc(b.block) : ''} · 높이 ${num(b.h, 1)} m(${esc(b.hsrc)})</span></h3>${table([{ h: '입면 방향', k: 'o' }, { h: '길이(m)', k: 'len', num: 1, f: v => num(v, 0) }, { h: '직달일사', k: 's' }, { h: '일사(W/m²)', k: 'I', num: 1, f: v => num(v) }, { h: '작동', k: 'st' }], rows, { nw: 1, maxh: 260 })}<p class="small">길이 5 m 이상 입면만 표시. 입면 중앙(높이 ${num(b.h / 2, 1)} m) 한 점에서 판정한 맑은 날 간이 계산.</p>${ep}</div>`;

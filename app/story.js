@@ -69,7 +69,7 @@ SCENES.push({
     const nb = [[40, 190, 60, 100], [105, 230, 35, 60], [290, 170, 55, 120], [355, 240, 45, 50], [410, 205, 70, 85]].map(([x, y, w, h]) => `<rect class="nb" x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('');
     return `<div class="stg"><svg viewBox="0 0 560 330" class="smap"><line x1="0" y1="290" x2="560" y2="290" stroke="var(--line)"/>${nb}<g id="s2b">${fl}</g>
     <g id="s2obs" style="opacity:0"><path d="M210 290 L 470 ${(290 - 260 * Math.tan(B.obstruction_deg * Math.PI / 180)).toFixed(1)}" stroke="var(--sun)" stroke-dasharray="4 4" stroke-width="1.5"/><text x="300" y="283" class="sl">가려진 정도 ${ft(B.obstruction_deg, 1)}°(주변 ${B.n_neighbors}동)</text></g>
-    <g id="s2w" style="opacity:0"><text x="20" y="30" class="sl">창면적비 40% · 창 U 3.24 W/m²·K · SHGC 0.39 · 가시광 투과율 0.305</text><text x="20" y="48" class="sl">기기 밀도 1.0 · 냉동기 COP 배수 2.0 (보정용 31동으로 결정)</text></g></svg>
+    <g id="s2w" style="opacity:0"><text x="20" y="30" class="sl">창면적비 40% · 창 U 3.24 W/(m²·K) · SHGC 0.39 · 가시광 투과율 0.305</text><text x="20" y="48" class="sl">기기 전력밀도 1.0 · 냉동기 COP 배수 2.0 (보정용 31동으로 결정)</text></g></svg>
     <div class="sside"><p><b>기준 모델</b>: DOE 대형 사무소 기준 모델(Deru et al., 2011)의 외피·설비 사양을 모든 건물에 같은 방식으로 적용하고, 건물마다 윤곽·층수·높이·연면적을 바꾼다.</p>
     <ul class="slist"><li class="s2i">층수 <b>${nf}층</b>, 높이 <b>${ft(B.height_m)} m</b>, 연면적 <b>${ft(B.gross_area_m2)} m²</b></li>
     <li class="s2i">주변 건물 <b>${B.n_neighbors}동</b>을 차폐물로 넣음 → 가려진 정도 <b>${ft(B.obstruction_deg, 1)}°</b></li>
@@ -94,7 +94,7 @@ SCENES.push({
     return `<div class="stg"><svg viewBox="0 0 ${W} ${Hh}" class="smap"><line x1="${x0 - 8}" y1="${y0}" x2="${W - 20}" y2="${y0}" stroke="var(--line)"/>${[0.25, 0.5, 0.75].map(k => `<text x="${x0 - 12}" y="${(y0 - k * 220 + 4).toFixed(1)}" class="sl" text-anchor="end">${ft(mx * k, 1)}</text>`).join("")}<text x="${x0 - 12}" y="${y0 - 220 + 4}" class="sl" text-anchor="end">kWh/m²</text>${bars}
     <g transform="translate(60,24)"><rect class="bm" width="12" height="12"/><text x="18" y="11" class="sl">건축HUB 건물에너지정보 월별 전기(2023–2024)</text><rect class="bsl" x="300" width="12" height="12"/><text x="318" y="11" class="sl">EnergyPlus 계산(보정 후)</text></g>
     <text x="60" y="52" class="sl">${esc(D.B.name)} — 보정 후 CV(RMSE) ${ft(D.B.cv_rmse_cal, 1)}%, NMBE ${ft(D.B.nmbe_cal, 1)}%</text></svg>
-    <div class="sside"><p>개선 전 모델의 월 전력을 건축HUB 건물에너지정보(2023–2024년 월별 전기)와 비교해 CV(RMSE)·NMBE를 구한다. 보정은 <b>기기 밀도 1.0, 냉동기 COP 배수 2.0</b> 두 값만 바꾸고 보정용 31동으로 정한 뒤, 시험용 215동에는 손대지 않고 적용한다. ${esc(D.B.name)}의 CV(RMSE)는 보정 전 ${ft(D.B.cv_rmse_uncal, 1)}% → 보정 후 ${ft(D.B.cv_rmse_cal, 1)}%로, 전역 배율이므로 이 건물은 보정 후 오차가 오히려 커졌다.</p>
+    <div class="sside"><p>개선 전 모델의 월 전력을 건축HUB 건물에너지정보(2023–2024년 월별 전기)와 비교해 CV(RMSE)·NMBE를 구한다. 보정은 <b>기기 전력밀도 1.0, 냉동기 COP 배수 2.0</b> 두 값만 바꾸고 보정용 31동으로 정한 뒤, 시험용 215동에는 손대지 않고 적용한다. ${esc(D.B.name)}의 CV(RMSE)는 보정 전 ${ft(D.B.cv_rmse_uncal, 1)}% → 보정 후 ${ft(D.B.cv_rmse_cal, 1)}%로, 전역 배율이므로 이 건물은 보정 후 오차가 오히려 커졌다.</p>
     <table class="stbl"><tr><th></th><th>보정 전</th><th>보정 후</th></tr>
     ${['보정용 31동', '시험용 215동'].map(s => { const a = row(s); return `<tr><td>${s} CV(RMSE) 중앙값</td><td>${ft(a[0].cv_rmse_median, 1)}%</td><td><b>${ft(a[1].cv_rmse_median, 1)}%</b></td></tr>`; }).join('')}</table>
     <p class="small">ASHRAE Guideline 14 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)을 만족한 건물은 보정 후 31동 중 ${row('보정용 31동')[1].n_pass_g14}동, 215동 중 ${row('시험용 215동')[1].n_pass_g14}동 — 결과를 <b>개선 전후의 상대 비교</b>로만 해석한다는 한계를 원고 3.6·6.3절에 밝힌다.</p></div></div>`;

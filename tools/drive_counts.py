@@ -8,7 +8,8 @@ import os, json, pickle, math, numpy as np, pandas as pd, pvlib
 S = '/tmp/claude-0/-home-claude/d855b01c-4d65-5c73-a219-ae59fd128dc1/scratchpad'
 RES = S + '/mb/res_sb10'; OUT = S + '/recalc/out'
 EPW = S + '/data/tmyx2011_2025/KOR_SO_Seoul.WS.471080_TMYx.2011-2025.epw'
-WWR = 0.40; LAT, LON, TZ = 37.5665, 126.9780, 9   # 기상 관측소 위치 근사(태양 위치용)
+WWR = 0.40; FH0 = 3.9624   # 모델 대표 층의 층고(DOE 기준 모델) — 창 면적을 EnergyPlus 모델과 같게 맞춤(2026-11-05)
+LAT, LON, TZ = 37.5665, 126.9780, 9   # 기상 관측소 위치 근사(태양 위치용)
 FAC = ['S', 'E', 'N', 'W']; AZ = {'S': 180, 'E': 90, 'N': 0, 'W': 270}
 THR = 300.0
 
@@ -66,7 +67,7 @@ for n in names:
             wi_c, wi_n = a['win_inc'].get(key), b['win_inc'].get(key)
             r = min(1.0, wi_c / wi_n) if wi_c is not None and wi_n else 1.0
             bs = beam * r; total = bs + diff
-            area = L * nfl * fh * WWR
+            area = L * nfl * FH0 * WWR
             for tag in ['S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PK']:
                 if tag == 'VF_C' and f not in ('E', 'W'): continue
                 tilt, lift, trans = count(bs, total, tag)

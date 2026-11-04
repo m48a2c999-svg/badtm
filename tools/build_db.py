@@ -26,12 +26,12 @@ meta = [
     ('author', '조승완 · 국민대학교 일반대학원 건축학과 박사과정 · 지도교수 박미애'),
     ('engine', 'EnergyPlus 23.2, 서울 TMYx 2011–2025, 계산 간격 10분, 연간 8,760시간'),
     ('prototype', 'DOE 대형 사무소 기준 모델(Deru et al., 2011): 창면적비 40%, 창 U 3.24 W/m²·K, SHGC 0.39, 가시광 투과율 0.305'),
-    ('calibration', '기기 밀도 1.0, 냉동기 COP 배수 2.0; 보정용 31동으로 결정'),
-    ('conditions', '9개 대안 모두 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월). 작동 규칙은 일사량 기준 제어 2종만 냉방기(5~9월)에 적용(난방기에는 걷어 올림·수평), 나머지는 연중. 설계일에는 장치 미작동. 주변 차폐 포함·제외 두 경우를 계산.'),
-    ('status', '257동 결과(9개 대안 연중 계산, 일사량 기준 제어는 냉방기 작동, 주변 차폐 포함·제외 완료).'),
+    ('calibration', '기기 전력밀도 1.0, 냉동기 COP 배수 2.0; 보정용 31동으로 결정'),
+    ('conditions', '9개 대안 모두 같은 257동·같은 보정 모델·같은 기상(TMYx)·같은 계산 간격(10분)·같은 계산 기간(연중 1~12월). 작동 규칙은 일사량 기준 제어 2종만 냉방 기간(5~9월)에 적용(난방 기간에는 걷어 올림·수평), 나머지는 연중. 설계일에는 장치 미작동. 주변 차폐 포함·제외 두 경우를 계산.'),
+    ('status', '257동 결과(9개 대안 연중 계산, 일사량 기준 제어는 냉방 기간 작동, 주변 차폐 포함·제외 완료).'),
     ('basis', '국가승인통계 「상업용부동산 임대동향조사」(국토교통부 작성·한국부동산원 조사, 승인번호 제408001호)의 서울 오피스 권역(도심, 강남, 여의도·마포) — 2040 서울도시기본계획 3도심(서울도심, 여의도·영등포, 강남)에 대응(통계 권역은 마포 포함). 오피스 조사 대상(업무시설, 6층 이상)과 같은 건물 기준. 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 지구단위계획구역으로 정함.'),
     ('scope', '키네틱 파사드 = 외피 요소가 물리적으로 움직이는 가동형 외부 차양(블라인드·루버). 고정형·가동형 구분은 「건축물의 에너지절약설계기준」 제5조를 따름.'),
-    ('originality', '밀집지역이라는 조건(주변 건물에 가려진 정도)이 성능 개선 효과의 크기와 방향을 바꾼다는 것을 실제 업무 용도 건물 257동과 9개 대안(같은 계산 기간)으로 정량화하고, 같은 건물의 주변 차폐 포함·제외 비교로 그 영향을 분리하여 건물 조건별 적용 조건을 제시. 블록 합산 피크전력은 동시율 0.993~1.000으로 건물별 합과 거의 같아 보조 지표.'),
+    ('originality', '밀집지역이라는 조건(주변 건물에 가려진 정도)이 성능 개선 효과의 크기와 방향을 바꾼다는 것을 실제 업무 용도 건물 257동과 9개 대안(같은 계산 기간)으로 정량화하고, 같은 건물의 주변 차폐 포함·제외 비교로 주변 건물의 단파 차폐가 대안 효과에 주는 영향을 비교하여 257동 중앙값 기준의 건물 조건별 검토 우선순위를 제시. 블록 합산 피크전력은 동시율 0.993~1.000으로 건물별 합과 거의 같아 보조 지표.'),
     ('built', pd.Timestamp.now(tz='Asia/Seoul').strftime('%Y-%m-%d %H:%M KST')),
 ]
 con.execute('CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT)')
@@ -93,8 +93,8 @@ ALT = [
     ('S3', '키네틱 파사드', '블라인드 컷오프 각도 제어', '외부 블라인드(80 mm)', '직달일사를 막는 각도(컷오프 각도)로 슬랫을 계산 간격(10분)마다 조절', '연중', '창 앞(각도 조절)', '자연채광 감소', '', 1, 1, 'S3@c'),
     ('LH_C', '키네틱 파사드', '수평 루버 컷오프 각도 제어', '수평 루버(300 mm)', '같은 방식의 컷오프 각도 제어', '연중', '창 앞(각도 조절)', '자연채광 감소', '', 1, 1, 'LH_C@c'),
     ('VF_C', '키네틱 파사드', '수직 루버 컷오프 각도 제어', '수직 루버(300 mm), 동·서', '같은 방식의 컷오프 각도 제어', '연중', '창 앞(각도 조절)', '자연채광 감소', '', 1, 1, 'VF_C@c'),
-    ('BT_T300', '키네틱 파사드', '블라인드 일사량 기준 제어', '외부 블라인드(80 mm)', '냉방기(5~9월): 창면 입사 일사량 300 W/m² 초과 시 내림(컷오프 각도)', '냉방기(5~9월), 난방기는 걷어 올림', '걷어 올림', '자연채광 유지', None, 1, 1, 'BT_T300c'),
-    ('LT_T300', '키네틱 파사드', '수평 루버 일사량 기준 제어', '수평 루버(300 mm)', '냉방기(5~9월): 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도', '냉방기(5~9월), 난방기는 수평', '창 앞(수평)', '자연채광 감소', None, 1, 1, 'LT_T300c'),
+    ('BT_T300', '키네틱 파사드', '블라인드 일사량 기준 제어', '외부 블라인드(80 mm)', '냉방 기간(5~9월): 창면 입사 일사량 300 W/m² 초과 시 내림(컷오프 각도)', '냉방 기간(5~9월), 난방 기간은 걷어 올림', '걷어 올림', '자연채광 유지', None, 1, 1, 'BT_T300c'),
+    ('LT_T300', '키네틱 파사드', '수평 루버 일사량 기준 제어', '수평 루버(300 mm)', '냉방 기간(5~9월): 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도', '냉방 기간(5~9월), 난방 기간은 수평', '창 앞(수평)', '자연채광 감소', None, 1, 1, 'LT_T300c'),
     ('PK', '키네틱 파사드', '피크 시간대 차양 폐쇄', '외부 블라인드(80 mm)', '평일 13~18시 슬랫 폐쇄, 그 밖에는 수평', '연중', '창 앞(수평)', '자연채광 감소', None, 1, 1, 'PKY@c'),
 ]
 con.execute('''CREATE TABLE alternatives(tag TEXT PRIMARY KEY, category TEXT, name TEXT, device TEXT, operation TEXT, period TEXT, idle_state TEXT, daylight TEXT,
@@ -107,7 +107,7 @@ N3 = K['buildings']
 RC = json.load(open(os.path.join(W, 'tools/derived/recalc.json'), encoding='utf-8'))
 con.execute('CREATE TABLE results_3bldg(tag TEXT PRIMARY KEY, dEUI_pct REAL, dpeak_pct REAL, CF REAL, dUDI_ARK REAL, dUDI_GFC REAL, dUDI_GST REAL, dPMV_ARK REAL, dPMV_GFC REAL, dPMV_GST REAL, dEUI_nosh_pct REAL, dpeak_nosh_pct REAL)')
 D3 = RC['detailed3']
-for t, w in D3['with'].items():   # 2026-10-27 재계산(일사량 기준 제어는 냉방기): 차폐 포함 / 제외
+for t, w in D3['with'].items():   # 2026-10-27 재계산(일사량 기준 제어는 냉방 기간): 차폐 포함 / 제외
     o = D3['without'][t]
     con.execute('INSERT INTO results_3bldg VALUES(?,?,?,?,?,?,?,?,?,?,?,?)', (t, round(w['dEUI'], 6), round(w['dpeak'], 6), round(w['CF'], 6), *[round(x, 6) for x in w['dUDI']], *[round(x, 6) for x in w['dPMV']], round(o['dEUI'], 6), round(o['dpeak'], 6)))   # 표시 반올림과 겹치지 않게 6자리로 저장(2026-10-29)
 con.execute("INSERT INTO meta VALUES('base_3bldg', ?)", (json.dumps({'EUI': 145.58, 'peak_kW': 9875, 'buildings': N3}),))
@@ -233,7 +233,7 @@ if os.path.exists(RVP):
     _ready = all(r.get('n') for r in _sp['cooling']) and len(_wu['rows']) == 9 and all(r.get('k10') and r.get('e13') for r in _se['rows'])
     if _ready:
         con.execute('CREATE TABLE review_same_period(period TEXT, tag TEXT, label TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, dpeak_med REAL, peak_dec INTEGER, both_dec INTEGER, dUDI_med REAL, dPMV_med REAL)')
-        for per, k in (('연중', 'yearround'), ('냉방기', 'cooling')):
+        for per, k in (('연중', 'yearround'), ('냉방 기간', 'cooling')):
             for r in _sp[k]:
                 con.execute('INSERT INTO review_same_period VALUES(?,?,?,?,?,?,?,?,?,?,?)', (per, r['tag'], r['label'], r['n'], r['eui'], r['eui_dec'], r['pk'], r['pk_dec'], r['both'], r.get('udi'), r.get('pmv')))
         con.execute('CREATE TABLE review_warmup(alt TEXT, n INTEGER, dEUI_absdiff_med REAL, dEUI_absdiff_max REAL, dpeak_absdiff_med REAL, dpeak_absdiff_max REAL, sign_same INTEGER)')
@@ -242,7 +242,7 @@ if os.path.exists(RVP):
         con.execute('CREATE TABLE review_sensitivity(alt TEXT, model TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, dpeak_med REAL, rho REAL, sign_same INTEGER, n_pairs INTEGER)')
         for r in _se['rows']:
             con.execute('INSERT INTO review_sensitivity VALUES(?,?,?,?,?,?,?,?,?)', (r['alt'], '보정 기준', r['base']['n'], r['base']['eui'], r['base']['eui_dec'], r['base']['pk'], None, None, None))
-            for v, nm in (('k10', '냉동기 COP 배수 1.0'), ('e13', '기기 밀도 1.3')):
+            for v, nm in (('k10', '냉동기 COP 배수 1.0'), ('e13', '기기 전력밀도 1.3')):
                 x = r[v]
                 con.execute('INSERT INTO review_sensitivity VALUES(?,?,?,?,?,?,?,?,?)', (r['alt'], nm, x['n'], x['eui'], x['eui_dec'], x['pk'], r.get(v + '_rho'), r.get(v + '_sign_same'), r.get(v + '_n')))
         con.commit()
