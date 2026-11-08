@@ -52,14 +52,14 @@ export function createPaperRenderer(api,S){
    caption('05 / FINDING 01','냉방 감소만으로 전체 에너지 절감을 판단할 수 없습니다.','겨울 일사 차단에 따른 난방 증가, 채광 감소에 따른 조명 증가를 함께 검토합니다.');
   }else if(i===5){
    heading('06 / OPERATING SEASON','작동 계절이 결과를 바꿉니다.','블라인드 일사량 기준 제어 · 257동 건물별 EUI 변화 중앙값 · 차폐 포함');
-   compare({label:'냉방기 작동 / 5~9월',value:p.main.BT_T300.e,copy:'난방기에는 블라인드를 걷어 올립니다.'},{label:'연중 작동 / 1~12월',value:p.annual.BT_T300.e,copy:'겨울 일사 차단으로 난방이 늘어납니다.'},'장치는 같아도 작동 기간이 다르면 결과가 달라집니다.');
-   caption('06 / FINDING 02','같은 장치의 다른 운전을 함께 보고합니다.','냉방기 작동 조건은 연중 결과 확인 후 선택 / 후속 표본에서 추가 검증 필요');
+   compare({label:'냉방 기간 작동 / 5~9월',value:p.main.BT_T300.e,copy:'난방 기간에는 블라인드를 걷어 올립니다.'},{label:'연중 작동 / 1~12월',value:p.annual.BT_T300.e,copy:'겨울 일사 차단으로 난방이 늘어납니다.'},'장치는 같아도 작동 기간이 다르면 결과가 달라집니다.');
+   caption('06 / FINDING 02','같은 장치의 다른 운전을 함께 보고합니다.','냉방 기간 작동 조건은 연중 결과 확인 후 선택 / 후속 표본에서 추가 검증 필요');
   }else if(i===6){
    heading('07 / SURROUNDING OBSTRUCTION','주변 차폐는 분석 조건입니다.','동일한 257동 · 동일한 블라인드 고정 대안 · 건물별 EUI 변화 중앙값');
    compare({label:'주변 건물 차폐 포함',value:p.main.F0.e,copy:'밀집지역의 주변 차폐면을 모델에 포함합니다.'},{label:'주변 건물 차폐 제외',value:p.without.F0.e,copy:'같은 건물에서 주변 차폐면만 제외합니다.'},'각 변화율은 해당 차폐 조건의 개선 전 모델과 비교합니다.');
    caption('07 / FINDING 03','주변 차폐에 따라 효과의 크기와 방향이 달라집니다.','한 건물의 결과를 모든 건물에 그대로 적용하지 않고, 건물 조건별로 평가합니다.');
   }else if(i===7){
-   const r=p.main.BT_T300;heading('08 / MULTIPLE CRITERIA','함께 감소한 건물은 '+r.both+'동, 효과 크기는 작습니다.','냉방기 블라인드 일사량 기준 제어 · 차폐 포함 · 257동');
+   const r=p.main.BT_T300;heading('08 / MULTIPLE CRITERIA','함께 감소한 건물은 '+r.both+'동, 효과 크기는 작습니다.','냉방 기간 블라인드 일사량 기준 제어 · 차폐 포함 · 257동 · 구동 전력 제외');
    for(let k=0;k<257;k++){ctx.fillStyle=k<r.both?cyan:'#273d49';ctx.beginPath();ctx.arc(83+(k%29)*29,372+Math.floor(k/29)*29,6.3,0,Math.PI*2);ctx.fill();}
    text(r.both+' / 257',66,728,57,cyan,300,'left',mono);text('EUI와 건물 피크전력이 모두 감소',66,776,23,muted);
    const values=[['EUI',r.e,'%'],['건물 피크전력',r.peak,'%'],['유용조도 UDI',r.udi,'%p'],['열쾌적 허용시간',r.pmv,'%p']];values.forEach((v,k)=>{const y=367+k*104;text(v[0],1110,y,24,muted);text(s(v[1])+v[2],1818,y+4,45,k<2?cyan:v[1]>0?cyan:gold,300,'right',mono);line2([1110,y+29],[1818,y+29],'#2c4552',1,.8);});
@@ -69,12 +69,12 @@ export function createPaperRenderer(api,S){
    text('CV(RMSE) 중앙값',66,386,28,muted);text(n(p.before.cv_rmse_median,1)+'%',66,503,88,'#708c9c',300,'left',mono);text('→',460,490,54,gold);text(n(p.valid.cv_rmse_median,1)+'%',580,503,88,gold,300,'left',mono);text('보정 전',66,555,24,muted);text('보정 후',580,555,24,muted);
    text(p.valid.n_pass_g14+' / '+p.valid.n,1240,486,82,gold,300,'left',mono);text('원고에서 제시한 월 기준 충족',1240,545,25,muted);
    const limits=['실제 외피·설비·운전 조건 부족','냉동기 COP 배수 2.0 가정의 영향','약 100동의 워밍업 미수렴 경고'];limits.forEach((v,k)=>text('0'+(k+1)+'   '+v,66,665+k*55,28,white));
-   caption('09 / LIMITATIONS','상대적인 개선 효과도 추가 검증이 필요합니다.','보정 개선·수렴 재계산·입력 가정 민감도·구동 에너지와 비용 검토');
+   caption('09 / LIMITATIONS','상대적인 개선 효과도 추가 검증이 필요합니다.','시간별 실측 검증·외피 사양 민감도·대기전력이 작은 제품·비용 검토');
   }else{
    const P=camera([178,78,240],[0,0,0],[1500,500],1050);panel(P,.32+Math.sin(local*.2)*.12,{alpha:.36});
    text('CONCLUSION / EXTENSION',66,183,18,gold,400,'left',mono);text('건물 조건에 맞는',64,290,64,white,500);text('적용 근거를 찾는 연구.',64,382,64,white,500);
-   ['제어 방식 · 작동 계절 · 주변 차폐를 함께 평가','보정·워밍업·민감도 검증을 보강','구동 전력 추정과 서울 오피스 3권역 536동 계산'].forEach((v,k)=>{text('0'+(k+1),66,527+k*89,26,gold,400,'left',mono);text(v,145,527+k*89,31,white);});
-   caption('10 / RESEARCH CONTRIBUTION','이번 257동의 연구 결과를 후속 검증으로 이어갑니다.','도심·여의도·마포 등 확장 범위의 결과를 이미 계산한 것으로 해석하지 않습니다.');
+   ['제어 방식 · 작동 기간 · 주변 차폐를 함께 평가','구동 전력(대기전력 포함)을 함께 계산','서울 오피스 3권역 536동에서 같은 방향 확인'].forEach((v,k)=>{text('0'+(k+1),66,527+k*89,26,gold,400,'left',mono);text(v,145,527+k*89,31,white);});
+   caption('10 / RESEARCH CONTRIBUTION','257동의 결과를 서울 오피스 3권역 536동으로 확인하였습니다.','모두 같은 모델 위의 상대 비교이며, 강남 131동은 257동과 같은 계산입니다.');
   }
   const fade=1-ramp(local,0,.45);if(t>0&&fade>0){ctx.fillStyle='rgba(3,5,7,'+fade*.75+')';ctx.fillRect(0,110,1920,905);}frame(t);
  };

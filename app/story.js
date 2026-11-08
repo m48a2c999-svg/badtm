@@ -97,7 +97,7 @@ SCENES.push({
     <div class="sside"><p>개선 전 모델의 월 전력을 건축HUB 건물에너지정보(2023–2024년 월별 전기)와 비교해 CV(RMSE)·NMBE를 구한다. 보정은 <b>기기 전력밀도 1.0, 냉동기 COP 배수 2.0</b> 두 값만 바꾸고 보정용 31동으로 정한 뒤, 시험용 215동에는 손대지 않고 적용한다. ${esc(D.B.name)}의 CV(RMSE)는 보정 전 ${ft(D.B.cv_rmse_uncal, 1)}% → 보정 후 ${ft(D.B.cv_rmse_cal, 1)}%로, 전역 배율이므로 이 건물은 보정 후 오차가 오히려 커졌다.</p>
     <table class="stbl"><tr><th></th><th>보정 전</th><th>보정 후</th></tr>
     ${['보정용 31동', '시험용 215동'].map(s => { const a = row(s); return `<tr><td>${s} CV(RMSE) 중앙값</td><td>${ft(a[0].cv_rmse_median, 1)}%</td><td><b>${ft(a[1].cv_rmse_median, 1)}%</b></td></tr>`; }).join('')}</table>
-    <p class="small">ASHRAE Guideline 14 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)을 만족한 건물은 보정 후 31동 중 ${row('보정용 31동')[1].n_pass_g14}동, 215동 중 ${row('시험용 215동')[1].n_pass_g14}동 — 결과를 <b>개선 전후의 상대 비교</b>로만 해석한다는 한계를 원고 3.6·6.3절에 밝힌다.</p></div></div>`;
+    <p class="small">ASHRAE Guideline 14 월 기준(CV(RMSE) 15% 이하, NMBE ±5% 이내)을 만족한 건물은 보정 후 31동 중 ${row('보정용 31동')[1].n_pass_g14}동, 215동 중 ${row('시험용 215동')[1].n_pass_g14}동 — 결과를 <b>개선 전후의 상대 비교</b>로만 해석한다는 한계를 원고 4.6절·9.3절에 밝힌다.</p></div></div>`;
   },
   tick(p, el) {
     const bs = el.querySelectorAll('.bs'); bs.forEach((b, i) => { const h = +b.dataset.h * rng(p, 0.05 + i * 0.04, 0.3 + i * 0.04); b.setAttribute('height', h.toFixed(1)); b.setAttribute('y', (280 - h).toFixed(1)); });
@@ -172,7 +172,7 @@ SCENES.push({
     const B = D.B, R = D.R; const base = R.S1;
     const row = t => { const r = R[t]; return `<tr class="s6r"><td><span class="tag ${ALT[t].category === '고정형 차양' ? 'mut' : 'kin'}">${esc(ALT[t].category)}</span> ${esc(ALT[t].name)}</td><td class="mono">${ft(r.EUI, 2)}</td><td class="mono ${r.dEUI_pct < 0 ? 'ok' : 'bad'}">${pct(r.dEUI_pct)}</td><td class="mono">${ft(r.peak_kW)}</td><td class="mono ${r.dpeak_pct < 0 ? 'ok' : 'bad'}">${pct(r.dpeak_pct)}</td></tr>`; };
     return `<div class="stg"><div class="sform">
-    <div class="fx s6f"><b>EUI</b>(에너지 원단위) = 연간 에너지 사용량 ÷ 연면적 → 개선 전 <b>${ft(base.EUI, 2)} kWh/m²·yr</b> (${esc(B.name)}, 연면적 ${ft(B.gross_area_m2)} m²)</div>
+    <div class="fx s6f"><b>EUI</b>(에너지 원단위) = 연간 에너지 사용량 ÷ 모델 바닥면적 → 개선 전 <b>${ft(base.EUI, 2)} kWh/(m²·yr)</b> (${esc(B.name)}, 모델 바닥면적 ${ft(B.footprint_model_m2 * (B.floors + 1))} m² = 대표 층 면적 × (지상층수 + 지하 1개 층))</div>
     <div class="fx s6f"><b>피크전력</b> = 시간별 전력의 연간 최댓값 → 개선 전 <b>${ft(base.peak_kW)} kW</b></div>
     <div class="fx s6f"><b>ΔEUI(%)</b> = (EUI<sub>개선</sub> − EUI<sub>개선 전</sub>) ÷ EUI<sub>개선 전</sub> × 100 — 피크전력도 같은 식. 자연채광(UDI)·열쾌적 비율은 차이(%p)</div>
     <div class="fx s6f">예: 블라인드 고정 ${ft(R.F0.EUI, 3)} → (${ft(R.F0.EUI, 3)} − ${ft(base.EUI, 3)}) ÷ ${ft(base.EUI, 3)} × 100 = <b>${pct(R.F0.dEUI_pct)}</b></div></div>
@@ -195,7 +195,7 @@ SCENES.push({
     return `<div class="stg"><svg viewBox="0 0 ${W} ${Hh}" class="smap"><line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--ink)"/>${bars}
     <g id="s7m" style="opacity:0"><line x1="${(x0 + (x1 - x0) * mi / n).toFixed(1)}" y1="30" x2="${(x0 + (x1 - x0) * mi / n).toFixed(1)}" y2="${y0 + 100}" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="${(x0 + (x1 - x0) * mi / n + 8).toFixed(1)}" y="42" class="sl">중앙값 ${pct(m.e)} (${n}동 중 ${m.dec}동 감소)</text></g>
     <text x="${x0}" y="${Hh - 10}" class="sl">블라인드 고정 — 257동의 ΔEUI(%)를 작은 값부터 늘어놓은 것. 초록 = 감소, 주황 = 증가</text></svg>
-    <div class="sside"><p>건물별 변화율을 대안마다 ${n}동 모아 <b>중앙값</b>으로 보고하고(원고 표 5), 가려진 정도·평면 면적·층수 구간별로 다시 나눈다(표 6, 건물 특성별 페이지).</p>
+    <div class="sside"><p>건물별 변화율을 대안마다 ${n}동 모아 <b>중앙값</b>으로 보고하고(원고 표 5-2), 가려진 정도·평면 면적·층수 구간별로 다시 나눈다(표 5-4·5-5, 건물 특성별 페이지).</p>
     <table class="stbl s7t"><tr><th>대안</th><th>ΔEUI 중앙값</th><th>Δ피크 중앙값</th><th>감소 건물</th></tr>${ORDER257.map(t => `<tr class="s7r"><td>${esc(ALT[t].name)}</td><td class="mono ${D.med[t].e < 0 ? 'ok' : 'bad'}">${pct(D.med[t].e)}</td><td class="mono ${D.med[t].p < 0 ? 'ok' : 'bad'}">${pct(D.med[t].p)}</td><td class="mono">${D.med[t].dec}동</td></tr>`).join('')}</table>
     <p class="small">가려진 정도 구간 경계 ${ft(D.cb.obstruction_deg[0], 1)}°·${ft(D.cb.obstruction_deg[1], 1)}°, 평면 면적 ${ft(D.cb.footprint_model_m2[0], 1)}·${ft(D.cb.footprint_model_m2[1], 1)} m²(3분위), 층수 6~10·11~20·21층 이상. 전체 결과는 <a href="#/results">결과</a>·<a href="#/traits">건물 특성별</a> 페이지.</p></div></div>`;
   },
@@ -223,7 +223,7 @@ function pageStory() {
   </div>
   <h2>장면 설명</h2>
   <ol class="slist">${SCENES.map(s => `<li>${esc(s.title)}</li>`).join('')}</ol>
-  ${note('장면 ④의 태양 고도·창면 일사는 설명용 간이 값이며, 장치 상태는 원고 표 2의 작동 규칙을 간이하게 적용한 것이다(주변 차폐·요일 판정 없음). 그 밖의 숫자(건물 제원, 실측 비교, 시간별 전력, EUI·피크전력·변화율·중앙값)는 모두 연구 DB(research.sqlite)의 값이다. ' + SIMNOTE)}`;
+  ${note('장면 ④의 태양 고도·창면 일사는 설명용 간이 값이며, 장치 상태는 원고 표 4-3의 작동 규칙을 간이하게 적용한 것이다(주변 차폐·요일 판정 없음). 그 밖의 숫자(건물 제원, 실측 비교, 시간별 전력, EUI·피크전력·변화율·중앙값)는 모두 연구 DB(research.sqlite)의 값이다. ' + SIMNOTE)}`;
   const show = i => { STORY.sc = (i + SCENES.length) % SCENES.length; STORY.t = 0; const s = SCENES[STORY.sc]; $('#stitle').textContent = s.title; $('#sstage').innerHTML = s.html(D); $$('.sdots button').forEach((b, k) => b.classList.toggle('on', k === STORY.sc)); s.tick(0, $('#sstage'), D); };
   $('#spp').addEventListener('click', () => { STORY.play = !STORY.play; $('#spp').textContent = STORY.play ? '⏸ 일시정지' : '▶ 재생'; STORY.last = 0; });
   $('#sprev').addEventListener('click', () => show(STORY.sc - 1)); $('#snext').addEventListener('click', () => show(STORY.sc + 1));

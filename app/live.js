@@ -11,10 +11,10 @@ const LIVE = { loadReq: 0, map: null, canvas: null, R: null, t: 12 * 60, play: f
 const LRULE = {   // 9개 대안 — 원고 표 2와 같은 작동 규칙(일사량 기준 제어만 5~9월), ep = 257동 EnergyPlus 시간별 결과의 시나리오 이름
   F0: { name: '블라인드 고정', kind: 'fixed', ep: 'F0', txt: '슬랫 수평으로 항상 창 앞(움직이지 않음)' },
   LH_F0: { name: '수평 루버 고정', kind: 'fixed', ep: 'LH_F0', txt: '수평 루버(300 mm)가 항상 창 앞(움직이지 않음)' },
-  VF_F0: { name: '수직 루버 고정', kind: 'fixed', ep: 'VF_F0', txt: '동·서 입면 수직 루버(움직이지 않음)' },
+  VF_F0: { name: '수직 루버 고정', kind: 'fixed', ep: 'VF_F0', txt: '수직 루버(움직이지 않음). 간이 계산은 동·서 입면에 두며, EnergyPlus 계산은 평면 단변 두 입면에 둠' },
   S3: { name: '블라인드 컷오프 각도 제어', kind: 'track', ep: 'S3', txt: '입면에 직달일사가 들면 직달일사를 막는 각도(컷오프 각도)로 슬랫을 조절, 아니면 수평' },
   LH_C: { name: '수평 루버 컷오프 각도 제어', kind: 'track', ep: 'LH_C', txt: '같은 방식의 컷오프 각도 제어(수평 루버)' },
-  VF_C: { name: '수직 루버 컷오프 각도 제어', kind: 'track', ep: 'VF_C', txt: '같은 방식의 컷오프 각도 제어(동·서 수직 루버). 간이 계산의 작동 비율은 모든 입면의 직달일사 비율로 표시' },
+  VF_C: { name: '수직 루버 컷오프 각도 제어', kind: 'track', ep: 'VF_C', txt: '같은 방식의 컷오프 각도 제어(수직 루버; 간이 계산은 동·서 입면). 간이 계산의 작동 비율은 모든 입면의 직달일사 비율로 표시' },
   BT_T300: { name: '블라인드 일사량 기준 제어', kind: 'thresh', ep: 'BT_T300', txt: '냉방 기간(5~9월)에는 창면 입사 일사량 300 W/m² 초과 시 내리고 그 밖에는 걷어 올림. 난방 기간(10~4월)에는 걷어 올림' },
   LT_T300: { name: '수평 루버 일사량 기준 제어', kind: 'thresh', ep: 'LT_T300', txt: '냉방 기간(5~9월)에 창면 입사 일사량 300 W/m² 초과 시 컷오프 각도, 그 밖에는 수평. 난방 기간(10~4월)에는 수평' },
   PK: { name: '피크 시간대 차양 폐쇄', kind: 'peak', ep: 'PK', txt: '연중 평일 13~18시 슬랫 폐쇄, 그 밖에는 수평(요일은 EnergyPlus 계산과 같은 2023년 달력 기준)' },
@@ -213,7 +213,7 @@ function pageLive() {
       <div id="lbinfo"></div>
     </div>
   </div>
-  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 다른 지역의 에너지 성능은 같은 절차로 EnergyPlus 계산을 진행하고 있다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 4장의 결과에 쓰지 않는다.')}`;
+  ${note('이 페이지의 일사·그림자·작동 상태는 <b>맑은 날 가정의 간이 계산</b>(태양 위치 NOAA 식, ASHRAE 맑은 날 일사 모델, 건물 윤곽 × 높이 차폐)으로 브라우저에서 바로 계산한 값이며, EnergyPlus 계산 값이 아니다. 입면 일사는 입면마다 중앙(높이 1/2) 한 점에서 차폐를 판정해 구한 값을 입면 길이로 가중 평균한 값이다. 에너지(전력) 곡선은 역삼 257동의 EnergyPlus 23.2 시간별 결과(서울 TMYx 2011–2025 표준 기상, 여러 해의 실제 월을 엮은 대표 연도)이므로, 그날이 맑은 날이 아닐 수 있다. 서울 오피스 3권역의 EnergyPlus 계산 결과는 재계산·확장 페이지(원고 제7장)에 있다. 층수 정보가 없는 건물(도심 시험에서 84%)은 위에서 정한 높이로 가정하므로, 도심·여의도의 차폐 판정은 건축물대장 층수를 결합한 뒤에 쓸 수 있다. 이 페이지의 값은 원고 4장의 결과에 쓰지 않는다.')}`;
   // 지도
   LIVE.map = L.map('lmap', { scrollWheelZoom: false, zoomAnimation: false, fadeAnimation: false }).setView([37.5005, 127.0365], 16);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(LIVE.map);
@@ -385,7 +385,7 @@ function liveCharts() {
     const sum = a => a.reduce((x, y) => x + y, 0);
     const txt = alt ? `이 날 257동 합산 전력량: 개선 전 ${num(sum(base) / 1000, 1)} MWh → ${esc(LRULE[LIVE.rule].name)} ${num(sum(alt) / 1000, 1)} MWh(${pct(100 * (sum(alt) - sum(base)) / sum(base))}), 일 최대 ${num(Math.max(...base))} → ${num(Math.max(...alt))} kW(${pct(100 * (Math.max(...alt) - Math.max(...base)) / Math.max(...base))}).` : '이 대안은 257동에서 계산하지 않았다(상세 3개 동만 계산).';
     $('#lchart2').innerHTML = chartSvg('lc3', `EnergyPlus 23.2 · 257동 합산 시간별 전력(${LIVE.date}, 서울 TMYx)`, s3, 'kW', { xs, lo: 0 }) + `<p class="small">${txt} ${SIMNOTE}</p>`;
-  } else $('#lchart2').innerHTML = `<p class="small">이 지역의 에너지(전력) 값은 아직 EnergyPlus로 계산하지 않았다. 위 곡선은 맑은 날 가정의 일사와 작동 상태이며, 에너지 계산은 건축물대장을 결합하여 진행하고 있다.</p>`;
+  } else $('#lchart2').innerHTML = `<p class="small">이 페이지는 역삼 257동의 시간별 EnergyPlus 결과만 곡선으로 보여 준다. 위 곡선은 맑은 날 가정의 일사와 작동 상태이며, 서울 오피스 3권역의 EnergyPlus 계산 결과(건물별 중앙값)는 재계산·확장 페이지에 있다.</p>`;
   liveCursor();
 }
 function liveCursor() { for (const id of ['lc1', 'lc2', 'lc3']) { const sv = document.getElementById(id); if (!sv) continue; const x = +sv.dataset.l + LIVE.t / 1440 * +sv.dataset.w; const ln = document.getElementById(id + '-cur'); ln.setAttribute('x1', x); ln.setAttribute('x2', x); } }

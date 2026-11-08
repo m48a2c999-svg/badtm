@@ -1,8 +1,14 @@
 [
 {
 "group": "국내 문헌",
+"text": "강민호, 신학종, 곽영훈, 문선혜, 허정호. (2020). 건물에너지요구량과 시환경 쾌적을 고려한 외부 베네시안 블라인드의 차폐율 제어에 관한 연구. 대한건축학회논문집, 36(8), 107–117.",
+"url": "https://doi.org/10.5659/JAIK.2020.36.8.107",
+"year": 2020
+},
+{
+"group": "국내 문헌",
 "text": "공동석, 김두환, 장용성, 허정호. (2014). 성능진단 데이터로 보정된 모델을 이용한 기존건축물의 에너지시뮬레이션 기법. 설비공학논문집, 26(5), 231–239.",
-"url": "",
+"url": "https://doi.org/10.6110/KJACR.2014.26.5.231",
 "year": 2014
 },
 {
@@ -25,9 +31,39 @@
 },
 {
 "group": "국내 문헌",
+"text": "권혁주, 이금호, 이광호. (2017). 창면적비 및 향변화에 따른 슬랫형 블라인드의 최적각도 제어 알고리즘 산출 및 비교분석. 한국생태환경건축학회 논문집(KIEAE Journal), 17(4), 75–81.",
+"url": "https://doi.org/10.12813/kieae.2017.17.4.075",
+"year": 2017
+},
+{
+"group": "국내 문헌",
+"text": "김동일, 이병호. (2020). 개별건물 에너지소비량 보정기법 개발 및 적용방안. 한국태양에너지학회 논문집, 40(1), 15–24.",
+"url": "https://doi.org/10.7836/kses.2020.40.1.015",
+"year": 2020
+},
+{
+"group": "국내 문헌",
+"text": "김성임, 양인호, 하수연, 이수진, 진혜선, 서인애, 송승영. (2020). 계측데이터를 이용한 업무시설에서의 에너지용도별 사용량 추정방법 연구. 대한건축학회논문집 구조계, 36(5), 165–176.",
+"url": "https://doi.org/10.5659/JAIK_SC.2020.36.5.165",
+"year": 2020
+},
+{
+"group": "국내 문헌",
 "text": "김세동. (2002). 업무용 빌딩의 전력소비 특성을 고려한 수용률/부등률의 적용에 관한 연구. 조명·전기설비학회논문지, 16(6), 74–79.",
-"url": "",
+"url": "https://doi.org/10.5207/JIEIE.2002.16.6.074",
 "year": 2002
+},
+{
+"group": "국내 문헌",
+"text": "김진아, 윤성환. (2012). 사무공간의 냉난방 및 조명부하 저감을 위한 수평루버형 외부차양에 관한 연구. 대한건축학회논문집 계획계, 28(10), 345–352.",
+"url": "https://doi.org/10.5659/JAIK_PD.2012.28.10.345",
+"year": 2012
+},
+{
+"group": "국내 문헌",
+"text": "김진아, 윤성환. (2013). 블라인드형 외부차양의 종류 및 반사율에 따른 건물에너지 저감효과 분석. 한국태양에너지학회 논문집, 33(2), 28–34.",
+"url": "https://doi.org/10.7836/kses.2013.33.2.028",
+"year": 2013
 },
 {
 "group": "국내 문헌",
@@ -38,14 +74,20 @@
 {
 "group": "국내 문헌",
 "text": "윤성환, 김영진, 박철수. (2014). 기축 건물의 에너지 모델에 대한 베이지안 보정. 대한건축학회논문집 계획계, 30(10), 189–197.",
-"url": "",
+"url": "https://doi.org/10.5659/JAIK_PD.2014.30.10.189",
 "year": 2014
 },
 {
 "group": "국내 문헌",
-"text": "윤영일, 송정석, 이효원. (2011). 농어촌주택 표준설계의 유용조도 분석에 관한 연구 – 기상데이터 기반 동적 자연채광 시뮬레이션을 기반으로 –. KIEAE Journal, 11(1), 47–55.",
+"text": "윤영일, 송정석, 이효원. (2011). 농어촌주택 표준설계의 유용조도 분석에 관한 연구 – 기상데이터 기반 동적 자연채광 시뮬레이션을 기반으로 –. 한국생태환경건축학회 논문집(KIEAE Journal), 11(1), 47–55.",
 "url": "",
 "year": 2011
+},
+{
+"group": "국내 문헌",
+"text": "이경선, 유다은. (2012). 리스펀시브 키네틱 파사드의 친환경성에 대한 연구. 대한건축학회논문집 계획계, 28(6), 85–96.",
+"url": "https://doi.org/10.5659/JAIK_PD.2012.28.6.85",
+"year": 2012
 },
 {
 "group": "국내 문헌",
@@ -61,15 +103,27 @@
 },
 {
 "group": "국내 문헌",
-"text": "이한솔, 최경석. (2022). 그린리모델링을 통한 에너지 성능 개선 효과 분석. 한국생활환경학회지, 29(3), 281–288.",
-"url": "",
+"text": "이한솔, 최경석. (2022). 그린리모델링을 통한 에너지 성능 개선 효과 분석 – 공공건물의 패시브 기술을 중심으로 –. 한국생활환경학회지, 29(3), 281–288.",
+"url": "https://doi.org/10.21086/ksles.2022.6.29.3.281",
 "year": 2022
+},
+{
+"group": "국내 문헌",
+"text": "임한영, 임수현, 진혜선, 김성임, 이수진, 임재한, 송승영. (2018). 표본건물 계측에 의한 업무시설에서의 용도별 에너지사용량 및 CO2 배출량 연간 원단위 (2016 - 2017) 분석. 대한건축학회논문집 구조계, 34(8), 19–27.",
+"url": "https://doi.org/10.5659/JAIK_SC.2018.34.8.19",
+"year": 2018
 },
 {
 "group": "국내 문헌",
 "text": "장윤배, 이성룡. (2001). 천공차폐율 계산모형 개발에 관한 연구. 국토계획, 36(5), 125–137.",
 "url": "",
 "year": 2001
+},
+{
+"group": "국내 문헌",
+"text": "정회영, 김강수. (2010). 베네시안 블라인드 슬랫 조절에 따른 작업면 빛환경 향상 방안에 관한 연구. 대한건축학회논문집 계획계, 26(12), 279–286.",
+"url": "",
+"year": 2010
 },
 {
 "group": "국내 문헌",
@@ -85,9 +139,51 @@
 },
 {
 "group": "국외 문헌",
+"text": "Ahn, K., Shin, H., & Park, C. (2019). Energy analysis of 4625 office buildings in South Korea. Energies, 12(6), 1114.",
+"url": "https://doi.org/10.3390/en12061114",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Al-Masrani, S. M., & Al-Obaidi, K. M. (2019). Dynamic shading systems: A review of design parameters, platforms and evaluation strategies. Automation in Construction, 102, 195–216.",
+"url": "https://doi.org/10.1016/j.autcon.2019.01.014",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Al Touma, A., & Ouahrani, D. (2017). Shading and day-lighting controls energy savings in offices with fully-glazed façades in hot climates. Energy and Buildings, 151, 263–274.",
+"url": "https://doi.org/10.1016/j.enbuild.2017.06.058",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "An, J., Yan, D., Hong, T., & Sun, K. (2017). A novel stochastic modeling method to simulate cooling loads in residential districts. Applied Energy, 206, 134–149.",
+"url": "https://doi.org/10.1016/j.apenergy.2017.08.038",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Anderson, K. S., Hansen, C. W., Holmgren, W. F., Jensen, A. R., Mikofski, M. A., & Driesse, A. (2023). pvlib python: 2023 project update. Journal of Open Source Software, 8(92), 5994.",
+"url": "https://doi.org/10.21105/joss.05994",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "ASHRAE. (2005). 2005 ASHRAE handbook—Fundamentals (SI ed.). American Society of Heating, Refrigerating and Air-Conditioning Engineers.",
+"url": "",
+"year": 2005
+},
+{
+"group": "국외 문헌",
 "text": "ASHRAE. (2014). ASHRAE Guideline 14-2014: Measurement of energy, demand, and water savings. American Society of Heating, Refrigerating and Air-Conditioning Engineers.",
 "url": "",
 "year": 2014
+},
+{
+"group": "국외 문헌",
+"text": "Assadimoghadam, A., Banihashemi, S., Muminović, M., Lemckert, C., & Sanders, P. (2025). Adaptive façades for high-rise residential buildings: A qualitative analysis of the design parameters and methods. Buildings, 15(12), 2072.",
+"url": "https://doi.org/10.3390/buildings15122072",
+"year": 2025
 },
 {
 "group": "국외 문헌",
@@ -97,15 +193,219 @@
 },
 {
 "group": "국외 문헌",
+"text": "Baharlouei, F., Ardekani, A., Homayouni, H., & Rahbar, M. (2026). Intelligent control strategies for kinetic façades using artificial neural networks and multi-criteria decision-making: Achieving energy efficiency and visual comfort. Journal of Daylighting, 13(1), 347–362.",
+"url": "https://doi.org/10.15627/jd.2026.20",
+"year": 2026
+},
+{
+"group": "국외 문헌",
+"text": "Barbour, E., Cerezo Davila, C., Gupta, S., Reinhart, C., Kaur, J., & González, M. C. (2019). Planning for sustainable cities by estimating building occupancy with mobile phones. Nature Communications, 10(1), 3736.",
+"url": "https://doi.org/10.1038/s41467-019-11685-w",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Battini, F., Pernigotto, G., & Gasparella, A. (2023). District-level validation of a shoeboxing simplification algorithm to speed-up Urban Building Energy Modeling simulations. Applied Energy, 349, 121570.",
+"url": "https://doi.org/10.1016/j.apenergy.2023.121570",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Bellia, L., De Falco, F., & Minichiello, F. (2013). Effects of solar shading devices on energy requirements of standalone office buildings for Italian climates. Applied Thermal Engineering, 54(1), 190–201.",
+"url": "https://doi.org/10.1016/j.applthermaleng.2013.01.039",
+"year": 2013
+},
+{
+"group": "국외 문헌",
+"text": "Bianchi, C., Zhang, L., Goldwasser, D., Parker, A., & Horsey, H. (2020). Modeling occupancy-driven building loads for large and diversified building stocks through the use of parametric schedules. Applied Energy, 276, 115470.",
+"url": "https://doi.org/10.1016/j.apenergy.2020.115470",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Biljecki, F., Chow, Y. S., & Lee, K. (2023). Quality of crowdsourced geospatial building information: A global assessment of OpenStreetMap attributes. Building and Environment, 237, 110295.",
+"url": "https://doi.org/10.1016/j.buildenv.2023.110295",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "British Standards Institution [BSI]. (2015). BS EN 13659:2015 Shutters and external venetian blinds — Performance requirements including safety. BSI.",
+"url": "",
+"year": 2015
+},
+{
+"group": "국외 문헌",
+"text": "Brzezicki, M. (2024a). A systematic review of the most recent concepts in kinetic shading systems with a focus on biomimetics: A motion/deformation analysis. Sustainability, 16(13), 5697.",
+"url": "https://doi.org/10.3390/su16135697",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Brzezicki, M. (2024b). Daylight comfort performance of a vertical fin shading system: Annual simulation and experimental testing of a prototype. Buildings, 14(3), 571.",
+"url": "https://doi.org/10.3390/buildings14030571",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Carlucci, S., Causone, F., De Rosa, F., & Pagliano, L. (2015). A review of indices for assessing visual comfort with a view to their use in optimization processes to support building integrated design. Renewable and Sustainable Energy Reviews, 47, 1016–1033.",
+"url": "https://doi.org/10.1016/j.rser.2015.03.062",
+"year": 2015
+},
+{
+"group": "국외 문헌",
+"text": "Carlucci, S., & Pagliano, L. (2012). A review of indices for the long-term evaluation of the general thermal comfort conditions in buildings. Energy and Buildings, 53, 194–205.",
+"url": "https://doi.org/10.1016/j.enbuild.2012.06.015",
+"year": 2012
+},
+{
+"group": "국외 문헌",
+"text": "Catto Lucchino, E., & Goia, F. (2023). Multi-domain model-based control of an adaptive façade based on a flexible double skin system. Energy and Buildings, 285, 112881.",
+"url": "https://doi.org/10.1016/j.enbuild.2023.112881",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Chen, Y., & Hong, T. (2018). Impacts of building geometry modeling methods on the simulation results of urban building energy models. Applied Energy, 215, 717–735.",
+"url": "https://doi.org/10.1016/j.apenergy.2018.02.073",
+"year": 2018
+},
+{
+"group": "국외 문헌",
+"text": "Chen, Y., Hong, T., & Piette, M. A. (2017). Automatic generation and simulation of urban building energy models based on city datasets for city-scale building retrofit analysis. Applied Energy, 205, 323–335.",
+"url": "https://doi.org/10.1016/j.apenergy.2017.07.128",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Cho, S.-H., Shin, K.-S., & Zaheer-Uddin, M. (1995). The effect of slat angle of windows with venetian blinds on heating and cooling loads of buildings in South Korea. Energy, 20(12), 1225–1236.",
+"url": "https://doi.org/10.1016/0360-5442(95)00074-q",
+"year": 1995
+},
+{
+"group": "국외 문헌",
+"text": "Choi, S.-J., Lee, D.-S., & Jo, J.-H. (2017). Method of deriving shaded fraction according to shading movements of kinetic façade. Sustainability, 9(8), 1449.",
+"url": "https://doi.org/10.3390/su9081449",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Coakley, D., Raftery, P., & Keane, M. (2014). A review of methods to match building energy simulation models to measured data. Renewable and Sustainable Energy Reviews, 37, 123–141.",
+"url": "https://doi.org/10.1016/j.rser.2014.05.007",
+"year": 2014
+},
+{
+"group": "국외 문헌",
+"text": "Crawley, D. B., & Lawrie, L. K. (2019). Should we be using just 'typical' weather data in building performance simulation? In Proceedings of Building Simulation 2019: 16th Conference of IBPSA, Rome (pp. 4801–4808).",
+"url": "https://doi.org/10.26868/25222708.2019.210594",
+"year": 2019
+},
+{
+"group": "국외 문헌",
 "text": "Crawley, D. B., Lawrie, L. K., Winkelmann, F. C., Buhl, W. F., Huang, Y. J., Pedersen, C. O., Strand, R. K., Liesen, R. J., Fisher, D. E., Witte, M. J., & Glazer, J. (2001). EnergyPlus: Creating a new-generation building energy simulation program. Energy and Buildings, 33(4), 319–331.",
 "url": "https://doi.org/10.1016/S0378-7788(00)00114-6",
 "year": 2001
 },
 {
 "group": "국외 문헌",
+"text": "Datta, G. (2001). Effect of fixed horizontal louver shading devices on thermal perfomance of building by TRNSYS simulation. Renewable Energy, 23(3), 497–507.",
+"url": "https://doi.org/10.1016/s0960-1481(00)00131-2",
+"year": 2001
+},
+{
+"group": "국외 문헌",
 "text": "Deru, M., Field, K., Studer, D., Benne, K., Griffith, B., Torcellini, P., Liu, B., Halverson, M., Winiarski, D., Rosenberg, M., Yazdanian, M., Huang, J., & Crawley, D. (2011). U.S. Department of Energy commercial reference building models of the national building stock (NREL/TP-5500-46861). National Renewable Energy Laboratory.",
-"url": "",
+"url": "https://www.osti.gov/biblio/1009264",
 "year": 2011
+},
+{
+"group": "국외 문헌",
+"text": "Dogan, T., & Reinhart, C. (2017). Shoeboxer: An algorithm for abstracted rapid multi-zone urban building energy model generation and simulation. Energy and Buildings, 140, 140–153.",
+"url": "https://doi.org/10.1016/j.enbuild.2017.01.030",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Duffie, J. A., & Beckman, W. A. (2013). Solar engineering of thermal processes (4th ed.). Wiley.",
+"url": "",
+"year": 2013
+},
+{
+"group": "국외 문헌",
+"text": "El Geresi, S. Y., & Abu-Hijleh, B. (2013). The energy saving potential of using the optimum external fixed louvers configurations in an office building in UAE climate condition (Paper 53). In SB13 Dubai: Advancing the Green Agenda.",
+"url": "https://www.irbnet.de/daten/iconda/CIB_DC26855.pdf",
+"year": 2013
+},
+{
+"group": "국외 문헌",
+"text": "El Kontar, R., Polly, B., Charan, T., Fleming, K., Moore, N., Long, N., & Goldwasser, D. (2020). URBANopt: An open-source software development kit for community and urban district energy modeling (Preprint, NREL/CP-5500-76781). In 2020 Building Performance Analysis Conference and SimBuild.",
+"url": "",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Ellis, P. G., & Torcellini, P. A. (2005). Simulating tall buildings using EnergyPlus (NREL/CP-550-38133). In Proceedings of Building Simulation 2005: 9th Conference of IBPSA, Montréal.",
+"url": "",
+"year": 2005
+},
+{
+"group": "국외 문헌",
+"text": "European Committee for Standardization [CEN]. (2013). EN 1932:2013 External blinds and shutters — Resistance to wind loads — Method of testing and performance criteria. CEN.",
+"url": "",
+"year": 2013
+},
+{
+"group": "국외 문헌",
+"text": "Fahmy, M. K., Eltaweel, A., Rizi, R. A., & Imani, N. (2023). Integrated kinetic fins for western facades in territories with low solar altitudes. Buildings, 13(3), 782.",
+"url": "https://doi.org/10.3390/buildings13030782",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Fanger, P. O. (1970). Thermal comfort: Analysis and applications in environmental engineering. Danish Technical Press.",
+"url": "",
+"year": 1970
+},
+{
+"group": "국외 문헌",
+"text": "Faure, X., Johansson, T., & Pasichnyi, O. (2022). The impact of detail, shadowing and thermal zoning levels on urban building energy modelling (UBEM) on a district scale. Energies, 15(4), 1525.",
+"url": "https://doi.org/10.3390/en15041525",
+"year": 2022
+},
+{
+"group": "국외 문헌",
+"text": "Ferrando, M., Causone, F., Hong, T., & Chen, Y. (2020). Urban building energy modeling (UBEM) tools: A state-of-the-art review of bottom-up physics-based approaches. Sustainable Cities and Society, 62, 102408.",
+"url": "https://doi.org/10.1016/j.scs.2020.102408",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Freewan, A. A. Y. (2011). Improving thermal performance of offices in JUST using fixed shading devices. In Proceedings of the World Renewable Energy Congress 2011 (Linköping Electronic Conference Proceedings No. 57, pp. 1860–1866). Linköping University Electronic Press.",
+"url": "https://doi.org/10.3384/ecp110571860",
+"year": 2011
+},
+{
+"group": "국외 문헌",
+"text": "Ghofrani, A., Nazemi, S. D., & Jafari, M. (2019). HVAC load synchronization in smart building communities. Sustainable Cities and Society, 51, 101741.",
+"url": "https://doi.org/10.1016/j.scs.2019.101741",
+"year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Hammad, F. T., & Abu-Hijleh, B. (2010). The energy savings potential of using dynamic external louvers in an office building. Energy and Buildings, 42(10), 1888–1895.",
+"url": "https://doi.org/10.1016/j.enbuild.2010.05.024",
+"year": 2010
+},
+{
+"group": "국외 문헌",
+"text": "Han, Y., Taylor, J. E., & Pisello, A. L. (2017). Exploring mutual shading and mutual reflection inter-building effects on building energy performance. Applied Energy, 185(Part 2), 1556–1564.",
+"url": "https://doi.org/10.1016/j.apenergy.2015.10.170",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Hoffmann, S., & Lee, E. S. (2015). Potential energy savings with exterior shades in large office buildings and the impact of discomfort glare. In 4th Building Enclosure Science & Technology Conference (BEST4), Kansas City, MO (LBNL-187170; OSTI 1248922).",
+"url": "",
+"year": 2015
 },
 {
 "group": "국외 문헌",
@@ -115,9 +415,51 @@
 },
 {
 "group": "국외 문헌",
+"text": "Illuminating Engineering Society [IES]. (2012). LM-83-12 Approved method: IES spatial daylight autonomy (sDA) and annual sunlight exposure (ASE). Illuminating Engineering Society.",
+"url": "",
+"year": 2012
+},
+{
+"group": "국외 문헌",
 "text": "International Organization for Standardization [ISO]. (2005). ISO 7730:2005 Ergonomics of the thermal environment — Analytical determination and interpretation of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria. ISO.",
 "url": "",
 "year": 2005
+},
+{
+"group": "국외 문헌",
+"text": "Iqbal, W., Ullah, I., Hussain, A., Cho, M., Park, J., Lee, K., & Shin, S. (2025). Optimizing energy efficiency: Louver systems for sustainable building design. Buildings, 15(7), 1183.",
+"url": "https://doi.org/10.3390/buildings15071183",
+"year": 2025
+},
+{
+"group": "국외 문헌",
+"text": "Jamilu, G., Abdou, A., & Asif, M. (2024). Dynamic facades for sustainable buildings: A review of classification, applications, prospects and challenges. Energy Reports, 11, 5999–6014.",
+"url": "https://doi.org/10.1016/j.egyr.2024.05.047",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Kamel, E. (2022). A systematic literature review of physics-based urban building energy modeling (UBEM) tools, data sources, and challenges for energy conservation. Energies, 15(22), 8649.",
+"url": "https://doi.org/10.3390/en15228649",
+"year": 2022
+},
+{
+"group": "국외 문헌",
+"text": "Katal, A., Mortezazadeh, M., Wang, L. L., & Yu, H. (2022). Urban building energy and microclimate modeling – From 3D city generation to dynamic simulations. Energy, 251, 123817.",
+"url": "https://doi.org/10.1016/j.energy.2022.123817",
+"year": 2022
+},
+{
+"group": "국외 문헌",
+"text": "Kim, C.-H., Lee, S.-E., & Kim, K.-S. (2018). Analysis of energy saving potential in high-performance building technologies under Korean climatic conditions. Energies, 11(4), 884.",
+"url": "https://doi.org/10.3390/en11040884",
+"year": 2018
+},
+{
+"group": "국외 문헌",
+"text": "Kirimtat, A., Koyunbaba, B. K., Chatzikonstantinou, I., & Sariyildiz, S. (2016). Review of simulation modeling for shading devices in buildings. Renewable and Sustainable Energy Reviews, 53, 23–49.",
+"url": "https://doi.org/10.1016/j.rser.2015.08.020",
+"year": 2016
 },
 {
 "group": "국외 문헌",
@@ -127,9 +469,33 @@
 },
 {
 "group": "국외 문헌",
+"text": "Krarti, M. (2022). A comparative energy analysis of dynamic external shadings for office buildings. ASME Journal of Engineering for Sustainable Buildings and Cities, 3(2), 021001.",
+"url": "https://doi.org/10.1115/1.4054775",
+"year": 2022
+},
+{
+"group": "국외 문헌",
 "text": "Kunwar, N., Cetin, K. S., Passe, U., Zhou, X., & Li, Y. (2019). Full-scale experimental testing of integrated dynamically-operated roller shades and lighting in perimeter office spaces. Solar Energy, 186, 17–28.",
 "url": "https://doi.org/10.1016/j.solener.2019.04.069",
 "year": 2019
+},
+{
+"group": "국외 문헌",
+"text": "Kunwar, N., Cetin, K. S., Passe, U., Zhou, X., & Li, Y. (2020). Energy savings and daylighting evaluation of dynamic venetian blinds and lighting through full-scale experimental testing. Energy, 197, 117190.",
+"url": "https://doi.org/10.1016/j.energy.2020.117190",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Kwak, Y., Kang, J., Mun, S.-H., Jeong, Y.-S., & Huh, J.-H. (2020). Development and application of a flexible modeling approach to reference buildings for energy analysis. Energies, 13(21), 5815.",
+"url": "https://doi.org/10.3390/en13215815",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Lawrie, L. K., & Crawley, D. B. (2022). Development of global typical meteorological years (TMYx). Climate.OneBuilding.Org.",
+"url": "https://climate.onebuilding.org",
+"year": 2022
 },
 {
 "group": "국외 문헌",
@@ -145,14 +511,290 @@
 },
 {
 "group": "국외 문헌",
+"text": "Lilis, G., Giannakis, G., & Rovas, D. (2017). Inter-building shading calculations based on CityGML geometric data. In Proceedings of Building Simulation 2017 (IBPSA) (pp. 370–379).",
+"url": "https://doi.org/10.26868/25222708.2017.098",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Lomanowski, B. A., & Wright, J. L. (2009). Modeling fenestration with shading devices in building energy simulation: A practical approach. In Proceedings of Building Simulation 2009 (pp. 976–983). IBPSA.",
+"url": "https://publications.ibpsa.org/proceedings/bs/2009/papers/bs2009_0976_983.pdf",
+"year": 2009
+},
+{
+"group": "국외 문헌",
+"text": "Loonen, R. C. G. M., Trčka, M., Cóstola, D., & Hensen, J. L. M. (2013). Climate adaptive building shells: State-of-the-art and future challenges. Renewable and Sustainable Energy Reviews, 25, 483–493.",
+"url": "https://doi.org/10.1016/j.rser.2013.04.016",
+"year": 2013
+},
+{
+"group": "국외 문헌",
+"text": "Loutzenhiser, P. G. (2006). Empirical validations of the daylighting/window shading/solar gains models in building energy simulation programs [Doctoral dissertation, Iowa State University].",
+"url": "https://dr.lib.iastate.edu/handle/20.500.12876/66219",
+"year": 2006
+},
+{
+"group": "국외 문헌",
+"text": "Loutzenhiser, P. G., Manz, H., Felsmann, C., Strachan, P. A., & Maxwell, G. M. (2007a). An empirical validation of modeling solar gain through a glazing unit with external and internal shading screens. Applied Thermal Engineering, 27(2–3), 528–538.",
+"url": "https://doi.org/10.1016/j.applthermaleng.2006.06.016",
+"year": 2007
+},
+{
+"group": "국외 문헌",
+"text": "Loutzenhiser, P. G., Maxwell, G. M., & Manz, H. (2007b). An empirical validation of the daylighting algorithms and associated interactions in building energy simulation programs using various shading devices and windows. Energy, 32(10), 1855–1870.",
+"url": "https://doi.org/10.1016/j.energy.2007.02.005",
+"year": 2007
+},
+{
+"group": "국외 문헌",
+"text": "Luo, X., Hong, T., & Tang, Y.-H. (2020a). Modeling thermal interactions between buildings in an urban context. Energies, 13(9), 2382.",
+"url": "https://doi.org/10.3390/en13092382",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Luo, X., Tang, Y.-H., & Hong, T. (2020b). Efficient computation of surface sunlit fractions in urban-scale building modeling using ray-tracing techniques. In 2020 Building Performance Analysis Conference and SimBuild (ASHRAE/IBPSA-USA).",
+"url": "https://doi.org/10.20357/B77606",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Mardaljevic, J., Heschong, L., & Lee, E. (2009). Daylight metrics and energy savings. Lighting Research & Technology, 41(3), 261–283.",
+"url": "https://doi.org/10.1177/1477153509339703",
+"year": 2009
+},
+{
+"group": "국외 문헌",
+"text": "Meeus, J. (1991). Astronomical algorithms. Willmann-Bell.",
+"url": "",
+"year": 1991
+},
+{
+"group": "국외 문헌",
+"text": "Misawa, Y., Azuma, K., Cho, W., Iwamoto, S., & Iwata, M. (2016). Simulation study on energy conservation performance for integrated external louver facades. Journal of Facade Design and Engineering, 3(3–4), 237–252.",
+"url": "https://doi.org/10.3233/fde-160043",
+"year": 2016
+},
+{
+"group": "국외 문헌",
 "text": "Nabil, A., & Mardaljevic, J. (2005). Useful daylight illuminance: A new paradigm for assessing daylight in buildings. Lighting Research & Technology, 37(1), 41–57.",
 "url": "https://doi.org/10.1191/1365782805li128oa",
 "year": 2005
 },
 {
 "group": "국외 문헌",
+"text": "Nabil, A., & Mardaljevic, J. (2006). Useful daylight illuminances: A replacement for daylight factors. Energy and Buildings, 38(7), 905–913.",
+"url": "https://doi.org/10.1016/j.enbuild.2006.03.013",
+"year": 2006
+},
+{
+"group": "국외 문헌",
+"text": "Nicoletti, F., Kaliakatsos, D., & Parise, M. (2023). Optimizing the control of Venetian blinds with artificial neural networks to achieve energy savings and visual comfort. Energy and Buildings, 294, 113279.",
+"url": "https://doi.org/10.1016/j.enbuild.2023.113279",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Nielsen, M. V., Svendsen, S., & Jensen, L. (2011). Quantifying the potential of automated dynamic solar shading in office buildings through integrated simulations of energy and daylight. Solar Energy, 85(5), 757–768.",
+"url": "https://doi.org/10.1016/j.solener.2011.01.010",
+"year": 2011
+},
+{
+"group": "국외 문헌",
+"text": "NOAA Global Monitoring Laboratory. (n.d.). Solar calculation details.",
+"url": "https://gml.noaa.gov/grad/solcalc/calcdetails.html",
+"year": null
+},
+{
+"group": "국외 문헌",
+"text": "Norouziasas, A., Tabadkani, A., Rahif, R., Amer, M., van Dijk, D., Lamy, H., & Attia, S. (2023). Implementation of ISO/DIS 52016-3 for adaptive façades: A case study of an office building. Building and Environment, 235, 110195.",
+"url": "https://doi.org/10.1016/j.buildenv.2023.110195",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Oke, T. R. (1981). Canyon geometry and the nocturnal urban heat island: Comparison of scale model and field observations. Journal of Climatology, 1(3), 237–254.",
+"url": "https://doi.org/10.1002/joc.3370010304",
+"year": 1981
+},
+{
+"group": "국외 문헌",
+"text": "Oraiopoulos, A., & Howard, B. (2022). On the accuracy of Urban Building Energy Modelling. Renewable and Sustainable Energy Reviews, 158, 111976.",
+"url": "https://doi.org/10.1016/j.rser.2021.111976",
+"year": 2022
+},
+{
+"group": "국외 문헌",
+"text": "Pisello, A. L., Castaldo, V. L., Poli, T., & Cotana, F. (2014). Simulating the thermal-energy performance of buildings at the urban scale: Evaluation of inter-building effects in different urban configurations. Journal of Urban Technology, 21(1), 3–20.",
+"url": "https://doi.org/10.1080/10630732.2014.884386",
+"year": 2014
+},
+{
+"group": "국외 문헌",
+"text": "Pisello, A. L., Taylor, J. E., Xu, X., & Cotana, F. (2012). Inter-building effect: Simulating the impact of a network of buildings on the accuracy of building energy performance predictions. Building and Environment, 58, 37–45.",
+"url": "https://doi.org/10.1016/j.buildenv.2012.06.017",
+"year": 2012
+},
+{
+"group": "국외 문헌",
+"text": "Ramchurn, S. D., Vytelingum, P., Rogers, A., & Jennings, N. R. (2011). Agent-based control for decentralised demand side management in the smart grid. In Proceedings of the 10th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2011), Taipei (pp. 5–12).",
+"url": "",
+"year": 2011
+},
+{
+"group": "국외 문헌",
+"text": "Reinhart, C. F., & Cerezo Davila, C. (2016). Urban building energy modeling – A review of a nascent field. Building and Environment, 97, 196–202.",
+"url": "https://doi.org/10.1016/j.buildenv.2015.12.001",
+"year": 2016
+},
+{
+"group": "국외 문헌",
+"text": "Reinhart, C. F., Mardaljevic, J., & Rogers, Z. (2006). Dynamic daylight performance metrics for sustainable building design. LEUKOS, 3(1), 7–31.",
+"url": "https://doi.org/10.1582/LEUKOS.2006.03.01.001",
+"year": 2006
+},
+{
+"group": "국외 문헌",
+"text": "Rocchi, D., Argentini, T., Allsop, A., Amerio, L., Bernini, L., & Racco, S. (2016). Multi-scale methodology to assess wind loads on building louvers. In 8th International Colloquium on Bluff Body Aerodynamics and Applications (BBAA VIII), Boston, MA.",
+"url": "https://re.public.polimi.it/retrieve/handle/11311/1002040/149078/BBAAVIII_ID224.pdf",
+"year": 2016
+},
+{
+"group": "국외 문헌",
+"text": "Rubel, A., & Joarder, M. A. R. (2024). Performance of shading against west glass facades to optimise daylight, thermal comfort and energy efficiency of office buildings. Journal of Daylighting, 11(1), 131–148.",
+"url": "https://doi.org/10.15627/jd.2024.8",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Samuelson, H., Claussnitzer, S., Goyal, A., Chen, Y., & Romo-Castillo, A. (2016). Parametric energy simulation in early design: High-rise residential buildings in urban contexts. Building and Environment, 101, 19–31.",
+"url": "https://doi.org/10.1016/j.buildenv.2016.02.018",
+"year": 2016
+},
+{
+"group": "국외 문헌",
+"text": "Simmler, H., & Binder, B. (2008). Experimental and numerical determination of the total solar energy transmittance of glazing with venetian blind shading. Building and Environment, 43(2), 197–204.",
+"url": "https://doi.org/10.1016/j.buildenv.2006.10.011",
+"year": 2008
+},
+{
+"group": "국외 문헌",
+"text": "Simmler, H., Fischer, U., & Winkelmann, F. (1996). Solar-thermal window blind model for DOE-2. Lawrence Berkeley National Laboratory.",
+"url": "",
+"year": 1996
+},
+{
+"group": "국외 문헌",
+"text": "Somfy. (2017). J4 WT / J4 WT PROTECT range technical data sheet (DOC 120779/002). Somfy Activités SA.",
+"url": "",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Spearman, C. (1904). The proof and measurement of association between two things. The American Journal of Psychology, 15(1), 72–101.",
+"url": "https://doi.org/10.2307/1412159",
+"year": 1904
+},
+{
+"group": "국외 문헌",
+"text": "Sureshkumar Jayakumari, S. D., Imalka, S. T., Yang, R., Liu, C.-Y., Yang, S.-L., Marschall, M., Corradini, P., Fernandez Benito, A., & Williams, N. (2024). Energy and daylighting performance of kinetic building-integrated photovoltaics (BIPV) façade. Sustainability, 16(22), 9739.",
+"url": "https://doi.org/10.3390/su16229739",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Tabadkani, A., Roetzel, A., Li, H. X., & Tsangrassoulis, A. (2020a). A review of automatic control strategies based on simulations for adaptive facades. Building and Environment, 175, 106801.",
+"url": "https://doi.org/10.1016/j.buildenv.2020.106801",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Tabadkani, A., Tsangrassoulis, A., Roetzel, A., & Li, H. X. (2020b). Innovative control approaches to assess energy implications of adaptive facades based on simulation using EnergyPlus. Solar Energy, 206, 256–268.",
+"url": "https://doi.org/10.1016/j.solener.2020.05.087",
+"year": 2020
+},
+{
+"group": "국외 문헌",
+"text": "Threlkeld, J. L., & Jordan, R. C. (1958). Direct solar radiation available on clear days. ASHRAE Transactions, 64, 45–68.",
+"url": "",
+"year": 1958
+},
+{
+"group": "국외 문헌",
+"text": "Tian, C., Chen, T., & Chung, T.-M. (2014). Experimental and simulating examination of computer tools, Radlink and DOE2, for daylighting and energy simulation with venetian blinds. Applied Energy, 124, 130–139.",
+"url": "https://doi.org/10.1016/j.apenergy.2014.03.002",
+"year": 2014
+},
+{
+"group": "국외 문헌",
+"text": "U.S. Department of Energy [U.S. DOE]. (2023a). EnergyPlus version 23.2.0 [Computer software].",
+"url": "https://energyplus.net",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "U.S. Department of Energy [U.S. DOE]. (2023b). EnergyPlus version 23.2 engineering reference.",
+"url": "https://bigladdersoftware.com/epx/docs/23-2/engineering-reference/",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "U.S. Department of Energy [U.S. DOE]. (2023c). EnergyPlus version 23.2 input output reference.",
+"url": "https://bigladdersoftware.com/epx/docs/23-2/input-output-reference/",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "U.S. Department of Energy, Federal Energy Management Program [U.S. DOE FEMP]. (2015). M&V guidelines: Measurement and verification for performance-based contracts (Version 4.0). U.S. Department of Energy.",
+"url": "https://www.energy.gov/sites/prod/files/2016/01/f28/mv_guide_4_0.pdf",
+"year": 2015
+},
+{
+"group": "국외 문헌",
+"text": "Vallati, A., Mauri, L., & Colucci, C. (2018). Impact of shortwave multiple reflections in an urban street canyon on building thermal energy demands. Energy and Buildings, 174, 77–84.",
+"url": "https://doi.org/10.1016/j.enbuild.2018.06.037",
+"year": 2018
+},
+{
+"group": "국외 문헌",
+"text": "Yang, F., Zhou, H., Chen, J., Sun, Y., Wang, D., Sun, F., & Zhang, L. (2025). Energy-saving performance and optimization study of adaptive shading system—A case study. Buildings, 15(11), 1961.",
+"url": "https://doi.org/10.3390/buildings15111961",
+"year": 2025
+},
+{
+"group": "국외 문헌",
+"text": "Yeon, S., Yu, B., Seo, B., Yoon, Y., & Lee, K. H. (2019). ANN based automatic slat angle control of venetian blind for minimized total load in an office building. Solar Energy, 180, 133–145.",
+"url": "https://doi.org/10.1016/j.solener.2019.01.027",
+"year": 2019
+},
+{
+"group": "국외 문헌",
 "text": "Yi, D. H., Choi, S., Kim, D. W., & Yoon, S. (2026). Quantifying urban building shading effect for data-driven building energy modeling. Building and Environment, 289, 114011.",
 "url": "https://doi.org/10.1016/j.buildenv.2025.114011",
+"year": 2026
+},
+{
+"group": "국외 문헌",
+"text": "Yi, D.-H., & Kim, D.-W. (2024). The urban-scaled EnergyPlus simulation using Korean GIS to aid development of energy normalization for shading effect. In Building Simulation Applications BSA 2024: 6th IBPSA-Italy Conference (bu,press) (pp. 281–287).",
+"url": "",
+"year": 2024
+},
+{
+"group": "국외 문헌",
+"text": "Yu, C., & Pan, W. (2023). Inter-building effect on building energy consumption in high-density city contexts. Energy and Buildings, 278, 112632.",
+"url": "https://doi.org/10.1016/j.enbuild.2022.112632",
+"year": 2023
+},
+{
+"group": "국외 문헌",
+"text": "Yun, G., Park, D. Y., & Kim, K. S. (2017). Appropriate activation threshold of the external blind for visual comfort and lighting energy saving in different climate conditions. Building and Environment, 113, 247–266.",
+"url": "https://doi.org/10.1016/j.buildenv.2016.11.021",
+"year": 2017
+},
+{
+"group": "국외 문헌",
+"text": "Zhou, Y., Wang, C., Wang, W., Li, Z., Lu, Y., Admassie, S., & Tso, C. Y. (2026). Performance assessment of passive building envelope considering microclimate and shadows in urban context. Renewable Energy, 259, 125085.",
+"url": "https://doi.org/10.1016/j.renene.2025.125085",
 "year": 2026
 }
 ]
