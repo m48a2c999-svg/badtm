@@ -616,7 +616,7 @@ function runQ() {
 }
 
 /* ---------------- 라우팅 ---------------- */
-const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, story: () => pageStory(), refs: () => pageRefs(), gen: () => pageGen(), live: () => pageLive() };
+const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, story: () => pageStory(), refs: () => pageRefs(), reading: () => pageReading(), gen: () => pageGen(), live: () => pageLive() };
 const BUILT = {};
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';
@@ -632,7 +632,7 @@ function route() {
 (async function boot() {
   try {
     const SQL = await initSqlJs({ locateFile: f => 'app/vendor/' + f });
-    const buf = await (await fetch('data/db/research.sqlite?v=202611090300')).arrayBuffer();
+    const buf = await (await fetch('data/db/research.sqlite?v=202611091530')).arrayBuffer();
     DB = new SQL.Database(new Uint8Array(buf));
     for (const r of q('SELECT key, value FROM meta')) META[r.key] = r.value;
     for (const a of q('SELECT * FROM alternatives')) ALT[a.tag] = a;

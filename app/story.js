@@ -255,7 +255,7 @@ async function pageRefs() {
   <p>논문 원고의 참고문헌 목록과 같다(저자명 가나다·알파벳순). DOI가 있는 문헌은 링크로 열 수 있다. 검증되지 않은 문헌, 미투고 논문, 저자 본인의 논문은 포함하지 않는다.</p>
   <div class="ctrl"><label>검색 <input id="refq" type="search" placeholder="저자·제목·학술지·연도" style="min-width:260px"></label> <span class="small" id="refn"></span></div>
   <div id="reflist"></div>
-  ${note('서지 사항은 원고 참고문헌 기준이다.')}`;
+  ${note('서지 사항은 원고 참고문헌 기준이다. 원고에 넣지 않은 이론서 정리는 <a href="#/reading">참고 도서</a>에 있다.')}`;
   $('#refq').addEventListener('input', e => render(e.target.value)); render();
 }
 
