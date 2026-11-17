@@ -8,6 +8,7 @@ BASE={
  'S3':{'shading':True,'louver':allz(('cutoff',))},
  'F0':{'shading':True,'louver':allz(('fixed',0))},
  'SC':{'shading':True,'louver':allz(('cutoff_season',))},
+ 'F0D':{'shading':True,'louver':allz(('fixed_day',0))},   # 2026-11-17 B4: 블라인드 고정, 밤(창면 일사 없음)에는 걷음
 }
 
 from classify import zoned
@@ -26,6 +27,9 @@ def zscen(name,tag):
         elif var=='Y': sc['yearround']=True            # 2026-10-26: 연중(1~12월) 같은 조건
         elif var=='NS': sc['shading']=False             # 2026-10-26: 주변 건물 차폐 제외
         elif var=='YNS': sc['yearround']=True; sc['shading']=False
+        elif var.startswith('FH'): sc['fill_h']=float(var[2:])           # 2026-11-17 B2: 높이 자료 없는 주변 건물의 보완 높이(m)
+        elif var=='GLC': sc['glz']=(2.70,0.70,0.78)                       # 2026-11-17 B3: 투명 복층 수준 창(LE는 저방사 복층 수준)
+        elif var.startswith('SZ'): sc['szf']=int(var[2:])/100             # 2026-11-17 B1: 공조 용량 크기 계수 배수(SZ090, SZ110)
         elif var.startswith('T'): sc['timestep']=int(var[1:])
         else: raise KeyError(var)
         return sc

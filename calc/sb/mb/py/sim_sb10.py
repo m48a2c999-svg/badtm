@@ -57,6 +57,11 @@ def light_extract(d):
                      join Time t on r.TimeIndex=t.TimeIndex where d.Name=? and d.ReportingFrequency='Run Period' and t.EnvironmentPeriodIndex=?""", (m, env))
         R[m] = (v or 0.0) * J2KWH / area
     R['EUI'] = R['Electricity:Facility'] + R['NaturalGas:Facility']
+    try:   # 2026-11-17: autosized HVAC capacities (B1 check: same sizing across shading conditions)
+        R['sizing'] = {f'{t}|{n}|{d}': float(v) for t, n, d, v in c.execute(
+            "select CompType, CompName, Description, Value from ComponentSizes where CompType in ('Chiller:Electric:ReformulatedEIR','Boiler:HotWater','Coil:Cooling:Water','Coil:Heating:Water','Fan:VariableVolume') and (Description like '%Capacity%' or Description like '%Maximum Flow Rate%')")}
+    except Exception:
+        R['sizing'] = None
     for m, k in (('Electricity:Facility', 'el'), ('NaturalGas:Facility', 'gas')):
         rows = c.execute("""select t.Month, r.Value from ReportData r join ReportDataDictionary d on r.ReportDataDictionaryIndex=d.ReportDataDictionaryIndex
                      join Time t on r.TimeIndex=t.TimeIndex where d.Name=? and d.ReportingFrequency='Hourly' and t.EnvironmentPeriodIndex=? order by r.TimeIndex""", (m, env)).fetchall()

@@ -42,10 +42,11 @@ def eq_rect(b):
     while angd<=-90: angd+=180
     A=poly_area(p); k=math.sqrt(A/(w*d))
     return dict(L=w*k,W=d*k,ang=angd,area=A,c=centroid(p))
+FILL_H=None   # 2026-11-17 B2 민감도: 높이 자료가 없는 주변 건물에 넣을 보완 높이(m); None이면 기존처럼 제외
 def height(b):
     if b['h']: return b['h']
     if b['lv']: return b['lv']*3.6
-    return None
+    return FILL_H
 if __name__=='__main__':
     byid={b['id']:b for b in B}
     for k,i in TARGETS.items():

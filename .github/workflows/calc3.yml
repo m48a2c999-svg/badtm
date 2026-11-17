@@ -1,9 +1,9 @@
-name: calc2
+name: calc3
 on:
   push:
-    branches: [calc2]
+    branches: [calc3]
 concurrency:
-  group: calc2
+  group: calc3
   cancel-in-progress: true
 permissions:
   contents: write
@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        shard: [0,1,2,3,4,5,6,7]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,6 +32,6 @@ jobs:
       - name: run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PF: res2
-          SF: shard2
+          PF: res3
+          SF: shard3
         run: bash calc/run_shard.sh ${{ matrix.shard }}
