@@ -1,9 +1,9 @@
-name: calc3
+name: calc4
 on:
   push:
-    branches: [calc3]
+    branches: [calc4]
 concurrency:
-  group: calc3
+  group: calc4
   cancel-in-progress: true
 permissions:
   contents: write
@@ -32,6 +32,6 @@ jobs:
       - name: run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PF: res3
-          SF: shard3
+          PF: res4
+          SF: shard4
         run: bash calc/run_shard.sh ${{ matrix.shard }}

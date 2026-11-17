@@ -44,6 +44,8 @@ def zscen(name,tag):
     if tag=='LH_F0': return {'shading':True,'louver':allz(('fixed',0)),'louver_mat':'ExtLouverL'}
     if tag=='LH_C':  return {'shading':True,'louver':allz(('cutoff',)),'louver_mat':'ExtLouverL'}
     if tag=='VF_F0': return {'shading':True,'fins':{k:('fixed',0) for k in EW}}
+    if tag=='VF_F0X': return {'shading':True,'fins':{k:('fixed',0) for k in SN}}   # 2026-11-17 B6: 수직 루버를 모델 장변(S·N 존) 입면에 — 실제 장축이 남북에 가까운 108동에서 실제 동·서 입면
+    if tag=='VF_CX':  return {'shading':True,'fins':{k:('cutoff',) for k in SN}}
     if tag=='VF_C':  return {'shading':True,'fins':{k:('cutoff',) for k in EW}}
     if tag=='HV_F0': return {'shading':True,'louver':{k:('fixed',0) for k in SN},'louver_mat':'ExtLouverL','fins':{k:('fixed',0) for k in EW}}
     if tag=='HV_C':  return {'shading':True,'louver':{k:('cutoff',) for k in SN},'louver_mat':'ExtLouverL','fins':{k:('cutoff',) for k in EW}}
