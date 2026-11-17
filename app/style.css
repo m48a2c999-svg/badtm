@@ -338,3 +338,4 @@ body.film header.top,body.film footer.foot,body.film #page-story>h1,body.film #p
 body.film main{max-width:none;padding:0}body.film .splayer{margin:0;border:0;padding:22px 28px;min-height:100vh;box-sizing:border-box}
 body.film .splayer h2{font-size:22px;margin:0 0 14px}body.film .stg{gap:26px}body.film .sside p,body.film .slist{font-size:15px}body.film .stbl{font-size:14px}
 #drvtab td:first-child{white-space:nowrap}
+@media (max-width:480px){.tmap td:first-child{white-space:normal}.tmap td,.tmap th{padding:6px 4px;word-break:keep-all;overflow-wrap:anywhere}}

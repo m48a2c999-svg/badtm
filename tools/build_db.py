@@ -225,6 +225,15 @@ if os.path.exists(R3P):
             con.execute('INSERT INTO r3_blocks VALUES(?,?,?,?,?,?,?,?,?)', (reg, b['alt'], b['label'], b['n_blocks'], b['eui_range'][0], b['eui_range'][1], b['eui_med'], b['pk_med'], b['both']))
     con.commit()
 
+# ---- 추가 민감도(2026-11-17, calc3): 공조 용량·주변 높이 보완·창 사양·블라인드 고정 야간 걷음(40동) — 원고 표 4-10 ----
+RVB = os.path.join(W, 'tools', 'derived', 'review_b.json')
+if os.path.exists(RVB):
+    _rb = json.load(open(RVB))
+    con.execute('DROP TABLE IF EXISTS review_sensitivity_b')
+    con.execute('CREATE TABLE review_sensitivity_b(alt TEXT, model TEXT, n INTEGER, dEUI_med REAL, eui_dec INTEGER, sign_same INTEGER, rho REAL)')
+    for r in _rb['rows']:
+        con.execute('INSERT INTO review_sensitivity_b VALUES(?,?,?,?,?,?,?)', (r['alt'], r['model'], r['n'], r['dEUI_med'], r['eui_dec'], r['sign_same'], r['rho']))
+
 # ---- 검토 반영 계산(tools/review_analysis.py): 같은 작동 기간 비교, 워밍업 100일, 모델 가정 민감도 — 모든 계산이 끝났을 때만 넣는다 ----
 RVP = os.path.join(W, 'tools', 'derived', 'review.json')
 if os.path.exists(RVP):
