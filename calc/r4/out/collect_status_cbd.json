@@ -1,0 +1,18 @@
+{
+ "region": "cbd",
+ "done": true,
+ "n_bld": 1879,
+ "n_register": 1879,
+ "join": {
+  "centroid": 1672,
+  "none": 107,
+  "inner_point": 68,
+  "bun_search": 32
+ },
+ "stats": {
+  "kakao": 6962,
+  "title": 2818,
+  "energy": 0,
+  "errors": 0
+ }
+}

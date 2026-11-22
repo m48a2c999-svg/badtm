@@ -1,0 +1,112 @@
+{
+ "mpo": {
+  "name": "마포",
+  "n_blocks": 16,
+  "n_bld_in_blocks": 62,
+  "n_all": 1673,
+  "n_register_joined": 62,
+  "n_targets": 33,
+  "n_main_office": 27,
+  "floors_median": 18.0,
+  "obstr_median": 15.72,
+  "n_low_mid_high": [
+   10,
+   21,
+   2
+  ],
+  "nb_missing_median_pct": 4.424778761061947,
+  "join": {
+   "centroid": 33
+  },
+  "match": {
+   "single": 31,
+   "hungarian": 2
+  },
+  "n_heights": 851,
+  "n_scale_flags": 2
+ },
+ "ybd": {
+  "name": "여의도",
+  "n_blocks": 21,
+  "n_bld_in_blocks": 215,
+  "n_all": 628,
+  "n_register_joined": 202,
+  "n_targets": 88,
+  "n_main_office": 76,
+  "floors_median": 16.0,
+  "obstr_median": 18.835,
+  "n_low_mid_high": [
+   26,
+   39,
+   23
+  ],
+  "nb_missing_median_pct": 0.0,
+  "join": {
+   "centroid": 82,
+   "bun_search": 6
+  },
+  "match": {
+   "single": 78,
+   "hungarian": 10
+  },
+  "n_heights": 543,
+  "n_scale_flags": 1
+ },
+ "gbd": {
+  "name": "강남",
+  "n_blocks": 82,
+  "n_bld_in_blocks": 679,
+  "n_all": 8006,
+  "n_register_joined": 678,
+  "n_targets": 371,
+  "n_main_office": 335,
+  "floors_median": 13.0,
+  "obstr_median": 22.82,
+  "n_low_mid_high": [
+   40,
+   144,
+   187
+  ],
+  "nb_missing_median_pct": 0.9523809523809523,
+  "join": {
+   "centroid": 355,
+   "inner_point": 6,
+   "bun_search": 10
+  },
+  "match": {
+   "single": 369,
+   "hungarian": 2
+  },
+  "n_heights": 4383,
+  "n_scale_flags": 20
+ },
+ "cbd": {
+  "name": "도심",
+  "n_blocks": 87,
+  "n_bld_in_blocks": 1879,
+  "n_all": 12329,
+  "n_register_joined": 1772,
+  "n_targets": 98,
+  "n_main_office": 82,
+  "floors_median": 12.0,
+  "obstr_median": 18.73,
+  "n_low_mid_high": [
+   26,
+   48,
+   24
+  ],
+  "nb_missing_median_pct": 11.407509470506138,
+  "join": {
+   "centroid": 90,
+   "inner_point": 3,
+   "bun_search": 5
+  },
+  "match": {
+   "single": 89,
+   "hungarian": 5,
+   "fallback_best": 4
+  },
+  "n_heights": 5827,
+  "n_scale_flags": 30
+ }
+}

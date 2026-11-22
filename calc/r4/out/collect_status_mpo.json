@@ -1,0 +1,17 @@
+{
+ "region": "mpo",
+ "done": true,
+ "n_bld": 62,
+ "n_register": 62,
+ "join": {
+  "centroid": 56,
+  "inner_point": 2,
+  "bun_search": 4
+ },
+ "stats": {
+  "kakao": 910,
+  "title": 285,
+  "energy": 0,
+  "errors": 0
+ }
+}

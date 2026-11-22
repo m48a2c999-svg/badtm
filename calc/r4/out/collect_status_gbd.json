@@ -1,0 +1,18 @@
+{
+ "region": "gbd",
+ "done": true,
+ "n_bld": 679,
+ "n_register": 679,
+ "join": {
+  "centroid": 646,
+  "inner_point": 14,
+  "bun_search": 18,
+  "none": 1
+ },
+ "stats": {
+  "kakao": 3540,
+  "title": 1477,
+  "energy": 0,
+  "errors": 0
+ }
+}

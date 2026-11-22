@@ -1,0 +1,17 @@
+{
+ "region": "ybd",
+ "done": true,
+ "n_bld": 215,
+ "n_register": 215,
+ "join": {
+  "centroid": 194,
+  "bun_search": 8,
+  "none": 13
+ },
+ "stats": {
+  "kakao": 1352,
+  "title": 433,
+  "energy": 0,
+  "errors": 0
+ }
+}
