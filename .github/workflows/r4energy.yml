@@ -1,0 +1,35 @@
+name: r4energy
+on:
+  push:
+    branches: [r4]
+    paths: ['calc/r4/trigger_energy.txt']
+concurrency:
+  group: r4energy
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  energy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: setup
+        run: pip install -q numpy pandas
+      - name: energy
+        timeout-minutes: 320
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+          ENERGY_WORKERS: '6'
+        run: cd calc/r4 && python3 energy_r4.py $(cat trigger_energy.txt | head -1)
+      - name: commit
+        if: always()
+        run: |
+          git config user.name claude; git config user.email noreply@anthropic.com
+          git add -A calc/r4/out || true
+          git commit -qm "r4energy: $(date -u +%Y-%m-%dT%H:%MZ)" || echo nothing
+          for i in 1 2 3; do git pull -q --rebase origin r4 && git push -q origin HEAD:r4 && break; sleep 5; done

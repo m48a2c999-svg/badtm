@@ -36,7 +36,23 @@ def probe():
         json.dump(ok, open(os.path.join(OUT, 'energy_api.json'), 'w'), indent=1); print('energy_api', ok)
     return ok
 
-def run(reg, cfg):
+def _month(cfg, op, L, ym):
+    """한 달 값. 일시 오류는 None(캐시하지 않음, 다음 실행에서 다시 조회)."""
+    try: return energy_month(C, cfg, op, L, ym)
+    except LimitReached: raise
+    except Exception as e:
+        STATS['errors'] += 1; return None
+
+def run(reg, cfg, workers=int(os.environ.get('ENERGY_WORKERS', '6'))):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    lock = threading.Lock(); _put = C.put
+    def put(k, v):
+        with lock: _put(k, v)
+    C.put = put
+    def save():
+        with lock: d = dict(C.d)
+        json.dump(d, open(C.path + '.tmp', 'w', encoding='utf-8'), ensure_ascii=False); os.replace(C.path + '.tmp', C.path)
     seed = {}
     f = os.path.join(D, f'seed/badtm_energy_{reg}.json')
     if os.path.exists(f): seed = json.load(open(f, encoding='utf-8'))['data']
@@ -48,26 +64,33 @@ def run(reg, cfg):
         if not L: continue
         lots.setdefault(L['jibun'], [L, []])[1].append(t['id'])
     E = {}; done = True; n_seed = 0
+    def write():
+        json.dump(dict(region=REGIONS[reg], source=f'건축HUB 건물에너지 지번별 전기·가스 월별 사용량 2023-01~2024-12, 지번 합계; 3권역 자료(2026-11-01)에 있던 지번 {n_seed}개는 그 값을 씀; r4 2026-11-23', api=cfg, data=E),
+                  open(os.path.join(OUT, f'badtm_energy_{reg}.json.tmp'), 'w', encoding='utf-8'), ensure_ascii=False)
+        os.replace(os.path.join(OUT, f'badtm_energy_{reg}.json.tmp'), os.path.join(OUT, f'badtm_energy_{reg}.json'))
+    def one(L):
+        res = {}
+        for ym in YM:
+            for op in (cfg['el'], cfg['gas']): res[(op, ym)] = _month(cfg, op, L, ym)
+        return res
+    todo = []
+    for jb, (L, ids) in sorted(lots.items()):
+        s = seed.get(jb)
+        if s and len(s.get('el') or {}) == 24 and len(s.get('gas') or {}) == 24:
+            E[jb] = dict(ids=ids, el=s['el'], gas=s['gas'], complete=True, src='seed 2026-11-01'); n_seed += 1; continue
+        if not cfg: E[jb] = dict(ids=ids, el=(s or {}).get('el', {}), gas=(s or {}).get('gas', {}), complete=False, src='seed(부분)' if s else 'none'); continue
+        todo.append((jb, L, ids))
     try:
-        for i, (jb, (L, ids)) in enumerate(sorted(lots.items())):
-            s = seed.get(jb)
-            if s and len(s.get('el') or {}) == 24 and len(s.get('gas') or {}) == 24:
-                E[jb] = dict(ids=ids, el=s['el'], gas=s['gas'], complete=True, src='seed 2026-11-01'); n_seed += 1; continue
-            if not cfg: E[jb] = dict(ids=ids, el=(s or {}).get('el', {}), gas=(s or {}).get('gas', {}), complete=False, src='seed(부분)' if s else 'none'); continue
-            el = {}; gas = {}; ok = True
-            for ym in YM:
-                for op, dst in ((cfg['el'], el), (cfg['gas'], gas)):
-                    v = energy_month(C, cfg, op, L, ym)
-                    if v is None: ok = False
-                    elif v['qty'] is not None: dst[ym] = v['qty']
-            E[jb] = dict(ids=ids, el=el, gas=gas, complete=ok, src='api r4')
-            if i % 10 == 0: C.save(); print(reg, 'energy', i, '/', len(lots), dict(STATS), flush=True)
+        with ThreadPoolExecutor(workers) as ex:
+            for k, ((jb, L, ids), res) in enumerate(zip(todo, ex.map(lambda x: one(x[1]), todo))):
+                el = {ym: v['qty'] for (op, ym), v in res.items() if op == cfg['el'] and v and v['qty'] is not None}
+                gas = {ym: v['qty'] for (op, ym), v in res.items() if op == cfg['gas'] and v and v['qty'] is not None}
+                E[jb] = dict(ids=ids, el=el, gas=gas, complete=all(v is not None for v in res.values()), src='api r4')
+                if k % 10 == 0: save(); write(); print(reg, 'energy', k, '/', len(todo), dict(STATS), flush=True)
     except LimitReached as e:
         done = False; print('LIMIT', reg, e, flush=True)
-    C.save()
-    json.dump(dict(region=REGIONS[reg], source=f'건축HUB 건물에너지 지번별 전기·가스 월별 사용량 2023-01~2024-12, 지번 합계; 3권역 자료(2026-11-01)에 있던 지번 {n_seed}개는 그 값을 씀; r4 2026-11-23', api=cfg, data=E),
-              open(os.path.join(OUT, f'badtm_energy_{reg}.json'), 'w', encoding='utf-8'), ensure_ascii=False)
-    print(reg, 'lots', len(lots), 'seed', n_seed, 'complete', sum(1 for v in E.values() if v['complete']), 'done', done, flush=True)
+    save(); write(); C.put = _put
+    print(reg, 'lots', len(lots), 'seed', n_seed, 'api', len(todo), 'complete', sum(1 for v in E.values() if v['complete']), 'done', done, dict(STATS), flush=True)
     return done
 
 if __name__ == '__main__':
