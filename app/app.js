@@ -149,7 +149,7 @@ function pageHome() {
   </div>
   <h2>연구 흐름</h2>
   <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 기준 모델, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 성능 개선안</b>고정형 차양 · 키네틱 파사드 적용, 개선 전후 비교</div><div><b>05 건물 조건별 지표</b>가려진 정도·평면 규모·층수별 효과, 주변 차폐 포함·제외 비교, 블록 피크전력(보조)</div></div>
-  <div class="card" id="paperdl"><h3>논문 요약본 — 학술논문 형식</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 연구 목적, 방법, 결과, 한계를 학술논문 형식으로 요약한 PDF이다. 학술지에 게재된 논문이 아니며, 모든 수치는 EnergyPlus 시뮬레이션 값이다.</p><p><a class="btn sun" href="media/dissertation_summary.pdf" download="조승완_박사학위논문_요약본_학술논문형식.pdf">요약본 PDF 내려받기</a></p></div>
+  <div class="card" id="paperdl"><h3>논문 요약본 — 학술논문 형식</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 연구 목적, 방법, 결과, 한계를 학술논문 형식(8쪽, 표 8·그림 6)으로 요약한 PDF이다. 학술지에 게재된 논문이 아니며, 모든 수치는 EnergyPlus 시뮬레이션 값이다.</p><p><a class="btn sun" href="media/dissertation_summary.pdf" download="조승완_박사학위논문_요약본_학술논문형식.pdf">요약본 PDF 내려받기</a></p></div>
   <h2>논문 지도</h2>
   <p class="small">논문 원고(제1~9장, 부록 A·B)의 장·절과 표가 이 사이트의 어느 페이지에 있는지. 원고의 수치는 모두 아래 페이지와 <a href="#/db">데이터베이스</a>에서 다시 확인할 수 있다.</p>
   <table class="tmap"><tr><th>원고</th><th>내용</th><th>사이트</th></tr>
