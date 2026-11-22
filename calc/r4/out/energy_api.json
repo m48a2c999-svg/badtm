@@ -1,0 +1,6 @@
+{
+ "base": "https://apis.data.go.kr/1613000/BldEngyHubService",
+ "el": "getBeElctyUsgInfo",
+ "gas": "getBeGasUsgInfo",
+ "qty": "useQty"
+}
