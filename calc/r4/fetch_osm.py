@@ -94,7 +94,9 @@ for reg in sys.argv[1:]:
         P['floor_area_est_m2'] = round(sum(x['area'] * x['levels'] for x in bs if x['levels'] is not None)) if lv else None
     bld = [b for b in B if b.get('block')]
     now = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    tmpf = os.path.join(OUT, f'badtm_osm_{reg}.json.tmp')
     json.dump(dict(region=REGIONS[reg], source=f'OpenStreetMap via Overpass API (ODbL © OpenStreetMap contributors), fetched {now} via {used}; 가구: {bsrc}; 범위 = 가구 경계 바깥 약 400 m',
-                   bbox=[s, w, n, e], pad_deg=[PAD_LAT, PAD_LON], used=used, plans=plans, blocks=feats, bld=bld, all=B), open(os.path.join(OUT, f'badtm_osm_{reg}.json'), 'w', encoding='utf-8'), ensure_ascii=False)
+                   bbox=[s, w, n, e], pad_deg=[PAD_LAT, PAD_LON], used=used, plans=plans, blocks=feats, bld=bld, all=B), open(tmpf, 'w', encoding='utf-8'), ensure_ascii=False)
+    os.replace(tmpf, os.path.join(OUT, f'badtm_osm_{reg}.json'))
     print(f'{reg}: 가구 {len(feats)}, 범위 안 건물 {len(B)}, 가구 안 {len(bld)}, 층수 태그 {sum(1 for b in bld if b["levels"] is not None)}', flush=True)
     time.sleep(5)
