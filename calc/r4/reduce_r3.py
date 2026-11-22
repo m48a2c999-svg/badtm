@@ -52,6 +52,8 @@ for fn in files:
             s = blk.setdefault((b, tag), [np.zeros(8760), 0.0, 0, 0.0])
             s[0] += hk; s[1] += hk.max(); s[2] += 1; s[3] += float(R['area'])
     if R.get('sizing'): d['sizing'] = R['sizing']
+    if tag in ('S1c', 'S1@ns') and R.get('meta'):   # r4: 구동 횟수 산정용 기하(drive_counts.py와 같은 항목)
+        m = R['meta']; d['meta'] = {k: (m[k].tolist() if hasattr(m.get(k), 'tolist') else m.get(k)) for k in ('ang', 'Lx', 'Ly', 'fh', 'bands', 'counts') if k in m}
     rec.setdefault(name, {})[tag] = d
 B = {}
 for (b, tag), (s, sp, n, ar) in blk.items():
