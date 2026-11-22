@@ -1,0 +1,31 @@
+name: r4reduce
+on:
+  push:
+    branches: [r4]
+    paths: ['calc/r4/trigger_reduce.txt']
+concurrency:
+  group: r4reduce
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: setup
+        run: pip install -q numpy pandas
+      - name: reduce
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash calc/r4/reduce_all.sh
+      - name: commit
+        run: |
+          git config user.name claude; git config user.email noreply@anthropic.com
+          git add -A calc/r4/red
+          git commit -qm "r4reduce: $(date -u +%Y-%m-%dT%H:%MZ)" || echo nothing
+          for i in 1 2 3; do git pull -q --rebase origin r4 && git push -q origin HEAD:r4 && break; sleep 5; done
