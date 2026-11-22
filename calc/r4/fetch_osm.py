@@ -44,7 +44,7 @@ def mapo_blocks():
     feats = [dict(type='Feature', geometry=mapping(G4.iloc[i]), properties=dict(plan_id=PID, plan=PN, block=f'{n+1:03d}', area_m2=round(parts[i].area), commercial_pct=100.0)) for n, i in enumerate(order)]
     plan = dict(id=PID, name=PN, gu='11440', gu_name='마포구', area_ha=round(zone.area / 1e4, 2), commercial_pct=100.0, n_blocks=len(feats), notice=None, date='2026-09 (UPIS)', promotion=[],
                 rule='도로명 마포대로(OpenStreetMap)에서 30 m 이내인 상업지역(UPIS UQ111) 다각형의 합 − 도시계획시설 도로(UQ151), 2,000 m² 이상',
-                polygons=[dict(id=r.PRESENT_SN, name=r.DGM_NM, notice=r.NTFC_SN, date=r.CREATE_DAT, area_m2=round(r.geometry.area)) for r in sel.itertuples()],
+                polygons=[dict(id=str(r.PRESENT_SN), name=str(r.DGM_NM), notice=(None if r.NTFC_SN is None or str(r.NTFC_SN) in ('nan', 'None') else str(r.NTFC_SN)), date=str(r.CREATE_DAT)[:10], area_m2=round(r.geometry.area)) for r in sel.itertuples()],
                 axis_osm_ways=[el['id'] for el in j['elements'] if el.get('geometry')], axis_length_m=round(axis.length))
     gj = [dict(type='Feature', geometry=mapping(gpd.GeoSeries([zone], crs=CRS).to_crs(4326).iloc[0]), properties=dict(kind='zone', area_ha=plan['area_ha'])),
           dict(type='Feature', geometry=mapping(gpd.GeoSeries([axis], crs=CRS).to_crs(4326).iloc[0]), properties=dict(kind='axis', name='마포대로', length_m=plan['axis_length_m']))] + \
