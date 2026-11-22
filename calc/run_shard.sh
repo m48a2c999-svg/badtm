@@ -11,15 +11,15 @@ else
   mkdir rr && cd rr && git init -q && git checkout -q -b $PF-$K && echo "calc results shard $K" > README.md && git add README.md && git -c user.name=claude -c user.email=noreply@anthropic.com commit -qm init && git remote add origin https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY && cd ..
 fi
 # 이미 올린 결과를 캐시로 되살림(다시 실행할 때 이어서 계산)
-mkdir -p $R/r3/mb/res_r3_gbd $R/r3/mb/res_r3_ybd $R/sb/mb/res_sb10
-for d in r3_gbd r3_ybd sb10; do
+mkdir -p $R/r3/mb/res_r3_gbd $R/r3/mb/res_r3_ybd $R/r3/mb/res_r3_cbd $R/sb/mb/res_sb10
+for d in r3_gbd r3_ybd r3_cbd sb10; do
   [ -d rr/res/$d ] || continue
   case $d in sb10) T=$R/sb/mb/res_sb10;; *) T=$R/r3/mb/res_$d;; esac
   for f in rr/res/$d/*.pkl.gz; do [ -e "$f" ] && gunzip -c "$f" > $T/$(basename "$f" .gz); done
 done
 push() {
   cd $W/rr; n=0
-  for d in r3_gbd r3_ybd sb10; do
+  for d in r3_gbd r3_ybd r3_cbd sb10; do
     case $d in sb10) T=$R/sb/mb/res_sb10;; *) T=$R/r3/mb/res_$d;; esac
     mkdir -p res/$d
     for f in $T/*.pkl; do [ -e "$f" ] || continue; g=res/$d/$(basename $f).gz; [ -e "$g" ] && continue; gzip -c "$f" > "$g"; n=$((n+1)); done
@@ -33,12 +33,20 @@ import json,sys,os
 R=os.environ['GITHUB_WORKSPACE']+'/calc'; K=int(sys.argv[1]); J=json.load(open(f"{R}/{os.environ.get('SF','shard')}_{K:02d}.json"))
 g={}
 for kind,reg,j in J: g.setdefault((kind,reg),[]).append(j)
+def wave(t):   # calc5: run in priority waves across regions (population first, then sensitivities)
+    if '@k10' in t or '@e13' in t or '__SZ' in t: return 2
+    if '__GLC' in t or '__LE' in t or '@m2' in t or '@p2' in t: return 3
+    if '__FH' in t or '@w100' in t or '@ts' in t: return 4
+    return 1
+g2={}
 for (kind,reg),L in g.items():
-    p = f'{R}/r3/mb/py/job_{reg}.json' if kind=='r3' else f'{R}/sb/mb/py/job_sb.json'
-    json.dump(L,open(p,'w')); print(kind,reg,len(L))
+    for j in L: g2.setdefault((wave(j[1]),kind,reg),[]).append(j)
+for (w,kind,reg),L in sorted(g2.items()):
+    p = f'{R}/r3/mb/py/jobw{w}_{reg}.json' if kind=='r3' else f'{R}/sb/mb/py/job_sb.json'
+    json.dump(L,open(p,'w')); print(kind,reg,w,len(L))
 PY
 cd $R/r3/mb/py; export BUNDLE=$R/r3
-for reg in gbd ybd; do [ -f job_$reg.json ] && REGION=$reg python3 sim_r3.py job_$reg.json $NP; done
+for f in $(ls jobw*_*.json 2>/dev/null | sort); do reg=${f#*_}; reg=${reg%.json}; REGION=$reg python3 sim_r3.py $f $NP; push; done
 cd $R/sb/mb/py; export BUNDLE=$R/sb
 [ -f job_sb.json ] && python3 sim_sb10.py job_sb.json $NP
 kill $PP 2>/dev/null; push

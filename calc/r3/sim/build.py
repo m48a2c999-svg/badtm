@@ -123,6 +123,7 @@ def build(name, scen, run_weather=True, extra_outputs=True):
        shading: bool (surrounding buildings)
        louver: None | dict zone_key->('fixed',theta)|('cutoff',)|('sched',sched_name)|None   zone_key like 'B3_S'
     """
+    import geom as _geom; _geom.FILL_H = scen.get('fill_h')   # 2026-11-17 B2: 주변 건물 높이 보완(없으면 None)
     ref = parse(open(REF).read())
     N, counts = FLOORS[name]
     bf = band_floors(name)
@@ -236,7 +237,9 @@ def build(name, scen, run_weather=True, extra_outputs=True):
             o[1] = str(int(scen.get('timestep', 6)))   # v10 (2026-10-20): default 6 steps/h (10 min), as the DOE prototype; 15 min did not converge for tall models
         if o[0] == 'ShadowCalculation':
             # PolygonClipping, Periodic, 20
-            o[1:] = ['PolygonClipping', 'Periodic', '20', '15000']
+            o[1:] = ['PolygonClipping', 'Timestep', '1', '15000'] if scen.get('shadow_ts') else ['PolygonClipping', 'Periodic', '20', '15000']   # 2026-11-23 calc5: 그림자 매 계산 간격 갱신 민감도
+        if o[0] == 'Sizing:Parameters' and scen.get('szf'):   # 2026-11-17 B1: 공조 용량 민감도 — 기준 모델 크기 계수(1.33)에 배수 적용
+            o[1] = '%.4f' % (1.33 * scen['szf']); o[2] = '%.4f' % (1.33 * scen['szf'])
         if o[0] == 'SimulationControl':
             o[5] = 'YES' if run_weather else 'NO'
             o[4] = 'NO'
@@ -410,7 +413,7 @@ def build(name, scen, run_weather=True, extra_outputs=True):
                     spec = fins.get(key); mat = 'ExtFin'
                 if spec is None:
                     continue
-                if spec[0] == 'fixed':
+                if spec[0] in ('fixed', 'fixed_day'):   # fixed_day (2026-11-17 B4): 고정 각도, 창면 일사가 있을 때(낮)만 내림, 밤에는 걷음
                     phi = 90.0 - spec[1]
                     sch = 'Slat_' + key
                     objs.append(['Schedule:Constant', sch, 'SlatAngleLim', '%.2f' % phi])
@@ -429,7 +432,7 @@ def build(name, scen, run_weather=True, extra_outputs=True):
                 elif spec[0] == 'sched':
                     ctl, sname = 'ScheduledSlatAngle', spec[1]
                 avail = 'LouverSeason' if spec[0] in ('cutoff_season', 'cutoff_sol', 'cutoff_sol2') else 'LouverAvail'
-                ctype, sp = ('OnIfHighSolarOnWindow', '%g' % spec[1]) if spec[0] == 'cutoff_sol' else (('OnIfHighOutdoorAirTempAndHighSolarOnWindow' if spec[3] == 'oat' else 'OnIfHighZoneAirTempAndHighSolarOnWindow'), '%g' % spec[1]) if spec[0] == 'cutoff_sol2' else ('OnIfScheduleAllows', '')
+                ctype, sp = ('OnIfHighSolarOnWindow', '1') if spec[0] == 'fixed_day' else ('OnIfHighSolarOnWindow', '%g' % spec[1]) if spec[0] == 'cutoff_sol' else (('OnIfHighOutdoorAirTempAndHighSolarOnWindow' if spec[3] == 'oat' else 'OnIfHighZoneAirTempAndHighSolarOnWindow'), '%g' % spec[1]) if spec[0] == 'cutoff_sol2' else ('OnIfScheduleAllows', '')
                 sp2 = ''
                 if spec[0] == 'cutoff_sol2': sp, sp2 = '%g' % spec[2], '%g' % spec[1]   # E+: Setpoint = temperature (C), Setpoint 2 = solar (W/m2)
                 objs.append(['WindowShadingControl', 'WSC_' + key, zone, '1', 'ExteriorBlind', '', ctype,

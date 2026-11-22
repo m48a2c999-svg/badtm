@@ -237,7 +237,7 @@ def build(name, scen, run_weather=True, extra_outputs=True):
             o[1] = str(int(scen.get('timestep', 6)))   # v10 (2026-10-20): default 6 steps/h (10 min), as the DOE prototype; 15 min did not converge for tall models
         if o[0] == 'ShadowCalculation':
             # PolygonClipping, Periodic, 20
-            o[1:] = ['PolygonClipping', 'Periodic', '20', '15000']
+            o[1:] = ['PolygonClipping', 'Timestep', '1', '15000'] if scen.get('shadow_ts') else ['PolygonClipping', 'Periodic', '20', '15000']   # 2026-11-23 calc5: 그림자 매 계산 간격 갱신 민감도
         if o[0] == 'Sizing:Parameters' and scen.get('szf'):   # 2026-11-17 B1: 공조 용량 민감도 — 기준 모델 크기 계수(1.33)에 배수 적용
             o[1] = '%.4f' % (1.33 * scen['szf']); o[2] = '%.4f' % (1.33 * scen['szf'])
         if o[0] == 'SimulationControl':
