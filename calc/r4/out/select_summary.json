@@ -14,16 +14,18 @@
    21,
    2
   ],
-  "nb_missing_median_pct": 4.424778761061947,
+  "nb_missing_median_pct": 3.6363636363636362,
   "join": {
    "centroid": 33
   },
   "match": {
-   "single": 31,
-   "hungarian": 2
+   "single": 30,
+   "hungarian": 2,
+   "fallback_best": 1
   },
-  "n_heights": 851,
-  "n_scale_flags": 2
+  "n_heights": 852,
+  "n_scale_flags": 2,
+  "floor_fix": []
  },
  "ybd": {
   "name": "여의도",
@@ -34,23 +36,25 @@
   "n_targets": 88,
   "n_main_office": 76,
   "floors_median": 16.0,
-  "obstr_median": 18.835,
+  "obstr_median": 18.82,
   "n_low_mid_high": [
-   26,
-   39,
-   23
+   27,
+   40,
+   21
   ],
   "nb_missing_median_pct": 0.0,
   "join": {
-   "centroid": 82,
-   "bun_search": 6
+   "centroid": 85,
+   "bun_search": 3
   },
   "match": {
-   "single": 78,
+   "fallback_best": 2,
+   "single": 76,
    "hungarian": 10
   },
   "n_heights": 543,
-  "n_scale_flags": 1
+  "n_scale_flags": 1,
+  "floor_fix": []
  },
  "gbd": {
   "name": "강남",
@@ -61,24 +65,25 @@
   "n_targets": 371,
   "n_main_office": 335,
   "floors_median": 13.0,
-  "obstr_median": 22.82,
+  "obstr_median": 22.46,
   "n_low_mid_high": [
-   40,
-   144,
-   187
+   42,
+   150,
+   179
   ],
-  "nb_missing_median_pct": 0.9523809523809523,
+  "nb_missing_median_pct": 0.9493670886075949,
   "join": {
-   "centroid": 355,
-   "inner_point": 6,
-   "bun_search": 10
+   "centroid": 362,
+   "bun_search": 4,
+   "inner_point": 5
   },
   "match": {
    "single": 369,
    "hungarian": 2
   },
   "n_heights": 4383,
-  "n_scale_flags": 20
+  "n_scale_flags": 19,
+  "floor_fix": []
  },
  "cbd": {
   "name": "도심",
@@ -86,27 +91,34 @@
   "n_bld_in_blocks": 1879,
   "n_all": 12329,
   "n_register_joined": 1772,
-  "n_targets": 98,
-  "n_main_office": 82,
+  "n_targets": 99,
+  "n_main_office": 83,
   "floors_median": 12.0,
-  "obstr_median": 18.73,
+  "obstr_median": 18.34,
   "n_low_mid_high": [
    26,
-   48,
-   24
+   51,
+   22
   ],
-  "nb_missing_median_pct": 11.407509470506138,
+  "nb_missing_median_pct": 10.96774193548387,
   "join": {
-   "centroid": 90,
+   "centroid": 92,
    "inner_point": 3,
-   "bun_search": 5
+   "bun_search": 4
   },
   "match": {
-   "single": 89,
-   "hungarian": 5,
-   "fallback_best": 4
+   "single": 88,
+   "hungarian": 10,
+   "fallback_best": 1
   },
-  "n_heights": 5827,
-  "n_scale_flags": 30
+  "n_heights": 5855,
+  "n_scale_flags": 30,
+  "floor_fix": [
+   [
+    "w223158457",
+    "KOREAN Re 빌딩",
+    "r4 조회 0 → 2026-11-01 조회 12"
+   ]
+  ]
  }
 }
