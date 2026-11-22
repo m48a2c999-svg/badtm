@@ -1,0 +1,54 @@
+name: r4collect
+on:
+  push:
+    branches: [r4]
+    paths: ['calc/r4/trigger_collect.txt']
+concurrency:
+  group: r4collect
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: setup
+        run: pip install -q numpy pandas scipy shapely pyproj pyogrio geopandas
+      - name: probe energy API
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: cd calc/r4 && python3 energy_r4.py probe || true
+      - name: OSM
+        run: cd calc/r4 && python3 fetch_osm.py mpo ybd gbd cbd
+      - name: register
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: cd calc/r4 && python3 collect.py mpo ybd gbd cbd
+      - name: select
+        run: |
+          cd calc/r4
+          python3 - <<'PY'
+          import json,os,sys
+          ok=all(os.path.exists(f'out/collect_status_{r}.json') and json.load(open(f'out/collect_status_{r}.json'))['done'] for r in ['mpo','ybd','gbd','cbd'])
+          open('out/.collect_done','w').write('1' if ok else '0'); print('collect done:', ok)
+          PY
+          if [ "$(cat out/.collect_done)" = "1" ]; then python3 select_r4.py mpo ybd gbd cbd; fi
+      - name: energy
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: cd calc/r4 && if [ "$(cat out/.collect_done)" = "1" ]; then python3 energy_r4.py mpo ybd gbd cbd; fi
+      - name: commit
+        if: always()
+        run: |
+          git config user.name claude; git config user.email noreply@anthropic.com
+          git add -A calc/r4/out calc/r3/data/r3 || true
+          git commit -qm "r4collect: $(date -u +%Y-%m-%dT%H:%MZ)" || echo nothing
+          for i in 1 2 3; do git pull -q --rebase origin r4 && git push -q origin HEAD:r4 && break; sleep 5; done
