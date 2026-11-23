@@ -149,7 +149,7 @@ function pageHome() {
   </div>
   <h2>연구 흐름</h2>
   <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 기준 모델, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 성능 개선안</b>고정형 차양 · 키네틱 파사드 적용, 개선 전후 비교</div><div><b>05 건물 조건별 지표</b>가려진 정도·평면 규모·층수별 효과, 주변 차폐 포함·제외 비교, 블록 피크전력(보조)</div></div>
-  <div class="card" id="paperdl"><h3>논문 요약본 — 학술논문 형식</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 연구 목적, 방법, 결과, 한계를 학술논문 형식(8쪽, 표 8·그림 6)으로 요약한 PDF이다. 학술지에 게재된 논문이 아니며, 모든 수치는 EnergyPlus 시뮬레이션 값이다.</p><p><a class="btn sun" href="media/dissertation_summary.pdf" download="조승완_박사학위논문_요약본_학술논문형식.pdf">요약본 PDF 내려받기</a></p></div>
+  <div class="card" id="paperdl"><h3>논문 요약본 — 학술논문 형식</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 연구 목적, 방법, 결과, 한계를 학술논문 형식(8쪽, 표 8·그림 6; 역삼 257동과 서울 오피스 네 지역 591동)으로 요약한 PDF이다. 학술지에 게재된 논문이 아니며, 모든 수치는 EnergyPlus 시뮬레이션 값이다.</p><p><a class="btn sun" href="media/dissertation_summary.pdf" download="조승완_박사학위논문_요약본_학술논문형식.pdf">요약본 PDF 내려받기</a></p></div>
   <h2>논문 지도</h2>
   <p class="small">논문 원고(제1~9장, 부록 A·B)의 장·절과 표가 이 사이트의 어느 페이지에 있는지. 원고의 수치는 모두 아래 페이지와 <a href="#/db">데이터베이스</a>에서 다시 확인할 수 있다.</p>
   <table class="tmap"><tr><th>원고</th><th>내용</th><th>사이트</th></tr>
@@ -162,7 +162,7 @@ function pageHome() {
   <tr><td>5.4 · 8.5</td><td>밀집 조건에 따른 효과(표 5-4·5-5), 건물 조건별 검토 우선순위(표 8-1)</td><td><a href="#/traits">건물 특성별</a></td></tr>
   <tr><td>5.7</td><td>키네틱 장치의 구동 전력량(표 5-9·5-10), 대기전력을 피크전력에 더한 결과(표 5-11) — 제품 사양을 바꿔 다시 계산</td><td><a href="#/alts">성능 개선안</a></td></tr>
   <tr><td>제6장</td><td>층대·입면·월별·시간별 상세 분석(표 6-1~6-5) — 원고에만</td><td>—</td></tr>
-  <tr><td>5.9 · 제7장</td><td>가구 단위 수치(표 5-14, 테헤란로제2지구 140동), 서울 오피스 3권역 536동 확장(표 7-1~7-11)</td><td><a href="#/plan">재계산·확장</a></td></tr>
+  <tr><td>5.9 · 제7장</td><td>가구 단위 수치(표 5-14, 테헤란로제2지구 140동), 서울 오피스 네 지역 591동 확장(제7장)</td><td><a href="#/plan">재계산·확장</a></td></tr>
   <tr><td>제8장 · 제9장</td><td>논의(불확실성과 해석 범위), 결론(연구 질문에 대한 답, 기여, 한계와 후속 연구)</td><td><a href="#/plan">재계산·확장</a>(한계)</td></tr>
   <tr><td>부록 A</td><td>연구 시스템(표 A-1), 자료 생성기 시험(표 A-2), 지도 위 실시간 시뮬레이션</td><td><a href="#/db">데이터베이스</a> · <a href="#/gen">자료 생성기</a> · <a href="#/live">실시간 시뮬레이션</a></td></tr>
   </table>
@@ -184,11 +184,11 @@ function pageSite() {
   const alts = ORDER257.map(t => `<option value="${t}">${esc(altName(t))}</option>`).join('');
   $('#page-site').innerHTML = `
   <div class="kicker">대상지 · 건물 데이터베이스</div>
-  <h1>서울 오피스 3권역 — 역삼 257동과 3권역 가구</h1>
-  <p>지도에는 연구 대상인 3권역(도심, 강남, 여의도·마포)의 지구단위계획구역과 가구 경계가 모두 나온다. 그 가운데 EnergyPlus 계산을 마친 것은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 지상 6층 이상 건물 가운데 업무 용도이고 공개 자료로 모델을 만들 수 있었던 257동(업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이며, 건물별 결과 색은 이 257동에만 있다. 나머지 가구(도심·여의도와 강남의 다른 가구)는 경계를 표시하며, 같은 절차로 계산한 서울 오피스 3권역 536동의 결과는 <a href="#/plan">재계산·확장</a>에 있다. 지도의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
-  <p class="small">연구 대상은 국가승인통계가 정한 서울 오피스 3권역(도심, 강남, 여의도·마포) 안의 업무 기능 지구단위계획구역 가구이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개; <a href="#/plan">재계산·확장</a>). 이 페이지와 결과 페이지의 수치는 모두 역삼 257동의 결과이다(그중 140동이 테헤란로제2지구 가구 40개 안). 같은 절차와 20개 조건으로 계산한 3권역 536동(도심 94·강남 363·여의도·마포 79동)의 결과는 <a href="#/plan">재계산·확장</a>에 있다(가구·건물 자료는 <a href="#/gen">자료 생성기</a>).</p>
+  <h1>서울 오피스 네 지역 — 역삼 257동과 네 지역 591동</h1>
+  <p>지도에는 네 지역(도심, 강남, 여의도, 마포)의 대상 구역과 가구 경계가 나온다. 윤곽으로 칠한 건물은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 257동(제4~6장의 방법 사례; 업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이고, 점은 네 지역에서 같은 절차로 만든 계산 대상 591동(제7장)이다. 지도 색을 "대안별 EUI 변화"로 두면 두 집단 모두 고른 대안의 건물별 EUI 변화로 칠해진다. 257동의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
+  <p class="small">네 지역은 국가승인통계가 정한 서울 오피스 세 권역(도심, 강남, 여의도·마포) 안의 연구자 정의 구역이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개, 마포대로 30 m 이내 상업지역 가구 16개). 이 페이지 아래 표와 결과 페이지의 수치는 역삼 257동의 결과이다(그중 140동이 테헤란로제2지구 가구 40개 안). 네 지역 591동(도심 99·강남 371·여의도 88·마포 33동)의 결과는 <a href="#/plan">재계산·확장</a>에 있다.</p>
   <div class="ctrl">
-    <label>권역<select id="mregion"><option value="">3권역 전체</option><option value="강남(GBD)">강남 — 363동 계산(역삼 257동 중 131동 포함)</option><option value="도심(CBD)">도심 — 94동 계산</option><option value="여의도·마포(YBD)">여의도·마포 — 79동 계산</option><option value="yeoksam">역삼 4개 대블록(확대)</option></select></label>
+    <label>지역<select id="mregion"><option value="">네 지역 전체</option><option value="강남(GBD)">강남 — 371동</option><option value="도심(CBD)">도심 — 99동</option><option value="여의도(YBD)">여의도 — 88동</option><option value="마포(MPO)">마포 — 33동</option><option value="yeoksam">역삼 4개 대블록(확대)</option></select></label>
     <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 피크전력 변화</option></select></label>
     <label>대안<select id="malt">${alts}</select></label>
     <label>주변 차폐<select id="mcond"><option value="차폐 포함">포함(본 결과)</option><option value="차폐 제외">제외(비교)</option></select></label>
@@ -235,20 +235,21 @@ function drawMap() {
     const pg = L.polygon(JSON.parse(b.polygon), { color: SEL === b.sim_name ? COL.sun : '#333', weight: SEL === b.sim_name ? 3 : 0.6, fillColor: colorOf(b, mode), fillOpacity: 0.85 });
     pg.bindTooltip(`${esc(b.name)} · ${b.floors}층`); pg.on('click', () => selectBuilding(b.sim_name, false)); pg.addTo(LAYER);
   }
+  r4DrawMarkers($('#malt').value, mcond(), mode);
   let leg = '';
   if (mode === 'block') leg = Object.entries(blockColor).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join(' ');
   else if (CLASS_DEF[mode]) leg = `${CLASS_DEF[mode].label}: ` + CLASS_DEF[mode].levels.slice(0, 3).map((l, i) => `<span><i style="background:${seq3[i]}"></i>${l}</span>`).join(' ');
   else { const lim = mode === 'dEUI_pct' ? 2 : 3; leg = `${altName($('#malt').value)}(주변 차폐 ${mcond() === '차폐 제외' ? '제외' : '포함'}) · ${METRIC[mode].label}: ` + [-lim, -lim / 2, 0, lim / 2, lim].map(v => `<span><i style="background:${divColor(v, lim)}"></i>${pct(v, 1)}</span>`).join(' ') + ' (초록 = 감소, 빨강 = 증가)'; }
   $('#mleg').innerHTML = leg;
 }
-/* 3권역(도심·강남·여의도·마포)의 지구단위계획구역·가구 경계를 대상지 지도에 겹친다. 자료: data/upis(서울 UPIS 2026-09, 자료 생성기와 같은 파일).
-   계산을 마친 건물은 역삼 257동뿐이므로 다른 가구는 경계만 그린다(상태는 districts 표). */
+/* 네 지역(도심·강남·여의도·마포)의 대상 구역·가구 경계를 대상지 지도에 겹친다. 자료: data/upis(서울 UPIS 2026-09, 자료 생성기와 같은 파일), 마포는 data/r4/area_mpo.geojson(용도지역 기준 구역).
+   네 지역 계산 대상 591동은 r4DrawMarkers(app/r4.js)가 점으로 그린다(상태는 districts 표). */
 const REG = { layers: {}, bounds: {}, done: false };
-const REG_COL = { '도심(CBD)': '#7a4f9d', '강남(GBD)': '#1f6f8b', '여의도·마포(YBD)': '#b06a2a' };
+const REG_COL = { '도심(CBD)': '#7a4f9d', '강남(GBD)': '#1f6f8b', '여의도(YBD)': '#b06a2a', '마포(MPO)': '#2f7d6b' };
 async function drawRegions() {
   if (REG.done || typeof PRESET === 'undefined') return; REG.done = true;
   const D = Object.fromEntries(q('SELECT code, name, status FROM districts').map(r => [r.code, r]));
-  const CODE = { '도심(CBD)': 'CBD', '강남(GBD)': 'GBD', '여의도·마포(YBD)': 'YBD' };
+  const CODE = { '도심(CBD)': 'CBD', '강남(GBD)': 'GBD', '여의도(YBD)': 'YBD', '마포(MPO)': 'MPO' };
   const gbdDone = new Set(q('SELECT DISTINCT plan_id || "-" || gagu k FROM gbd_assign').map(r => r.k));
   const nDone = Object.fromEntries(q('SELECT plan_id || "-" || gagu k, COUNT(*) n FROM gbd_assign GROUP BY 1').map(r => [r.k, r.n]));
   try {
@@ -268,7 +269,7 @@ async function drawRegions() {
         for (const b of blocks[f.properties.id] || []) {
           const k = `${b.properties.plan_id}-${b.properties.block}`; const nd = nDone[k];
           L.geoJSON(b, { style: { color: col, weight: 0.8, fillColor: col, fillOpacity: nd ? 0.22 : 0.06 } })
-            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 수치)` : ` · 가구 경계(3권역 계산 결과는 재계산·확장)`)).addTo(g); nb++;
+            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 수치)` : ` · 가구 경계(네 지역 계산 결과는 재계산·확장)`)).addTo(g); nb++;
         }
       }
       g.addTo(MAP); REG.layers[reg] = g;
@@ -277,6 +278,16 @@ async function drawRegions() {
         L.marker(g.getBounds().getCenter(), { icon: L.divIcon({ className: 'reglabel', html: `<span style="border-color:${col};color:${col}">${esc(reg)}<br><small>가구 ${nb}개 · ${esc(st)}</small></span>`, iconSize: [160, 40], iconAnchor: [80, 20] }), interactive: false }).addTo(MAP);
       }
     }
+    try {   // 마포: 마포대로 30 m 이내 상업지역(용도지역) 구역과 가구(원고 7.1.2항)
+      const mj = await (await fetch('data/r4/area_mpo.geojson')).json(); const col = REG_COL['마포(MPO)'], st = (D.MPO || {}).status || ''; const g = L.featureGroup(); let nb = 0;
+      for (const f of mj.features) {
+        if (f.properties.kind === 'zone') L.geoJSON(f, { style: { color: col, weight: 2.2, dashArray: '8 5', fill: false } }).bindTooltip(`마포대로변 상업지역(${f.properties.area_ha} ha) · 마포(MPO) · ${esc(st)}`).addTo(g);
+        else if (f.properties.kind === 'axis') L.geoJSON(f, { style: { color: col, weight: 1, opacity: 0.5 } }).bindTooltip(`도로명 마포대로(OpenStreetMap) — 구역 선정 기준선`).addTo(g);
+        else { L.geoJSON(f, { style: { color: col, weight: 0.8, fillColor: col, fillOpacity: 0.06 } }).bindTooltip(`마포 가구 ${esc(f.properties.block || '')} · ${num(f.properties.area_m2)} m²`).addTo(g); nb++; }
+      }
+      g.addTo(MAP); REG.layers['마포(MPO)'] = g; REG.bounds['마포(MPO)'] = g.getBounds();
+      L.marker(g.getBounds().getCenter(), { icon: L.divIcon({ className: 'reglabel', html: `<span style="border-color:${col};color:${col}">마포(MPO)<br><small>가구 ${nb}개 · ${esc(st)}</small></span>`, iconSize: [160, 40], iconAnchor: [80, 20] }), interactive: false }).addTo(MAP);
+    } catch (e) { console.warn('마포 구역 표시 실패', e); }
     const all = L.featureGroup(Object.values(REG.layers)); REG.bounds[''] = all.getBounds();
     if (!$('#mregion').value) MAP.fitBounds(all.getBounds().pad(0.05));
     MAP.on('zoomend', () => { const z = MAP.getZoom(); Object.values(REG.layers).forEach(g => g.eachLayer(l => { if (l.setStyle && l.options.style && !l.options.style.dashArray) l.setStyle({ weight: z >= 14 ? 0.8 : 0.3 }); })); });
@@ -452,7 +463,7 @@ function pageTraits() {
   <label>y축<select id="sy">${Object.entries(METRIC).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}</select></label></div>
   <div id="scat"></div>
   <h2>적용 조건</h2><div id="tcond"></div>
-  ${note('구간 경계: 가려진 정도와 평면 면적은 257동의 3분위, 층수는 6~10·11~20·21층 이상(21층 이상은 10동뿐이므로 경향으로만 본다). 3권역 계산에도 257동의 구간 경계를 그대로 적용하였다(원고 7.1.4항). ' + SIMNOTE)}`;
+  ${note('구간 경계: 가려진 정도와 평면 면적은 257동의 3분위, 층수는 6~10·11~20·21층 이상(21층 이상은 10동뿐이므로 경향으로만 본다). 네 지역 계산에도 257동의 구간 경계를 그대로 적용하였다(원고 7.1.4항). ' + SIMNOTE)}`;
   ['tcls', 'tmet'].forEach(id => $('#' + id).addEventListener('change', drawTraitTable));
   ['salt', 'sx', 'sy'].forEach(id => $('#' + id).addEventListener('change', drawScatter));
   drawTraitTable(); drawScatter(); drawConditions();
@@ -522,25 +533,26 @@ function pageValid() {
 function pagePlan() {
   const D = q('SELECT * FROM districts');
   $('#page-plan').innerHTML = `
-  <div class="kicker">재계산·확장과 한계</div><h1>재계산, 그리고 국가승인통계의 서울 오피스 3권역으로</h1>
+  <div class="kicker">재계산·확장과 한계</div><h1>재계산, 그리고 국가승인통계의 서울 오피스 네 지역으로</h1>
   <h2>재계산</h2><ol>
   <li><b>같은 조건</b> — 완료. 9개 대안을 같은 257동·보정 모델·기상·계산 간격·계산 기간(연중 1~12월)으로 계산. 일사량 기준 제어 2종은 냉방 기간(5~9월)에만 작동, 피크 시간대 차양 폐쇄는 연중 평일 13~18시.</li>
     <li><b>차폐 포함·제외 비교</b> — 완료. 9개 대안 × 257동 × 차폐 포함·제외(결과 4절).</li>
   <li><b>같은 작동 기간 비교</b> — 완료. 9개 대안을 모두 연중 작동시킨 비교와 키네틱 6종을 모두 냉방 기간(5~9월)에만 작동시킨 비교(원고 표 5-8, <a href="#/results">결과 5-1절</a>).</li>
   <li><b>워밍업·모델 가정 민감도</b> — 완료. 워밍업 25일 → 100일(20동, 9개 대안), 냉동기 COP 배수 1.0·기기 전력밀도 1.3(40동, 9개 대안)(원고 표 4-8, <a href="#/valid">실측 비교</a>).</li>
-  <li><b>서울 오피스 3권역</b> — 완료. 도심 94동·강남 363동(역삼 257동과 겹치는 131동 포함)·여의도·마포 79동, 20개 조건(원고 제7장, 아래 표).</li>
+  <li><b>서울 오피스 네 지역</b> — 완료. 같은 수집·결합·선별 절차로 만든 도심 99동·강남 371동·여의도 88동·마포 33동에 20개 조건 + 추가 9개 조건(작동 기간·야간 걷음·장치 배치) + 지역별 표본 민감도(원고 제7장, <a href="#/plan" onclick="setTimeout(()=>document.getElementById('r4').scrollIntoView(),0)">아래 표</a>).</li>
 </ol>
   <h3>남은 과제(원고 9.3절)</h3><ul>
   <li>개선 전 기준을 대상 건물의 기존 외피 상태(창면적비·유리 사양)에 가깝게 맞추는 일.</li>
   <li>평균 차폐각 외의 밀집 지표(천공차폐율; 장윤배·이성룡, 2001) 보완.</li>
   <li>공간 주광 자율성(sDA)·과다 일사 노출(ASE)과 눈부심을 상세 3개 동 등 대표 건물에서 따로 계산하는 일.</li><li>실제 건물의 시간별 계측 자료로 보정한 모델에서 같은 비교를 반복하는 일.</li></ul>
-  <h2>확장 — 업무 기능 지구단위계획구역의 가구별 전체 건물</h2>
-  <div class="card"><p><b>권역의 근거.</b> ${esc(META.basis)}</p><p><b>가구(분석 단위).</b> 지구단위계획구역을 도시계획도로로 나눈 가구(2,000 m² 이상). 가구 안의 모든 건물을 주변 차폐와 가구 합산에 쓰고, 분석 대상은 업무시설 6층 이상 건물로 한다(<a href="#/gen">자료 생성기</a>).</p></div>
-  ${table([{ h: '권역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
+  <h2>확장 — 서울 오피스 네 지역의 가구</h2>
+  <div class="card"><p><b>지역의 근거.</b> ${esc(META.basis)}</p><p><b>가구(분석 단위).</b> 대상 구역(도심·강남·여의도는 업무 기능 지구단위계획구역, 마포는 마포대로 30 m 이내 상업지역)을 도시계획도로로 나눈 가구(2,000 m² 이상). 350 m 안 주변 건물을 모두 주변 차폐에 쓰고, 계산 대상은 업무시설이 포함된 6층 이상 건물로 하며, 가구 합산은 가구 안 계산 대상 건물만 더한다(원고 7.7절; <a href="#/gen">자료 생성기</a>).</p></div>
+  ${table([{ h: '지역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
   ${gbdSection()}
-  ${r3Section()}
-  <div class="flow"><div><b>경계</b>지구단위계획구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장·건축HUB(공공데이터 포털)</div><div><b>모델</b>역삼 257동과 같은 자동 모델·20개 조건(업무시설 6층 이상)</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
-  <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다. 실측 대조는 전기에 한정되어 난방 가스와 총 EUI 변화의 실측 타당성은 검증하지 못하였다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다.</li><li>작동 기간은 연중과 냉방 기간(5~9월) 두 가지만 비교하였다. 블라인드 고정의 EUI 감소는 EnergyPlus 외부 블라인드 모델에서 창 바깥 차양층이 밤사이 열손실을 줄인 결과에 크게 의존하며(밤에 걷어 올리면 257동 중앙값 −1.18% → +0.94%), 실제 건물에서는 바람·틈새 대류로 작아질 수 있다. 고정형 차양의 효과 방향은 개선 전 창 사양에 따라서도 바뀌었다(원고 표 4-10). 약 100동의 워밍업 미수렴 경고는 민감도 계산(20동, 9개 대안)에서 검토한 20동에서 대안 간 비교에 영향이 작았다(원고 표 4-8; 경고가 있던 전체 건물로 일반화하지 않음).</li><li>키네틱 장치의 구동 전력량은 작동 규칙으로 다시 센 작동 횟수와 제품 사양으로 추정한 값이며(원고 5.7절, <a href="#/alts">성능 개선안</a>에서 사양을 바꿔 다시 계산), 회당 작동 시간·대기전력·모터당 창 면적은 가정값이다.</li><li>그림자 계산은 20일마다 갱신하였다. 매 계산 간격 갱신과 비교한 대표 4동에서 EUI 변화는 −0.11~+0.27%p, 건물 피크전력 변화는 최대 1.8%p 달랐다(원고 표 4-9). 3권역 모델도 실측 월 기준을 충족한 건물이 적었다(도심 1/77, 강남 4/214, 여의도·마포 4/77; 원고 표 7-3).</li><li>257동 주변 350 m 이내 건물의 약 60%(건물별 중앙값)는 높이 자료가 없어 차폐면에서 빠졌으므로 주변 차폐가 작게 반영되었을 수 있다(3권역은 0~13%; 원고 4.2.1항·7.1.3항). 수직 루버는 평면(등가 직사각형)의 단변 두 입면에 두었으므로 257동 중 108동에서는 실제 방위가 남·북에 가까운 입면에 설치되었다(두 집단의 결과는 비슷함; 원고 4.3.2항).</li><li>3권역 계산 대상 536동 가운데 62동은 건축물대장 주용도가 업무시설이 아닌 복합 용도이다(주용도 업무시설 474동만 집계해도 권역별 EUI 중앙값의 부호는 같음; 원고 7.1.1항). 강남에서 블라인드·수평 루버 컷오프 각도 제어의 감소(−0.25%, −0.11%)는 건물별 중앙값 기준이며 권역 합산과 가구별 중앙값은 증가였고, 그림자 갱신 간격의 민감도를 고려하면 방향을 확정하지 않는다(원고 7.3.1항).</li></ol>`;
+  ${r4Section()}
+  <div class="flow"><div><b>경계</b>대상 구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장 표제부(지번 결합·윤곽–표제부 짝짓기)</div><div><b>모델</b>역삼 257동과 같은 자동 모델·20개 + 9개 조건(업무 용도 6층 이상)</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
+  <h2>한계</h2><ol><li>모든 결과는 시뮬레이션 값이며, 실측 기준을 충족한 건물이 적어 상대 비교로만 해석한다. 실측 대조는 전기에 한정되어 난방 가스와 총 EUI 변화의 실측 타당성은 검증하지 못하였다.</li><li>외피와 설비는 기준 모델 값이며, 실제 건물의 외피·설비·운전 시간은 반영하지 못하였다. 다수 건물의 효과 크기는 냉동기 효율 가정(COP 배수 2.0)에 따라 달라진다.</li><li>성능 개선 비용, 장기 성능, 실제 작동, 재실자 만족도는 다루지 않는다.</li><li>작동 기간은 연중과 냉방 기간(5~9월) 두 가지만 비교하였다. 블라인드 고정의 EUI 감소는 EnergyPlus 외부 블라인드 모델에서 창 바깥 차양층이 밤사이 열손실을 줄인 결과에 크게 의존하며(밤에 걷어 올리면 257동 중앙값 −1.18% → +0.94%), 실제 건물에서는 바람·틈새 대류로 작아질 수 있다. 고정형 차양의 효과 방향은 개선 전 창 사양에 따라서도 바뀌었다(원고 표 4-10). 약 100동의 워밍업 미수렴 경고는 민감도 계산(20동, 9개 대안)에서 검토한 20동에서 대안 간 비교에 영향이 작았다(원고 표 4-8; 경고가 있던 전체 건물로 일반화하지 않음).</li><li>키네틱 장치의 구동 전력량은 작동 규칙으로 다시 센 작동 횟수와 제품 사양으로 추정한 값이며(원고 5.7절, <a href="#/alts">성능 개선안</a>에서 사양을 바꿔 다시 계산), 회당 작동 시간·대기전력·모터당 창 면적은 가정값이다.</li><li>그림자 계산은 20일마다 갱신하였다. 매 계산 간격 갱신과 비교한 대표 4동에서 EUI 변화는 −0.11~+0.27%p, 건물 피크전력 변화는 최대 1.8%p 달랐다(원고 표 4-9). 네 지역 모델도 실측 월 기준을 충족한 건물이 적었다(도심 1/83, 강남 6/349, 여의도 4/79, 마포 1/26; 원고 표 7-3).</li><li>257동 주변 350 m 이내 건물의 약 60%(건물별 중앙값)는 높이 자료가 없어 차폐면에서 빠졌으므로 주변 차폐가 작게 반영되었을 수 있다(네 지역은 0~11%; 원고 4.2.1항·7.1.3항). 수직 루버는 평면(등가 직사각형)의 단변 두 입면에 두었으므로 257동 중 108동에서는 실제 방위가 남·북에 가까운 입면에 설치되었다(두 집단의 결과는 비슷함; 원고 4.3.2항).</li><li>네 지역 계산 대상 591동 가운데 70동은 건축물대장 주용도가 업무시설이 아니고 기타 용도에 업무시설이 있는 건물이다(통계 대응 부분집합만 집계해도 36개 지역·대안 조합 모두 EUI 중앙값의 부호가 같음; 원고 7.8.2항). 강남에서 블라인드·수평 루버 컷오프 각도 제어의 감소(−0.27%, −0.14%)는 건물별 중앙값 기준이며 지역 합산(+0.33%, +0.33%)과 가구별 중앙값은 증가였고, 그림자 갱신 간격 민감도 범위 안의 값이어서 방향을 확정하지 않는다(원고 7.3.1항). 네 지역에서도 창 사양을 바꾸면 고정형 차양의 감소가 사라지거나 증가로 바뀌었다(원고 7.8.1항).</li></ol>`;
+  r4Bind();
 }
 
 
@@ -560,20 +572,6 @@ function drawDrive() {
     `<p class="small">257동 건물별 중앙값, 주변 차폐 포함. 구동 전력량 = (모터 수 × 각도 조절 횟수 × 전력 × 시간 + 모터 수 × 내림·올림 횟수 × 전력 × 시간 + 모터 수 × 대기전력 × 8,760시간) ÷ 바닥면적. 등가 모터 수 = 창 면적 ÷ 모터당 창 면적. 창 면적은 EnergyPlus 모델과 같은 값(기준 층고 3.96 m × 창면적비 40% × 입면 길이 × 층수)이며, 시간은 초를 3.6×10⁶으로 나누어 kWh로 바꾼다. EUI 변화(구동 포함) = 건물별 EUI 변화 + 구동 전력량 ÷ 개선 전 EUI × 100.</p>`;
 }
 /* 강남 권역 가구별 수치(테헤란로제2지구 가구 안 140동) */
-function r3Section() {
-  let S; try { S = q('SELECT * FROM r3_summary'); } catch (e) { return ''; }
-  if (!S.length) return '';
-  const regs = [...new Set(S.map(r => r.region))];
-  const ord = ['F0', 'LH_F0', 'VF_F0', 'S3', 'LH_C', 'VF_C', 'BT_T300', 'LT_T300', 'PKY'];
-  const body = regs.map(reg => {
-    const W = S.filter(r => r.region === reg && r.cond === '차폐 포함'), N = S.filter(r => r.region === reg && r.cond === '차폐 제외');
-    const rows = ord.map(a => { const w = W.find(r => r.alt === a) || {}, n = N.find(r => r.alt === a) || {}; return { label: w.label, e: w.dEUI_med, q: pr(w.dEUI_q1, w.dEUI_q3), ed: `${w.eui_dec}/${w.n_bldg}`, p: w.dpeak_med, b: w.both_dec, u: w.dUDI_med, rho: w.rho_obstr, en: n.dEUI_med, fl: w.sign_flip }; });
-    const nm = (W[0] || {}).region_name, nb = (W[0] || {}).n_bldg;
-    return `<h3>${esc(nm)} — 업무 용도 6층 이상 ${nb}동</h3>${table([{ h: '대안', k: 'label' }, { h: 'EUI 변화 중앙값', k: 'e', num: 1, f: v => pct(v), cls: bad }, { h: '사분위 범위', k: 'q', num: 1 }, { h: 'EUI 감소 동수', k: 'ed', num: 1 }, { h: '피크전력 변화', k: 'p', num: 1, f: v => pct(v), cls: bad }, { h: '둘 다 감소', k: 'b', num: 1 }, { h: 'UDI 변화', k: 'u', num: 1, f: v => sgn(v, 1, '%p') }, { h: 'ρ(가려진 정도)', k: 'rho', num: 1, f: v => v == null ? '—' : v.toFixed(2).replace('-', '−') }, { h: '차폐 제외 EUI', k: 'en', num: 1, f: v => pct(v), cls: bad }, { h: '증감 방향이 바뀐 건물', k: 'fl', num: 1 }], rows, { nw: 1 })}`;
-  }).join('');
-  return `<h2>서울 오피스 3권역 계산 결과</h2><p>역삼 257동과 같은 모델·기상·계산 간격·계산 기간과 같은 20개 조건(개선 전과 9개 대안 × 주변 차폐 포함·제외)으로 계산한 결과이다. 건물별 값의 중앙값(개선 전 대비)이다. 강남은 역삼 257동과 겹치는 건물의 결과를 그대로 썼다.</p>${body}${note('3권역 계산은 같은 EnergyPlus 23.2를 Linux와 macOS(Apple 실리콘) 배포본으로 나누어 하였다. 같은 입력 4건을 두 배포본으로 계산한 EUI의 상대 차이는 10⁻⁵ 미만, 개선 전 대비 변화율의 차이는 0.001%p 미만이었다(원고 7.1.3항). ' + SIMNOTE)}`;
-}
-
 function gbdSection() {
   const G = q('SELECT * FROM gbd_blocks'); if (!G.length) return '';
   const all = G.find(r => r.gagu === 'ALL'), blk = G.filter(r => r.gagu !== 'ALL'); if (!all) return '';
@@ -595,7 +593,7 @@ const PRESETS = {
 };
 function pageDb() {
   const tabs = q("SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name");
-  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', drive_257: '키네틱 장치 연간 작동 횟수(건물·대안·입면별 창 면적, 각도 조절·내림·올림 횟수, 바닥면적)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 3권역 확장', gbd_blocks: '강남 테헤란로제2지구 가구별 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
+  const desc = { meta: '연구 메타 정보(제목·목적·범위·독창성·구간 경계)', blocks: '4개 대블록(경계, 건물 수, 개선 전 블록 지표)', block_meta: '대상지 중심·도로', buildings: '257동 건물 속성(형태·밀집 조건·실측 비교·좌표·윤곽)', alternatives: '성능 개선안(구분·장치·작동·자연채광·계산 범위)', drive_257: '키네틱 장치 연간 작동 횟수(건물·대안·입면별 창 면적, 각도 조절·내림·올림 횟수, 바닥면적)', results_3bldg: '상세 3개 동 블록 결과(개선 전 대비, 차폐 포함·제외)', results_257: '257동 × 대안 건물별 결과(보정 기준 대비)', block_257: '257동 블록 합산 지표', block_257_by_block: '대블록별 블록 지표', block_257_hourly: '257동 합산 시간별 전력(8,760시간 × 개선 전·9개 대안·운전 시차 2개)', results_257_cond: '257동 × 대안 × 조건(차폐 포함·차폐 제외, 일사량 기준 제어 비교용 차폐 포함(연중 작동)·차폐 제외(연중 작동)) 결과와 용도별 원단위', enduse_257: '257동 합산 용도별 원단위 변화(난방·냉방·조명·팬·펌프·냉각탑)', validation: '실측 비교 요약(ASHRAE G14)', monthly: '건물별 월별 전력: 실측과 모델(보정 후)', districts: '서울 오피스 네 지역(대상 구역·건물 수)', r4_areas: '네 지역 요약(구역·가구·대상 수·형태·개선 전·실측 비교)', r4_summary: '네 지역 × 대상 집합(전체·통계 대응·공공 제외) × 대안 × 차폐 포함·제외 요약', r4_tertile: '네 지역 가려진 정도 구간별 EUI 변화', r4_fband: '네 지역 층수 구간별 EUI 변화', r4_enduse: '네 지역 합산 용도별 원단위 변화', r4_blocks: '네 지역 가구 단위 수치(가구별 중앙값)', r4_added: '네 지역 추가 조건(냉방 기간 작동·연중 작동·야간 걷음·장변 배치)', r4_sens: '네 지역 표본의 모델 가정 민감도', r4_drive: '네 지역 키네틱 구동 전력량', r4_cmp257: '역삼 257동(전체·가구 안 140동)과 강남 같은 건물 비교', r4_buildings: '네 지역 591동 건물별 속성과 대안별 EUI·피크전력 변화', gbd_blocks: '강남 테헤란로제2지구 가구별 수치(257동 중 140동, 대안별 EUI·피크전력 변화)', gbd_assign: '257동 건물 → 테헤란로제2지구 가구 배정', v_results: '보기: 결과 + 대안 + 건물 조건 결합' };
   const sch = tabs.map(t => { const cols = q(`PRAGMA table_info(${t.name})`).map(c => c.name); const n = q1(`SELECT COUNT(*) n FROM ${t.name}`).n; return { name: t.name, type: t.type === 'view' ? '보기' : '표', n, d: desc[t.name] || '', cols: cols.join(', ') }; });
   const csv = tabs.filter(t => t.type === 'table' && t.name !== 'block_257_hourly');
   $('#page-db').innerHTML = `
@@ -604,19 +602,19 @@ function pageDb() {
   <p><a class="btn sun" href="data/db/research.sqlite" download>research.sqlite 내려받기</a> &nbsp; ${csv.map(t => `<a class="tag" href="data/db/csv/${t.name}.csv" download>${t.name}.csv</a>`).join('')}</p>
   <h2>구성</h2>${table([{ h: '이름', k: 'name', f: v => `<code>${v}</code>` }, { h: '종류', k: 'type' }, { h: '행', k: 'n', num: 1, f: v => num(v) }, { h: '내용', k: 'd' }, { h: '열', k: 'cols', f: v => `<span class="small mono">${esc(v)}</span>` }], sch)}
   <h2>연구 시스템(원고 부록 A)</h2>
-  <p class="small">경계 → 건물 → 모델 → 실측 비교 → 성능 개선안 → 지표·DB → 공개의 7개 모듈(원고 표 A-1). 지역을 입력하면 M1·M2의 OpenStreetMap 부분과 실시간 시뮬레이션(간이)이 자동으로 실행되고, M3~M6은 역삼 257동·상세 3개 동과 3권역 536동에서 스크립트로 실행하였다(원고 A.2절).</p>
+  <p class="small">경계 → 건물 → 모델 → 실측 비교 → 성능 개선안 → 지표·DB → 공개의 7개 모듈(원고 표 A-1). 지역을 입력하면 M1·M2의 OpenStreetMap 부분과 실시간 시뮬레이션(간이)이 자동으로 실행되고, 건축물대장 결합과 M3~M6은 역삼 257동·상세 3개 동과 네 지역 591동에서 스크립트로 실행하였다(원고 A.2절).</p>
   ${table([{ h: '모듈', k: 'm' }, { h: '기능', k: 'f' }, { h: '입력 자료', k: 'i' }, { h: '출력', k: 'o' }, { h: '도구', k: 't' }], [
     { m: 'M1 경계', f: '권역·구역을 정하고 구역을 도시계획도로로 나누어 가구를 만든다', i: '서울 UPIS 지구단위계획구역(UQ161)·도시계획시설 도로(UQ151)·용도지역(UQ111)·개발진흥지구(UQ129), 2026-09판', o: '구역 목록, 가구 경계, 가구별 상업지역 비율', t: 'Python(geopandas)' },
-    { m: 'M2 건물', f: '가구 안의 건물 윤곽과 속성을 모은다', i: 'OpenStreetMap 건물 윤곽, 건축물대장(용도·층수·연면적·사용승인)', o: '건물 목록(가구 번호 포함)', t: '브라우저(Overpass API), Python' },
+    { m: 'M2 건물', f: '가구 안과 주변의 건물 윤곽에 건축물대장을 결합하고 계산 대상·높이를 정한다', i: 'OpenStreetMap 건물 윤곽, 카카오 로컬(좌표→지번), 건축물대장 표제부(용도·층수·높이·면적)', o: '대상 목록, 주변 건물 높이, 평균 차폐각', t: '브라우저(Overpass API), Python' },
     { m: 'M3 모델', f: '건물마다 에너지 모델을 자동으로 만든다', i: 'M2 건물, DOE 대형 사무소 기준 모델, 서울 TMYx 2011–2025', o: 'EnergyPlus 입력 파일(등가 직사각형, 5개 층대, 주변 건물 차폐면)', t: 'Python, EnergyPlus 23.2' },
     { m: 'M4 실측 비교', f: '개선 전 모델을 실측과 비교하고 전역 배율로 보정한다', i: '건축HUB 월별 전기(2023–2024)', o: 'CV(RMSE)·NMBE, 보정 배율', t: 'Python, ASHRAE Guideline 14' },
     { m: 'M5 성능 개선안', f: '고정형 차양·키네틱 파사드를 적용해 연간 계산한다(차폐 포함·제외)', i: 'M3 모델, 대안 9종', o: '건물별 시간 전력·EUI·UDI·열쾌적', t: 'EnergyPlus 23.2(병렬 실행)' },
     { m: 'M6 지표·DB', f: '건물·가구·블록 지표를 계산해 데이터베이스에 모은다', i: 'M4·M5 결과, M1·M2 속성', o: 'SQLite 데이터베이스, CSV', t: 'Python(sqlite3)' },
     { m: 'M7 공개', f: '결과 탐색, 자료 생성, 실시간 시뮬레이션(간이)을 웹에서 제공한다', i: 'M6 데이터베이스, M1 가구, M2 건물', o: '연구 홈페이지, 자료 생성기, 실시간 시뮬레이션', t: 'HTML·JavaScript(sql.js, Leaflet)' }])}
-  <p class="small"><b>자료 생성기 시험 결과(원고 표 A-2, OpenStreetMap 건물 자료)</b></p>
+  <p class="small"><b>자료 생성기 시험 결과(원고 표 A-3, OpenStreetMap 건물 자료)</b></p>
   ${table([{ h: '권역', k: 'a' }, { h: '구역', k: 'b' }, { h: '가구', k: 'c', num: 1 }, { h: '가구 안 건물', k: 'd', num: 1 }, { h: '층수 정보가 있는 건물', k: 'e', num: 1 }], [
     { a: '강남', b: '테헤란로제2지구 지구단위계획구역', c: '82', d: '679', e: '422(62%)' },
-    { a: '여의도·마포', b: '여의도 금융중심 지구단위계획구역', c: '21', d: '215', e: '211(98%)' },
+    { a: '여의도', b: '여의도 금융중심 지구단위계획구역', c: '21', d: '215', e: '211(98%)' },
     { a: '도심', b: '세종로, 종로2·3가, 종로4·5가, 명동관광특구 지구단위계획구역 4개 + 도심 핵심부 도시정비형 재개발구역 등 23개(계 27개 구역)', c: '87', d: '1,879', e: '292(16%)' }])}
   <h2>SQL 질의</h2>
   <div class="ctrl"><label>예시<select id="qpre">${Object.keys(PRESETS).map(k => `<option>${esc(k)}</option>`).join('')}</select></label><button class="btn" id="qrun">실행</button></div>

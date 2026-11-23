@@ -13,7 +13,7 @@ const PRESET = {
     '11140UQ161PS202405140003', '11140UQ161PS202403260001', '11140UQ161PS202409020001', '11140UQ161PS202504070001', '11140UQ161PS202408280001',
     '11140UQ161PS202407110001', '11110UQ161PS202405270002', '11140UQ161PS202604290001'],
   '강남(GBD)': ['11680UQ161PS202505140001'],
-  '여의도·마포(YBD)': ['11000UQ161PS202411250001'],
+  '여의도(YBD)': ['11000UQ161PS202411250001'],   // 여의도·마포 권역의 여의도; 마포는 지구단위계획구역이 아닌 용도지역 기준 구역이어서 생성기 목록에 없음(원고 7.1.2항)
 };
 const GEN_MAX_PLANS = 30, GEN_MAX_HA = 600;
 const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
@@ -64,7 +64,7 @@ function pageGen() {
   <h2>가구별 결과</h2><div id="gout"><p class="small">아직 만든 자료가 없다.</p></div>
   <h2>시스템 구성</h2>
   <div class="flow"><div><b>입력</b>권역 · 구역 · 구 이름</div><div><b>① 경계</b>지구단위계획구역(UQ161) − 도시계획도로(UQ151) = 가구(2,000 m² 이상), 상업지역(UQ111) 비율</div><div><b>② 건물</b>OpenStreetMap 건물 윤곽·층수 태그(Overpass API)</div><div><b>③ 배정·지표</b>건물 중심점 → 가구, 건물 수·건폐율·층수</div><div><b>④ 계산 엔진</b>건축물대장 결합 → EnergyPlus 자동 모델 → 성능 개선안 → DB</div></div>
-  <div id="gnote"></div>${note('② 건물 윤곽은 OpenStreetMap 기여자 자료(ODbL)로, 빠진 건물이나 층수 태그가 없는 건물이 있다. ④ 계산 엔진 단계(건축물대장 결합·EnergyPlus)는 이 페이지에서 실행하지 않으며, 내려받은 자료를 입력으로 쓴다. 계산 엔진(스크립트)으로 실행한 범위는 역삼 257동과 서울 오피스 3권역 536동의 절차(자동 모델·실측 비교·성능 개선안)이다(원고 부록 A).')}`;
+  <div id="gnote"></div>${note('② 건물 윤곽은 OpenStreetMap 기여자 자료(ODbL)로, 빠진 건물이나 층수 태그가 없는 건물이 있다. ④ 계산 엔진 단계(건축물대장 결합·EnergyPlus)는 이 페이지에서 실행하지 않으며, 내려받은 자료를 입력으로 쓴다. 계산 엔진(스크립트)으로 실행한 범위는 역삼 257동과 서울 오피스 네 지역 591동의 절차(자동 모델·실측 비교·성능 개선안)이다(원고 부록 A).')}`;
   $('#gpre').addEventListener('change', () => { const k = $('#gpre').value; if (!k) return; GEN.sel = new Set(PRESET[k]); $('#gq').value = ''; genList(); });
   $('#gq').addEventListener('input', genList); $('#gcom').addEventListener('change', genList);
   $('#grun').addEventListener('click', genRun); $('#gclear').addEventListener('click', () => { GEN.sel.clear(); genList(); });

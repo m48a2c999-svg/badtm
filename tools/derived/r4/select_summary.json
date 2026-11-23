@@ -1,0 +1,124 @@
+{
+ "mpo": {
+  "name": "마포",
+  "n_blocks": 16,
+  "n_bld_in_blocks": 62,
+  "n_all": 1673,
+  "n_register_joined": 62,
+  "n_targets": 33,
+  "n_main_office": 27,
+  "floors_median": 18.0,
+  "obstr_median": 15.72,
+  "n_low_mid_high": [
+   10,
+   21,
+   2
+  ],
+  "nb_missing_median_pct": 3.6363636363636362,
+  "join": {
+   "centroid": 33
+  },
+  "match": {
+   "single": 30,
+   "hungarian": 2,
+   "fallback_best": 1
+  },
+  "n_heights": 852,
+  "n_scale_flags": 2,
+  "floor_fix": []
+ },
+ "ybd": {
+  "name": "여의도",
+  "n_blocks": 21,
+  "n_bld_in_blocks": 215,
+  "n_all": 628,
+  "n_register_joined": 202,
+  "n_targets": 88,
+  "n_main_office": 76,
+  "floors_median": 16.0,
+  "obstr_median": 18.82,
+  "n_low_mid_high": [
+   27,
+   40,
+   21
+  ],
+  "nb_missing_median_pct": 0.0,
+  "join": {
+   "centroid": 85,
+   "bun_search": 3
+  },
+  "match": {
+   "fallback_best": 2,
+   "single": 76,
+   "hungarian": 10
+  },
+  "n_heights": 543,
+  "n_scale_flags": 1,
+  "floor_fix": []
+ },
+ "gbd": {
+  "name": "강남",
+  "n_blocks": 82,
+  "n_bld_in_blocks": 679,
+  "n_all": 8006,
+  "n_register_joined": 678,
+  "n_targets": 371,
+  "n_main_office": 335,
+  "floors_median": 13.0,
+  "obstr_median": 22.46,
+  "n_low_mid_high": [
+   42,
+   150,
+   179
+  ],
+  "nb_missing_median_pct": 0.9493670886075949,
+  "join": {
+   "centroid": 362,
+   "bun_search": 4,
+   "inner_point": 5
+  },
+  "match": {
+   "single": 369,
+   "hungarian": 2
+  },
+  "n_heights": 4383,
+  "n_scale_flags": 19,
+  "floor_fix": []
+ },
+ "cbd": {
+  "name": "도심",
+  "n_blocks": 87,
+  "n_bld_in_blocks": 1879,
+  "n_all": 12329,
+  "n_register_joined": 1772,
+  "n_targets": 99,
+  "n_main_office": 83,
+  "floors_median": 12.0,
+  "obstr_median": 18.34,
+  "n_low_mid_high": [
+   26,
+   51,
+   22
+  ],
+  "nb_missing_median_pct": 10.96774193548387,
+  "join": {
+   "centroid": 92,
+   "inner_point": 3,
+   "bun_search": 4
+  },
+  "match": {
+   "single": 88,
+   "hungarian": 10,
+   "fallback_best": 1
+  },
+  "n_heights": 5855,
+  "n_scale_flags": 30,
+  "floor_fix": [
+   [
+    "w223158457",
+    "KOREAN Re 빌딩",
+    "r4 조회 0 → 2026-11-01 조회 12"
+   ]
+  ]
+ }
+}
