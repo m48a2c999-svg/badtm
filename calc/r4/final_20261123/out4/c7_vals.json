@@ -1,0 +1,490 @@
+{
+ "flips_tot": {
+  "CBD": 234,
+  "GBD": 1792,
+  "YBD": 223,
+  "MPO": 71
+ },
+ "flips_big": {
+  "CBD": 115,
+  "GBD": 1352,
+  "YBD": 129,
+  "MPO": 41
+ },
+ "same": {
+  "n_r4_gbd": 371,
+  "n_same": 135,
+  "n_same_in140": 135,
+  "n_257_not_in_r4": 122,
+  "input": {
+   "floors_diff_n": 1,
+   "height_diff_n": 4,
+   "height_diff_med": 0.0,
+   "obstr_diff_med": 0.38000000000000256,
+   "obstr_diff_q": [
+    0.030000000000000693,
+    1.240000000000002
+   ],
+   "obstr_diff_absmax": 6.120000000000001,
+   "cls_changed": 16
+  },
+  "alts": {
+   "with": {
+    "F0": {
+     "n": 135,
+     "med257": -1.6496,
+     "medr4": -1.6757902052308977,
+     "absdiff_med": 0.048852552226637425,
+     "absdiff_q3": 0.11943756852763965,
+     "same_sign": 133,
+     "rho": 0.9681055506779828
+    },
+    "LH_F0": {
+     "n": 135,
+     "med257": -0.8763,
+     "medr4": -0.856001829646876,
+     "absdiff_med": 0.07525081696406882,
+     "absdiff_q3": 0.16187148570070864,
+     "same_sign": 129,
+     "rho": 0.9638644129001763
+    },
+    "VF_F0": {
+     "n": 135,
+     "med257": -0.5443,
+     "medr4": -0.5409758647991368,
+     "absdiff_med": 0.03300974740244156,
+     "absdiff_q3": 0.07701600356941929,
+     "same_sign": 133,
+     "rho": 0.9538312209354796
+    },
+    "S3": {
+     "n": 135,
+     "med257": -0.193,
+     "medr4": -0.2611251934827686,
+     "absdiff_med": 0.10483026267522066,
+     "absdiff_q3": 0.2842606865248709,
+     "same_sign": 129,
+     "rho": 0.9654143076466885
+    },
+    "LH_C": {
+     "n": 135,
+     "med257": -0.0807,
+     "medr4": -0.12956887758182542,
+     "absdiff_med": 0.11136959823011305,
+     "absdiff_q3": 0.2885657154563292,
+     "same_sign": 129,
+     "rho": 0.9600928691023491
+    },
+    "VF_C": {
+     "n": 135,
+     "med257": 0.3109,
+     "medr4": 0.23221884218630764,
+     "absdiff_med": 0.06112589808270741,
+     "absdiff_q3": 0.15753152934892148,
+     "same_sign": 124,
+     "rho": 0.9268754267876307
+    },
+    "BT_T300": {
+     "n": 135,
+     "med257": -0.0643,
+     "medr4": -0.06578150088108264,
+     "absdiff_med": 0.008421883151808425,
+     "absdiff_q3": 0.01888414211374178,
+     "same_sign": 130,
+     "rho": 0.9363767836745819
+    },
+    "LT_T300": {
+     "n": 135,
+     "med257": -0.8953,
+     "medr4": -0.839109421855238,
+     "absdiff_med": 0.06860191206942334,
+     "absdiff_q3": 0.1609298086140884,
+     "same_sign": 129,
+     "rho": 0.9632231001853478
+    },
+    "PK": {
+     "n": 135,
+     "med257": 0.3091,
+     "medr4": 0.21334712607447284,
+     "absdiff_med": 0.1005339973917001,
+     "absdiff_q3": 0.2950157368489387,
+     "same_sign": 124,
+     "rho": 0.9255828699639059
+    }
+   },
+   "nosh": {
+    "F0": {
+     "n": 135,
+     "med257": -0.1647,
+     "medr4": -0.17407225284628833,
+     "absdiff_med": 0.011127747153711676,
+     "absdiff_q3": 0.03620638192594117,
+     "same_sign": 133,
+     "rho": 0.9885572139303483
+    },
+    "LH_F0": {
+     "n": 135,
+     "med257": 1.8272,
+     "medr4": 1.8232656561548835,
+     "absdiff_med": 0.014870442455498956,
+     "absdiff_q3": 0.0578020147614533,
+     "same_sign": 135,
+     "rho": 0.993956687152473
+    },
+    "VF_F0": {
+     "n": 135,
+     "med257": 0.5672,
+     "medr4": 0.5714993095675758,
+     "absdiff_med": 0.01293317583326159,
+     "absdiff_q3": 0.038391475145583887,
+     "same_sign": 134,
+     "rho": 0.9823578187493904
+    },
+    "S3": {
+     "n": 135,
+     "med257": 7.0486,
+     "medr4": 6.989283463430117,
+     "absdiff_med": 0.02752149063878484,
+     "absdiff_q3": 0.07337232803258287,
+     "same_sign": 135,
+     "rho": 0.9935518486001368
+    },
+    "LH_C": {
+     "n": 135,
+     "med257": 6.1663,
+     "medr4": 6.0735915814879275,
+     "absdiff_med": 0.02515224372515501,
+     "absdiff_q3": 0.07610216925278124,
+     "same_sign": 135,
+     "rho": 0.9924677988347527
+    },
+    "VF_C": {
+     "n": 135,
+     "med257": 3.3526,
+     "medr4": 3.2799032116753017,
+     "absdiff_med": 0.02218170133317532,
+     "absdiff_q3": 0.08999485074176006,
+     "same_sign": 135,
+     "rho": 0.9872890449712224
+    },
+    "BT_T300": {
+     "n": 135,
+     "med257": -0.1292,
+     "medr4": -0.12474260825627648,
+     "absdiff_med": 0.007975925897613555,
+     "absdiff_q3": 0.01664587370018766,
+     "same_sign": 129,
+     "rho": 0.9267750793939111
+    },
+    "LT_T300": {
+     "n": 135,
+     "med257": 1.8945,
+     "medr4": 1.8084509768295183,
+     "absdiff_med": 0.015430463170991615,
+     "absdiff_q3": 0.06416275859011433,
+     "same_sign": 135,
+     "rho": 0.9941176470588236
+    },
+    "PK": {
+     "n": 135,
+     "med257": 5.4778,
+     "medr4": 5.468195368835419,
+     "absdiff_med": 0.02113472484520873,
+     "absdiff_q3": 0.05662564934782366,
+     "same_sign": 135,
+     "rho": 0.9914788801092578
+    }
+   }
+  }
+ },
+ "sel": {
+  "mpo": {
+   "name": "마포",
+   "n_blocks": 16,
+   "n_bld_in_blocks": 62,
+   "n_all": 1673,
+   "n_register_joined": 62,
+   "n_targets": 33,
+   "n_main_office": 27,
+   "floors_median": 18.0,
+   "obstr_median": 15.72,
+   "n_low_mid_high": [
+    10,
+    21,
+    2
+   ],
+   "nb_missing_median_pct": 3.6363636363636362,
+   "join": {
+    "centroid": 33
+   },
+   "match": {
+    "single": 30,
+    "hungarian": 2,
+    "fallback_best": 1
+   },
+   "n_heights": 852,
+   "n_scale_flags": 2,
+   "floor_fix": []
+  },
+  "ybd": {
+   "name": "여의도",
+   "n_blocks": 21,
+   "n_bld_in_blocks": 215,
+   "n_all": 628,
+   "n_register_joined": 202,
+   "n_targets": 88,
+   "n_main_office": 76,
+   "floors_median": 16.0,
+   "obstr_median": 18.82,
+   "n_low_mid_high": [
+    27,
+    40,
+    21
+   ],
+   "nb_missing_median_pct": 0.0,
+   "join": {
+    "centroid": 85,
+    "bun_search": 3
+   },
+   "match": {
+    "fallback_best": 2,
+    "single": 76,
+    "hungarian": 10
+   },
+   "n_heights": 543,
+   "n_scale_flags": 1,
+   "floor_fix": []
+  },
+  "gbd": {
+   "name": "강남",
+   "n_blocks": 82,
+   "n_bld_in_blocks": 679,
+   "n_all": 8006,
+   "n_register_joined": 678,
+   "n_targets": 371,
+   "n_main_office": 335,
+   "floors_median": 13.0,
+   "obstr_median": 22.46,
+   "n_low_mid_high": [
+    42,
+    150,
+    179
+   ],
+   "nb_missing_median_pct": 0.9493670886075949,
+   "join": {
+    "centroid": 362,
+    "bun_search": 4,
+    "inner_point": 5
+   },
+   "match": {
+    "single": 369,
+    "hungarian": 2
+   },
+   "n_heights": 4383,
+   "n_scale_flags": 19,
+   "floor_fix": []
+  },
+  "cbd": {
+   "name": "도심",
+   "n_blocks": 87,
+   "n_bld_in_blocks": 1879,
+   "n_all": 12329,
+   "n_register_joined": 1772,
+   "n_targets": 99,
+   "n_main_office": 83,
+   "floors_median": 12.0,
+   "obstr_median": 18.34,
+   "n_low_mid_high": [
+    26,
+    51,
+    22
+   ],
+   "nb_missing_median_pct": 10.96774193548387,
+   "join": {
+    "centroid": 92,
+    "inner_point": 3,
+    "bun_search": 4
+   },
+   "match": {
+    "single": 88,
+    "hungarian": 10,
+    "fallback_best": 1
+   },
+   "n_heights": 5855,
+   "n_scale_flags": 30,
+   "floor_fix": [
+    [
+     "w223158457",
+     "KOREAN Re 빌딩",
+     "r4 조회 0 → 2026-11-01 조회 12"
+    ]
+   ]
+  }
+ },
+ "form": {
+  "CBD": {
+   "n": 99,
+   "floors_med": 12.0,
+   "floors_q": [
+    9.0,
+    15.5
+   ],
+   "floors_range": [
+    6,
+    31
+   ],
+   "fband": {
+    "6-10": 45,
+    "11-20": 46,
+    "21+": 8
+   },
+   "obstr_med": 18.34,
+   "obstr_q": [
+    14.515,
+    22.295
+   ],
+   "obstr_range": [
+    2.48,
+    29.25
+   ],
+   "cls": {
+    "low": 26,
+    "mid": 51,
+    "high": 22
+   },
+   "high_share": 22.22222222222222,
+   "fp_med": 461.9,
+   "n_main_office": 83,
+   "n_nonoffice": 16,
+   "n_public": 4,
+   "n_officetel": 5,
+   "n_jiphap": 23,
+   "n_stat": 60,
+   "TA": 989097.87,
+   "n_warm": 36
+  },
+  "GBD": {
+   "n": 371,
+   "floors_med": 13.0,
+   "floors_q": [
+    10.0,
+    16.0
+   ],
+   "floors_range": [
+    6,
+    45
+   ],
+   "fband": {
+    "6-10": 129,
+    "11-20": 219,
+    "21+": 23
+   },
+   "obstr_med": 22.46,
+   "obstr_q": [
+    17.835,
+    27.045
+   ],
+   "obstr_range": [
+    1.53,
+    40.58
+   ],
+   "cls": {
+    "low": 42,
+    "mid": 150,
+    "high": 179
+   },
+   "high_share": 48.24797843665768,
+   "fp_med": 375.3,
+   "n_main_office": 335,
+   "n_nonoffice": 36,
+   "n_public": 1,
+   "n_officetel": 50,
+   "n_jiphap": 104,
+   "n_stat": 239,
+   "TA": 3394177.89,
+   "n_warm": 133
+  },
+  "YBD": {
+   "n": 88,
+   "floors_med": 16.0,
+   "floors_q": [
+    12.0,
+    25.5
+   ],
+   "floors_range": [
+    7,
+    69
+   ],
+   "fband": {
+    "6-10": 17,
+    "11-20": 40,
+    "21+": 31
+   },
+   "obstr_med": 18.82,
+   "obstr_q": [
+    13.5475,
+    22.7325
+   ],
+   "obstr_range": [
+    1.93,
+    35.89
+   ],
+   "cls": {
+    "low": 27,
+    "mid": 40,
+    "high": 21
+   },
+   "high_share": 23.863636363636363,
+   "fp_med": 1066.9,
+   "n_main_office": 76,
+   "n_nonoffice": 12,
+   "n_public": 1,
+   "n_officetel": 5,
+   "n_jiphap": 43,
+   "n_stat": 38,
+   "TA": 2759971.33,
+   "n_warm": 18
+  },
+  "MPO": {
+   "n": 33,
+   "floors_med": 18.0,
+   "floors_q": [
+    16.0,
+    23.0
+   ],
+   "floors_range": [
+    10,
+    40
+   ],
+   "fband": {
+    "6-10": 2,
+    "11-20": 21,
+    "21+": 10
+   },
+   "obstr_med": 15.72,
+   "obstr_q": [
+    13.92,
+    19.09
+   ],
+   "obstr_range": [
+    2.94,
+    25.54
+   ],
+   "cls": {
+    "low": 10,
+    "mid": 21,
+    "high": 2
+   },
+   "high_share": 6.0606060606060606,
+   "fp_med": 954.5,
+   "n_main_office": 27,
+   "n_nonoffice": 6,
+   "n_public": 1,
+   "n_officetel": 6,
+   "n_jiphap": 23,
+   "n_stat": 8,
+   "TA": 774353.6900000001,
+   "n_warm": 4
+  }
+ }
+}
