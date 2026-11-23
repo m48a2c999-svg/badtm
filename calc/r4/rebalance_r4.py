@@ -13,6 +13,10 @@ for k in [str(i) for i in range(20)] + ['local']:   # r4res-local: 로컬에서 
     for p in out:
         parts = p.split('/'); done.add((parts[1], parts[2].replace('.pkl.gz', '')))
 left = [j for j in jobs if (j[1], f"{j[2][0]}_{j[2][1]}") not in done]
+RSV = os.path.join(D, 'local_reserved.json')   # 로컬에서 계산 중인 작업(끝나면 r4res-local에 올라옴): 이번 재배분에서 뺀다
+if os.path.exists(RSV):
+    rs = {(j[1], f"{j[2][0]}_{j[2][1]}") for j in json.load(open(RSV))}
+    n0 = len(left); left = [j for j in left if (j[1], f"{j[2][0]}_{j[2][1]}") not in rs]; print('reserved for local', n0 - len(left))
 left.sort(key=lambda j: (j[0], j[1], j[2][0], j[2][1]))
 SH = [[] for _ in range(20)]
 for k, j in enumerate(left): SH[k % 20].append(j)
