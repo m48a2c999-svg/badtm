@@ -3,6 +3,7 @@
 # 결과(pkl.gz)는 브랜치 r4res-<shard>에 올리고, 다시 실행하면 올린 결과를 캐시로 되살려 이어서 계산한다.
 set -u
 K=$1; PF=r4res; R=$GITHUB_WORKSPACE/calc; NP=$(nproc)
+END=$(( $(date +%s) + ${R4_SECONDS:-19500} ))   # 작업 제한(350분) 전에 계산을 멈추고 마지막 결과를 올리기 위한 마감
 REGS="r4cbd r4gbd r4ybd r4mpo"
 W=$RUNNER_TEMP/res; mkdir -p $W; cd $W
 URL=https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY
@@ -25,6 +26,6 @@ for (w,reg),L in sorted(g.items()):
     json.dump(L,open(f'{R}/r3/mb/py/r4w{w}_{reg}.json','w')); print(w,reg,len(L))
 PY
 cd $R/r3/mb/py; export BUNDLE=$R/r3
-for f in $(ls r4w*_*.json 2>/dev/null | sort); do reg=${f#*_}; reg=${reg%.json}; REGION=$reg python3 sim_r3.py $f $NP; push; done
+for f in $(ls r4w*_*.json 2>/dev/null | sort); do left=$(( END - $(date +%s) )); [ $left -le 60 ] && { echo "deadline reached"; break; }; reg=${f#*_}; reg=${reg%.json}; REGION=$reg timeout $left python3 sim_r3.py $f $NP; push; done
 kill $PP 2>/dev/null; push
 echo "SHARD $K FINISHED $(date -u)"
