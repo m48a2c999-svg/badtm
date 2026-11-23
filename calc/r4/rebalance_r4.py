@@ -8,7 +8,7 @@ if not os.path.isdir(os.path.join(D, 'shards_orig')): shutil.copytree(os.path.jo
 jobs = []
 for f in sorted(glob.glob(os.path.join(D, 'shards_orig', 'shard_*.json'))): jobs += json.load(open(f))
 done = set()
-for k in range(20):
+for k in [str(i) for i in range(20)] + ['local']:   # r4res-local: 로컬에서 계산한 분담 끝부분
     out = subprocess.run(['gh', 'api', f'repos/{repo}/git/trees/r4res-{k}?recursive=1', '--jq', '.tree[] | select(.path|test("pkl")) | .path'], capture_output=True, text=True).stdout.split()
     for p in out:
         parts = p.split('/'); done.add((parts[1], parts[2].replace('.pkl.gz', '')))
