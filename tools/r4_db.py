@@ -104,7 +104,7 @@ for A in ['CBD', 'GBD', 'YBD', 'MPO']:
     s = SEL[RK[A]]; f = G[A]['form']
     con.execute('INSERT INTO districts VALUES(?,?,?,?,?)', (A, ZONE[A][0], f'{ZONE[A][1]}({ZONE[A][2]} ha, 가구 {s["n_blocks"]}개)',
                 f'가구 안 건물 {s["n_bld_in_blocks"]:,}동(OpenStreetMap), 업무 용도 6층 이상 계산 대상 {f["n"]}동(주용도 업무시설 {f["n_main_office"]}동). 20개 조건 + 추가 9개 조건 + 표본 민감도 계산 완료.', '완료'))
-con.execute("UPDATE meta SET value=replace(value, ?, ?) WHERE key='basis'", ('계산 대상은 오피스 조사 기준(주용도 업무시설, 6층 이상)을 참고하여 건축물대장 주용도 또는 기타 용도에 업무시설이 포함된 6층 이상 건물(3권역 536동 중 62동은 주용도가 업무시설이 아닌 복합 용도). 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 지구단위계획구역으로 정함.', '본 연구는 이 세 권역에서 네 지역(도심, 강남, 여의도, 마포)을 정함. 계산 대상은 오피스 조사 기준(주용도 업무시설, 6층 이상)을 참고하여 건축물대장 주용도 또는 기타 용도에 업무시설이 포함된 6층 이상 건물(네 지역 591동 중 70동은 주용도가 업무시설이 아니고 기타 용도에 업무시설이 있는 건물). 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 도심·강남·여의도는 업무 기능 지구단위계획구역, 마포는 마포대로에서 30 m 이내의 상업지역(용도지역)으로 정함.'))
+con.execute("UPDATE meta SET value=replace(value, ?, ?) WHERE key='basis'", ('계산 대상은 오피스 조사 기준(주용도 업무시설, 6층 이상)을 참고하여 건축물대장 주용도 또는 기타 용도에 업무시설이 포함된 6층 이상 건물(3권역 536동 중 62동은 주용도가 업무시설이 아닌 복합 용도). 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 지구단위계획구역으로 정함.', '본 연구는 이 권역을 근거로 네 지역(도심, 강남, 여의도, 마포)을 정함. 계산 대상은 오피스 조사 기준(주용도 업무시설, 6층 이상)을 참고하여 건축물대장 주용도 또는 기타 용도에 업무시설이 포함된 6층 이상 건물(네 지역 591동 중 70동은 주용도가 업무시설이 아니고 기타 용도에 업무시설이 있는 건물). 여의도는 금융중심지법에 따른 금융중심지(2009). 경계는 도심·강남·여의도는 업무 기능 지구단위계획구역, 마포는 마포대로에서 30 m 이내의 상업지역(용도지역)으로 정함.'))
 con.execute("UPDATE meta SET value=? WHERE key='built'", (pd.Timestamp.now(tz='Asia/Seoul').strftime('%Y-%m-%d %H:%M KST'),))
 con.commit()
 for (t,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'r4_%' OR name='districts' OR name='meta')").fetchall():
