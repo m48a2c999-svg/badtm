@@ -119,6 +119,8 @@ const SIMNOTE = 'EnergyPlus 23.2 시뮬레이션 값이며 실측값이 아니�
 /* ---------------- 페이지: 개요 ---------------- */
 function pageHome() {
   const nB = q1('SELECT COUNT(*) n FROM buildings').n;
+  const nR4 = q1('SELECT COUNT(*) n FROM r4_buildings').n;   // 네 지역 591동
+  const N_SHARED = 141;   // 강남 371동 중 역삼 257동에도 속하는 건물(같은 윤곽 135동 + 윤곽이 다른 같은 건물 6동; 원고 7.8.2항)
   const nAlt = ORDER.length;
   const r = {}; for (const t of ORDER257) { const v = q('SELECT dEUI_pct e, dpeak_pct p FROM results_257 WHERE tag=?', [t]); r[t] = { e: median(v.map(x => x.e)), p: median(v.map(x => x.p)), both: v.filter(x => x.e < 0 && x.p < 0).length, n: v.length }; }
   const eMeds = Object.values(r).map(x => x.e);
@@ -135,10 +137,10 @@ function pageHome() {
   </div>
   <div class="purpose"><b>연구 목적</b><br>${esc(META.purpose)}</div>
   <div class="grid g4" style="margin:18px 0">
-    <div class="card tick stat"><b>${nB}동</b><span>역삼역 일대 4개 대블록의 업무 용도 건물</span><em>상세 모델 3개 동 포함</em></div>
+    <div class="card tick stat"><b>${nB + nR4 - N_SHARED}동</b><span>계산 대상 업무 용도 건물(총계)</span><em>역삼 ${nB}동 + 서울 오피스 네 지역 ${nR4}동, ${N_SHARED}동은 두 대상에 함께 속함</em></div>
     <div class="card tick stat"><b>${nAlt}개</b><span>외피 성능 개선안</span><em>고정형 차양 3 · 키네틱 파사드 6</em></div>
-    <div class="card tick stat"><b class="sun">${pr(Math.min(...eMeds), Math.max(...eMeds))}</b><span>257동 건물별 EUI 변화 중앙값의 범위</span><em>9개 대안, 주변 차폐 포함</em></div>
-    <div class="card tick stat"><b class="kin">${r.BT_T300.both}동</b><span>EUI와 피크전력을 함께 줄인 건물(블라인드 일사량 기준 제어, 257동 중)</span><em>나머지 8개 대안은 ${Math.max(...ORDER257.filter(t => t !== 'BT_T300').map(t => r[t].both))}동 이하</em></div>
+    <div class="card tick stat"><b class="sun">${pr(Math.min(...eMeds), Math.max(...eMeds))}</b><span>역삼 257동 건물별 EUI 변화 중앙값의 범위</span><em>9개 대안, 주변 차폐 포함</em></div>
+    <div class="card tick stat"><b class="kin">28/30</b><span>네 지역 591동에서 역삼 257동과 EUI 증감 방향이 같은 지역·대안 조합</span><em>판정 유보 범위(±0.1%) 밖 30개 조합 기준, 전체 36개 중 34개</em></div>
   </div>
   <div class="grid g2">
     <div class="card"><h3>연구 질문</h3><ol class="qlist">
@@ -148,8 +150,8 @@ function pageHome() {
     <div class="card"><h3>독창성</h3><p>${esc(META.originality)}</p><h3>범위</h3><p>${esc(META.scope)}</p></div>
   </div>
   <h2>연구 흐름</h2>
-  <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 기준 모델, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 성능 개선안</b>고정형 차양 · 키네틱 파사드 적용, 개선 전후 비교</div><div><b>05 건물 조건별 지표</b>가려진 정도·평면 규모·층수별 효과, 주변 차폐 포함·제외 비교, 블록 피크전력(보조)</div></div>
-  <div class="card" id="paperdl"><h3>논문 내려받기</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 전문과 요약본이다. 역삼 257동과 서울 오피스 네 지역(도심, 강남, 여의도, 마포) 591동의 결과를 담았으며, 모든 수치는 EnergyPlus 시뮬레이션 값이다. 파일은 Google Drive에서 열리며, 공유가 제한되어 있어 작성자 계정으로 로그인해야 받을 수 있다.</p><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>박사학위논문</b> <span class="small">(211쪽, PDF 9.2 MB)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/1S9TMGjwUD4uw4U59D8B7EMkiiKTcHAe9/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=1S9TMGjwUD4uw4U59D8B7EMkiiKTcHAe9" target="_blank" rel="noopener">내려받기</a></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>논문 요약본 — 학술논문 형식</b> <span class="small">(8쪽, PDF 1.2 MB · 학술지 게재 논문이 아님)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/12-SxT4UtwMxp6GNzJfCJWWmUSeiedkRr/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=12-SxT4UtwMxp6GNzJfCJWWmUSeiedkRr" target="_blank" rel="noopener">내려받기</a></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>연구요약</b> <span class="small">(4쪽, PDF 0.3 MB)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/1WoOl0gBazhjDymxDw5BBiTCYEZ-P58eN/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=1WoOl0gBazhjDymxDw5BBiTCYEZ-P58eN" target="_blank" rel="noopener">내려받기</a></div></div>
+  <div class="flow"><div><b>01 자료 결합</b>OpenStreetMap 건물 윤곽·높이 + 건축물대장 용도·층수·연면적</div><div><b>02 자동 모델</b>건물마다 EnergyPlus 모델(DOE 대형 사무소 기준 모델, 주변 건물 차폐)</div><div><b>03 실측 비교</b>건축HUB 월별 전기와 비교(ASHRAE Guideline 14)</div><div><b>04 성능 개선안</b>고정형 차양 · 키네틱 파사드 적용, 개선 전후 비교</div><div><b>05 건물 조건별 지표</b>가려진 정도·평면 규모·층수별 효과, 주변 차폐 포함·제외 비교, 블록 피크전력(보조)</div><div><b>06 네 지역 비교</b>서울 오피스 네 지역 591동에 같은 모델·계산 조건을 적용해 같은 지표로 비교</div></div>
+  <div class="card" id="paperdl"><h3>논문 내려받기</h3><p>박사학위논문 「서울 업무시설 밀집지역 기존 건물의 외피 성능 개선에 따른 에너지 성능 평가 — 키네틱 파사드 적용 시뮬레이션을 중심으로 —」의 전문과 요약본이다. 역삼 257동과 서울 오피스 네 지역(도심, 강남, 여의도, 마포) 591동의 결과를 담았으며, 모든 수치는 EnergyPlus 시뮬레이션 값이다. 파일은 Google Drive에서 열리며, 공유가 제한되어 있어 작성자 계정으로 로그인해야 받을 수 있다.</p><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>박사학위논문</b> <span class="small">(211쪽, PDF 9.2 MB)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/1c0QEhNImErZTYIkwne_aFqjhgZA5wk_f/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=1c0QEhNImErZTYIkwne_aFqjhgZA5wk_f" target="_blank" rel="noopener">내려받기</a></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>논문 요약본 — 학술논문 형식</b> <span class="small">(8쪽, PDF 1.2 MB · 학술지 게재 논문이 아님)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/12-SxT4UtwMxp6GNzJfCJWWmUSeiedkRr/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=12-SxT4UtwMxp6GNzJfCJWWmUSeiedkRr" target="_blank" rel="noopener">내려받기</a></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line,#ddd)"><div style="flex:1 1 260px"><b>연구요약</b> <span class="small">(4쪽, PDF 0.3 MB)</span></div><a class="btn ghost" href="https://drive.google.com/file/d/1WoOl0gBazhjDymxDw5BBiTCYEZ-P58eN/view" target="_blank" rel="noopener">Google Drive에서 보기</a><a class="btn sun" href="https://drive.google.com/uc?export=download&amp;id=1WoOl0gBazhjDymxDw5BBiTCYEZ-P58eN" target="_blank" rel="noopener">내려받기</a></div></div>
   <h2>논문 지도</h2>
   <p class="small">논문 원고(제1~9장, 부록 A·B)의 장·절과 표가 이 사이트의 어느 페이지에 있는지. 원고의 수치는 모두 아래 페이지와 <a href="#/db">데이터베이스</a>에서 다시 확인할 수 있다.</p>
   <table class="tmap"><tr><th>원고</th><th>내용</th><th>사이트</th></tr>
@@ -162,8 +164,8 @@ function pageHome() {
   <tr><td>5.4 · 8.5</td><td>밀집 조건에 따른 효과(표 5-4·5-5), 건물 조건별 검토 우선순위(표 8-1)</td><td><a href="#/traits">건물 특성별</a></td></tr>
   <tr><td>5.7</td><td>키네틱 장치의 구동 전력량(표 5-9·5-10), 대기전력을 피크전력에 더한 결과(표 5-11) — 제품 사양을 바꿔 다시 계산</td><td><a href="#/alts">성능 개선안</a></td></tr>
   <tr><td>제6장</td><td>층대·입면·월별·시간별 상세 분석(표 6-1~6-5) — 원고에만</td><td>—</td></tr>
-  <tr><td>5.9 · 제7장</td><td>가구 단위 수치(표 5-14, 테헤란로제2지구 140동), 서울 오피스 네 지역 591동 확장(제7장)</td><td><a href="#/plan">재계산·확장</a></td></tr>
-  <tr><td>제8장 · 제9장</td><td>논의(불확실성과 해석 범위), 결론(연구 질문에 대한 답, 기여, 한계와 후속 연구)</td><td><a href="#/plan">재계산·확장</a>(한계)</td></tr>
+  <tr><td>5.9 · 제7장</td><td>가구 단위 수치(표 5-14, 테헤란로제2지구 140동), 서울 오피스 네 지역 591동(제7장)</td><td><a href="#/plan">네 지역</a></td></tr>
+  <tr><td>제8장 · 제9장</td><td>논의(불확실성과 해석 범위), 결론(연구 질문에 대한 답, 기여, 한계와 후속 연구)</td><td><a href="#/plan">네 지역·한계</a></td></tr>
   <tr><td>부록 A</td><td>연구 시스템(표 A-1), 자료 생성기 시험(표 A-2), 지도 위 실시간 시뮬레이션</td><td><a href="#/db">데이터베이스</a> · <a href="#/gen">자료 생성기</a> · <a href="#/live">실시간 시뮬레이션</a></td></tr>
   </table>
   <h2>결과 요약</h2>
@@ -184,9 +186,9 @@ function pageSite() {
   const alts = ORDER257.map(t => `<option value="${t}">${esc(altName(t))}</option>`).join('');
   $('#page-site').innerHTML = `
   <div class="kicker">대상지 · 건물 데이터베이스</div>
-  <h1>서울 오피스 네 지역 — 역삼 257동과 네 지역 591동</h1>
-  <p>지도에는 네 지역(도심, 강남, 여의도, 마포)의 대상 구역과 가구 경계가 나온다. 윤곽으로 칠한 건물은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 257동(제4~6장의 방법 사례; 업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이고, 점은 네 지역에서 같은 절차로 만든 계산 대상 591동(제7장)이다. 지도 색을 "대안별 EUI 변화"로 두면 두 집단 모두 고른 대안의 건물별 EUI 변화로 칠해진다. 257동의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
-  <p class="small">네 지역은 국가승인통계가 정한 서울 오피스 권역(도심, 강남, 여의도·마포) 안의 연구자 정의 구역이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개, 마포대로 30 m 이내 상업지역 가구 16개). 이 페이지 아래 표와 결과 페이지의 수치는 역삼 257동의 결과이다(그중 140동이 테헤란로제2지구 가구 40개 안). 네 지역 591동(도심 99·강남 371·여의도 88·마포 33동)의 결과는 <a href="#/plan">재계산·확장</a>에 있다.</p>
+  <h1>계산 대상 707동 — 역삼 257동과 서울 오피스 네 지역 591동</h1>
+  <p>지도에는 네 지역(도심, 강남, 여의도, 마포)의 대상 구역과 가구 경계가 나온다. 윤곽으로 칠한 건물은 강남 테헤란로의 역삼역사거리를 중심으로 간선도로(봉은사로·역삼로·강남대로·언주로, 내부의 테헤란로·논현로)로 나뉜 4개 대블록 안의 257동(제4~6장의 방법 사례; 업무시설 245동, 업무 용도가 섞인 제2종 근린생활시설 12동)이고, 점은 네 지역에서 같은 절차로 만든 계산 대상 591동(제7장)이다(강남의 141동은 두 대상에 함께 속하므로 총계는 707동). 지도 색을 "대안별 EUI 변화"로 두면 두 집단 모두 고른 대안의 건물별 EUI 변화로 칠해진다. 257동의 건물이나 표의 행을 누르면 건물별 개선 전후 결과와 실측 비교를 볼 수 있다.</p>
+  <p class="small">네 지역은 국가승인통계가 정한 서울 오피스 권역(도심, 강남, 여의도·마포) 안의 연구자 정의 구역이다(강남 테헤란로제2지구 가구 82개, 여의도 금융중심 21개, 도심 27개 구역 가구 87개, 마포대로 30 m 이내 상업지역 가구 16개). 이 페이지 아래 표와 결과 페이지의 수치는 역삼 257동의 결과이다(그중 140동이 테헤란로제2지구 가구 40개 안). 네 지역 591동(도심 99·강남 371·여의도 88·마포 33동)의 결과는 <a href="#/plan">네 지역</a> 페이지에 있다.</p>
   <div class="ctrl">
     <label>지역<select id="mregion"><option value="">네 지역 전체</option><option value="강남(GBD)">강남 — 371동</option><option value="도심(CBD)">도심 — 99동</option><option value="여의도(YBD)">여의도 — 88동</option><option value="마포(MPO)">마포 — 33동</option><option value="yeoksam">역삼 4개 대블록(확대)</option></select></label>
     <label>지도 색 기준<select id="mcolor"><option value="block">대블록</option><option value="obstruction_class">주변 건물에 가려진 정도</option><option value="footprint_class">평면 면적(모델)</option><option value="floors_class">지상 층수</option><option value="dEUI_pct">대안별 EUI 변화</option><option value="dpeak_pct">대안별 피크전력 변화</option></select></label>
@@ -250,6 +252,7 @@ async function drawRegions() {
   if (REG.done || typeof PRESET === 'undefined') return; REG.done = true;
   const D = Object.fromEntries(q('SELECT code, name, status FROM districts').map(r => [r.code, r]));
   const CODE = { '도심(CBD)': 'CBD', '강남(GBD)': 'GBD', '여의도(YBD)': 'YBD', '마포(MPO)': 'MPO' };
+  const NB4 = Object.fromEntries(q('SELECT area, COUNT(*) n FROM r4_buildings GROUP BY area').map(r => [r.area, r.n]));
   const gbdDone = new Set(q('SELECT DISTINCT plan_id || "-" || gagu k FROM gbd_assign').map(r => r.k));
   const nDone = Object.fromEntries(q('SELECT plan_id || "-" || gagu k, COUNT(*) n FROM gbd_assign GROUP BY 1').map(r => [r.k, r.n]));
   try {
@@ -259,7 +262,7 @@ async function drawRegions() {
     const blocks = {};
     await Promise.all([...gus].map(async g => { try { const j = await (await fetch(`data/upis/blocks_${g}.geojson`)).json(); for (const f of j.features) (blocks[f.properties.plan_id] = blocks[f.properties.plan_id] || []).push(f); } catch (e) { } }));
     for (const [reg, ids] of Object.entries(PRESET)) {
-      const col = REG_COL[reg], st = (D[CODE[reg]] || {}).status || '';
+      const col = REG_COL[reg], st = '계산 대상 ' + (NB4[CODE[reg]] || 0) + '동';
       const g = L.featureGroup();
       const sel = new Set(ids); let nb = 0;
       for (const f of plans.features) {
@@ -269,7 +272,7 @@ async function drawRegions() {
         for (const b of blocks[f.properties.id] || []) {
           const k = `${b.properties.plan_id}-${b.properties.block}`; const nd = nDone[k];
           L.geoJSON(b, { style: { color: col, weight: 0.8, fillColor: col, fillOpacity: nd ? 0.22 : 0.06 } })
-            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동 계산 완료(가구별 수치)` : ` · 가구 경계(네 지역 계산 결과는 재계산·확장)`)).addTo(g); nb++;
+            .bindTooltip(`${esc(p.name || '')} 가구 ${b.properties.block} · ${num(b.properties.area_m2)} m²` + (nd ? ` · 257동 중 ${nd}동(가구별 수치)` : ` · 가구 경계(네 지역 결과는 네 지역 페이지)`)).addTo(g); nb++;
         }
       }
       g.addTo(MAP); REG.layers[reg] = g;
@@ -279,7 +282,7 @@ async function drawRegions() {
       }
     }
     try {   // 마포: 마포대로 30 m 이내 상업지역(용도지역) 구역과 가구(원고 7.1.2항)
-      const mj = await (await fetch('data/r4/area_mpo.geojson')).json(); const col = REG_COL['마포(MPO)'], st = (D.MPO || {}).status || ''; const g = L.featureGroup(); let nb = 0;
+      const mj = await (await fetch('data/r4/area_mpo.geojson')).json(); const col = REG_COL['마포(MPO)'], st = '계산 대상 ' + (NB4.MPO || 0) + '동'; const g = L.featureGroup(); let nb = 0;
       for (const f of mj.features) {
         if (f.properties.kind === 'zone') L.geoJSON(f, { style: { color: col, weight: 2.2, dashArray: '8 5', fill: false } }).bindTooltip(`마포대로변 상업지역(${f.properties.area_ha} ha) · 마포(MPO) · ${esc(st)}`).addTo(g);
         else if (f.properties.kind === 'axis') L.geoJSON(f, { style: { color: col, weight: 1, opacity: 0.5 } }).bindTooltip(`도로명 마포대로(OpenStreetMap) — 구역 선정 기준선`).addTo(g);
@@ -529,25 +532,26 @@ function pageValid() {
   ${note('실측 원자료는 지번 단위 월별 사용량이며, 지역난방·가스 흡수식 냉방 등 모델(전기 냉동기)과 다른 설비의 영향이 섞여 있을 수 있다.')}`;
 }
 
-/* ---------------- 페이지: 재계산·확장 ---------------- */
+/* ---------------- 페이지: 네 지역·한계 ---------------- */
 function pagePlan() {
   const D = q('SELECT * FROM districts');
   $('#page-plan').innerHTML = `
-  <div class="kicker">재계산·확장과 한계</div><h1>재계산, 그리고 국가승인통계의 서울 오피스 네 지역으로</h1>
-  <h2>재계산</h2><ol>
-  <li><b>같은 조건</b> — 완료. 9개 대안을 같은 257동·보정 모델·기상·계산 간격·계산 기간(연중 1~12월)으로 계산. 일사량 기준 제어 2종은 냉방 기간(5~9월)에만 작동, 피크 시간대 차양 폐쇄는 연중 평일 13~18시.</li>
-    <li><b>차폐 포함·제외 비교</b> — 완료. 9개 대안 × 257동 × 차폐 포함·제외(결과 4절).</li>
-  <li><b>같은 작동 기간 비교</b> — 완료. 9개 대안을 모두 연중 작동시킨 비교와 키네틱 6종을 모두 냉방 기간(5~9월)에만 작동시킨 비교(원고 표 5-8, <a href="#/results">결과 5-1절</a>).</li>
-  <li><b>워밍업·모델 가정 민감도</b> — 완료. 워밍업 25일 → 100일(20동, 9개 대안), 냉동기 COP 배수 1.0·기기 전력밀도 1.3(40동, 9개 대안)(원고 표 4-8, <a href="#/valid">실측 비교</a>).</li>
-  <li><b>서울 오피스 네 지역</b> — 완료. 같은 수집·결합·선별 절차로 만든 도심 99동·강남 371동·여의도 88동·마포 33동에 20개 조건 + 추가 9개 조건(작동 기간·야간 걷음·장치 배치) + 지역별 표본 민감도(원고 제7장, <a href="#/plan" onclick="setTimeout(()=>document.getElementById('r4').scrollIntoView(),0)">아래 표</a>).</li>
+  <div class="kicker">네 지역 결과와 한계</div><h1>계산 범위와 서울 오피스 네 지역</h1>
+  <div class="card"><p><b>계산 대상 총 707동.</b> 역삼역 일대 4개 대블록 257동(원고 제4~6장)과 국가승인통계의 서울 오피스 권역을 근거로 정한 네 지역(도심 99·강남 371·여의도 88·마포 33동) 591동(원고 제7장). 강남 371동 가운데 141동(같은 윤곽 135동, 윤곽이 다른 같은 건물 6동)은 257동에도 속하므로 총계에서 한 번만 세었다. 결과 수치는 어느 대상의 값인지 함께 적었다.</p></div>
+  <h2>계산 범위</h2><ol>
+  <li><b>같은 조건.</b> 9개 대안을 같은 257동·보정 모델·기상·계산 간격·계산 기간(연중 1~12월)으로 계산. 일사량 기준 제어 2종은 냉방 기간(5~9월)에만 작동, 피크 시간대 차양 폐쇄는 연중 평일 13~18시.</li>
+    <li><b>차폐 포함·제외 비교.</b> 9개 대안 × 257동 × 차폐 포함·제외(결과 4절).</li>
+  <li><b>같은 작동 기간 비교.</b> 9개 대안을 모두 연중 작동시킨 비교와 키네틱 6종을 모두 냉방 기간(5~9월)에만 작동시킨 비교(원고 표 5-8, <a href="#/results">결과 5-1절</a>).</li>
+  <li><b>워밍업·모델 가정 민감도.</b> 워밍업 25일 → 100일(20동, 9개 대안), 냉동기 COP 배수 1.0·기기 전력밀도 1.3(40동, 9개 대안)(원고 표 4-8, <a href="#/valid">실측 비교</a>).</li>
+  <li><b>서울 오피스 네 지역.</b> 같은 수집·결합·선별 절차로 만든 도심 99동·강남 371동·여의도 88동·마포 33동에 20개 조건 + 추가 9개 조건(작동 기간·야간 걷음·장치 배치) + 지역별 표본 민감도(원고 제7장, <a href="#/plan" onclick="setTimeout(()=>document.getElementById('r4').scrollIntoView(),0)">아래 표</a>).</li>
 </ol>
   <h3>남은 과제(원고 9.3절)</h3><ul>
   <li>개선 전 기준을 대상 건물의 기존 외피 상태(창면적비·유리 사양)에 가깝게 맞추는 일.</li>
   <li>평균 차폐각 외의 밀집 지표(천공차폐율; 장윤배·이성룡, 2001) 보완.</li>
   <li>공간 주광 자율성(sDA)·과다 일사 노출(ASE)과 눈부심을 상세 3개 동 등 대표 건물에서 따로 계산하는 일.</li><li>실제 건물의 시간별 계측 자료로 보정한 모델에서 같은 비교를 반복하는 일.</li></ul>
-  <h2>확장 — 서울 오피스 네 지역의 가구</h2>
+  <h2>서울 오피스 네 지역의 가구</h2>
   <div class="card"><p><b>지역의 근거.</b> ${esc(META.basis)}</p><p><b>가구(분석 단위).</b> 대상 구역(도심·강남·여의도는 업무 기능 지구단위계획구역, 마포는 마포대로 30 m 이내 상업지역)을 도시계획도로로 나눈 가구(2,000 m² 이상). 350 m 안 주변 건물을 모두 주변 차폐에 쓰고, 계산 대상은 업무시설이 포함된 6층 이상 건물로 하며, 가구 합산은 가구 안 계산 대상 건물만 더한다(원고 7.7절; <a href="#/gen">자료 생성기</a>).</p></div>
-  ${table([{ h: '지역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }, { h: '상태', k: 'status', f: v => `<span class="tag ${v === "진행 중" ? "sun" : "mut"}" style="white-space:nowrap">${esc(v)}</span>` }], D)}
+  ${table([{ h: '지역', k: 'code', f: (v, r) => `<b>${v}</b> ${esc(r.name)}` }, { h: '범위', k: 'extent' }, { h: '내용', k: 'note' }], D)}
   ${gbdSection()}
   ${r4Section()}
   <div class="flow"><div><b>경계</b>대상 구역 − 도시계획도로 = 가구(서울 UPIS 2026-09)</div><div><b>건물</b>OpenStreetMap 윤곽 + 건축물대장 표제부(지번 결합·윤곽–표제부 짝짓기)</div><div><b>모델</b>역삼 257동과 같은 자동 모델·20개 + 9개 조건(업무 용도 6층 이상)</div><div><b>지표</b>건물 조건별·가구별 개선 효과</div></div>
@@ -632,9 +636,17 @@ function runQ() {
 /* ---------------- 라우팅 ---------------- */
 const PAGES = { home: pageHome, site: pageSite, alts: pageAlts, results: pageResults, traits: pageTraits, valid: pageValid, plan: pagePlan, db: pageDb, story: () => pageStory(), refs: () => pageRefs(), reading: () => pageReading(), gen: () => pageGen(), live: () => pageLive() };
 const BUILT = {};
+/* 역삼 257동 결과를 보여 주는 페이지 위에 대상 범위를 밝힌다(총 707동 = 257동 + 591동 − 141동) */
+function scopeNote(key) {
+  if (!['alts', 'results', 'traits', 'valid', 'story', 'live'].includes(key)) return;
+  const pg = $('#page-' + key); if (!pg || pg.querySelector('.scope-note')) return;
+  const d = document.createElement('div'); d.className = 'scope-note';
+  d.innerHTML = '이 페이지의 수치는 <b>역삼 257동</b>의 결과입니다. 본 연구의 계산 대상은 <b>총 707동</b>(역삼 257동 + 서울 오피스 네 지역 591동, 141동은 두 대상에 함께 속함)이며, 네 지역 591동의 결과는 <a href="#/plan">네 지역</a> 페이지에 있습니다.';
+  pg.prepend(d);
+}
 function route() {
   const r = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home'; const key = PAGES[r] ? r : 'home';
-  if (!BUILT[key]) { PAGES[key](); BUILT[key] = 1; }
+  if (!BUILT[key]) { PAGES[key](); BUILT[key] = 1; scopeNote(key); }
   $$('.page').forEach(p => p.classList.toggle('on', p.id === 'page-' + key));
   $$('nav a').forEach(a => a.classList.toggle('on', a.dataset.r === key));
   document.body.classList.remove('navopen');
@@ -646,7 +658,7 @@ function route() {
 (async function boot() {
   try {
     const SQL = await initSqlJs({ locateFile: f => 'app/vendor/' + f });
-    const buf = await (await fetch('data/db/research.sqlite?v=202611091530')).arrayBuffer();
+    const buf = await (await fetch('data/db/research.sqlite?v=202611272040')).arrayBuffer();
     DB = new SQL.Database(new Uint8Array(buf));
     for (const r of q('SELECT key, value FROM meta')) META[r.key] = r.value;
     for (const a of q('SELECT * FROM alternatives')) ALT[a.tag] = a;

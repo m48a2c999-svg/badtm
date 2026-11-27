@@ -339,3 +339,4 @@ body.film main{max-width:none;padding:0}body.film .splayer{margin:0;border:0;pad
 body.film .splayer h2{font-size:22px;margin:0 0 14px}body.film .stg{gap:26px}body.film .sside p,body.film .slist{font-size:15px}body.film .stbl{font-size:14px}
 #drvtab td:first-child{white-space:nowrap}
 @media (max-width:480px){.tmap td:first-child{white-space:normal}.tmap td,.tmap th{padding:6px 4px;word-break:keep-all;overflow-wrap:anywhere}}
+.scope-note{font-size:14px;line-height:1.6;border-left:4px solid var(--sun);background:#fff;padding:10px 14px;margin:6px 0 16px}
